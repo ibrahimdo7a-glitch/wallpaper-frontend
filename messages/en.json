@@ -1,0 +1,94 @@
+{
+  "nav": {
+    "home": "Home",
+    "categories": "Categories",
+    "latest": "Latest",
+    "popular": "Popular",
+    "search": "Search",
+    "mobile": "Mobile Wallpapers",
+    "desktop": "Desktop Wallpapers",
+    "all": "All Wallpapers"
+  },
+  "action": {
+    "download": "Download",
+    "like": "Like",
+    "share": "Share",
+    "report": "Report",
+    "search_placeholder": "Search wallpapers...",
+    "filter": "Filter",
+    "sort": "Sort",
+    "show_more": "Show More",
+    "copy_link": "Copy Link",
+    "share_whatsapp": "Share on WhatsApp",
+    "share_twitter": "Share on Twitter"
+  },
+  "wallpaper": {
+    "views": "Views",
+    "downloads": "Downloads",
+    "likes": "Likes",
+    "resolution": "Resolution",
+    "size": "File Size",
+    "uploaded_by": "Uploaded by",
+    "category": "Category",
+    "tags": "Tags",
+    "free": "Free",
+    "paid": "Paid",
+    "price": "Price",
+    "buy_now": "Buy Now",
+    "similar": "Similar Wallpapers",
+    "from_category": "From Same Category",
+    "from_uploader": "From Same Uploader",
+    "device_mobile": "Mobile",
+    "device_desktop": "Desktop",
+    "device_tablet": "Tablet",
+    "device_all": "All"
+  },
+  "sort": {
+    "newest": "Newest",
+    "most_downloaded": "Most Downloaded",
+    "most_liked": "Most Liked",
+    "most_viewed": "Most Viewed",
+    "oldest": "Oldest"
+  },
+  "page": {
+    "home_title": "Wallpaper Platform - Best HD Wallpapers",
+    "home_description": "Browse thousands of free high quality wallpapers for your phone and computer",
+    "privacy": "Privacy Policy",
+    "terms": "Terms & Conditions",
+    "categories": "Categories",
+    "search_results": "Search Results",
+    "most_downloaded": "Most Downloaded",
+    "most_liked": "Most Liked"
+  },
+  "uploader": {
+    "wallpapers": "Wallpapers",
+    "total_downloads": "Total Downloads",
+    "total_likes": "Total Likes",
+    "total_views": "Total Views",
+    "member_since": "Member Since",
+    "all_wallpapers": "All Wallpapers"
+  },
+  "msg": {
+    "loading": "Loading...",
+    "no_results": "No results found",
+    "liked": "Liked!",
+    "already_liked": "Already liked",
+    "download_started": "Download started...",
+    "report_sent": "Report submitted successfully",
+    "copied": "Copied!",
+    "error": "An error occurred, please try again"
+  },
+  "report": {
+    "title": "Report Wallpaper",
+    "reason": "Reason",
+    "message": "Additional details (optional)",
+    "submit": "Submit Report",
+    "reasons": {
+      "copyright": "Copyright violation",
+      "inappropriate": "Inappropriate content",
+      "spam": "Spam",
+      "offensive": "Offensive content",
+      "other": "Other"
+    }
+  }
+}

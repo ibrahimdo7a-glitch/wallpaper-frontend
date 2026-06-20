@@ -1,0 +1,94 @@
+{
+  "nav": {
+    "home": "الرئيسية",
+    "categories": "الأقسام",
+    "latest": "الأحدث",
+    "popular": "الأكثر شعبية",
+    "search": "بحث",
+    "mobile": "خلفيات الجوال",
+    "desktop": "خلفيات الكمبيوتر",
+    "all": "جميع الخلفيات"
+  },
+  "action": {
+    "download": "تحميل",
+    "like": "إعجاب",
+    "share": "مشاركة",
+    "report": "إبلاغ",
+    "search_placeholder": "ابحث عن خلفيات...",
+    "filter": "فلتر",
+    "sort": "ترتيب",
+    "show_more": "عرض المزيد",
+    "copy_link": "نسخ الرابط",
+    "share_whatsapp": "مشاركة واتساب",
+    "share_twitter": "مشاركة تويتر"
+  },
+  "wallpaper": {
+    "views": "مشاهدة",
+    "downloads": "تحميل",
+    "likes": "إعجاب",
+    "resolution": "الدقة",
+    "size": "الحجم",
+    "uploaded_by": "رفع بواسطة",
+    "category": "القسم",
+    "tags": "الوسوم",
+    "free": "مجاني",
+    "paid": "مدفوع",
+    "price": "السعر",
+    "buy_now": "اشتر الآن",
+    "similar": "خلفيات مشابهة",
+    "from_category": "من نفس القسم",
+    "from_uploader": "من نفس المشرف",
+    "device_mobile": "جوال",
+    "device_desktop": "كمبيوتر",
+    "device_tablet": "تابلت",
+    "device_all": "الكل"
+  },
+  "sort": {
+    "newest": "الأحدث",
+    "most_downloaded": "الأكثر تحميلًا",
+    "most_liked": "الأكثر إعجابًا",
+    "most_viewed": "الأكثر مشاهدة",
+    "oldest": "الأقدم"
+  },
+  "page": {
+    "home_title": "منصة الخلفيات - أفضل خلفيات HD",
+    "home_description": "تصفح آلاف الخلفيات المجانية بجودة عالية لجوالك وكمبيوترك",
+    "privacy": "سياسة الخصوصية",
+    "terms": "الشروط والأحكام",
+    "categories": "الأقسام",
+    "search_results": "نتائج البحث",
+    "most_downloaded": "الأكثر تحميلًا",
+    "most_liked": "الأكثر إعجابًا"
+  },
+  "uploader": {
+    "wallpapers": "الخلفيات",
+    "total_downloads": "إجمالي التحميلات",
+    "total_likes": "إجمالي الإعجابات",
+    "total_views": "إجمالي المشاهدات",
+    "member_since": "عضو منذ",
+    "all_wallpapers": "جميع الخلفيات"
+  },
+  "msg": {
+    "loading": "جاري التحميل...",
+    "no_results": "لا توجد نتائج",
+    "liked": "تم الإعجاب!",
+    "already_liked": "أعجبك هذا مسبقًا",
+    "download_started": "بدأ التحميل...",
+    "report_sent": "تم إرسال البلاغ بنجاح",
+    "copied": "تم النسخ!",
+    "error": "حدث خطأ، يرجى المحاولة مرة أخرى"
+  },
+  "report": {
+    "title": "الإبلاغ عن خلفية",
+    "reason": "سبب البلاغ",
+    "message": "تفاصيل إضافية (اختياري)",
+    "submit": "إرسال البلاغ",
+    "reasons": {
+      "copyright": "انتهاك حقوق الملكية",
+      "inappropriate": "محتوى غير لائق",
+      "spam": "سبام",
+      "offensive": "محتوى مسيء",
+      "other": "أخرى"
+    }
+  }
+}
