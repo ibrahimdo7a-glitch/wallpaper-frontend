@@ -1,3 +1,4 @@
+import { setRequestLocale } from 'next-intl/server';
 import type { Metadata } from 'next';
 import { type Locale } from '@/lib/i18n';
 
@@ -8,6 +9,7 @@ export async function generateMetadata({ params: { locale } }: { params: { local
 }
 
 export default function PrivacyPage({ params: { locale } }: { params: { locale: Locale } }) {
+  setRequestLocale(locale);
   const isAr = locale === 'ar';
 
   return (

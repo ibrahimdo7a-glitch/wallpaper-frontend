@@ -1,3 +1,4 @@
+import { setRequestLocale } from 'next-intl/server';
 import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import Link from 'next/link';
@@ -27,6 +28,7 @@ export async function generateMetadata({ params: { locale, slug } }: Props): Pro
 }
 
 export default async function CategoryPage({ params: { locale, slug }, searchParams }: Props) {
+  setRequestLocale(locale);
   const isAr = locale === 'ar';
 
   let category;

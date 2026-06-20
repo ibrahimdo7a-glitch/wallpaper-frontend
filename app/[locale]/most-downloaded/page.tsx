@@ -1,3 +1,4 @@
+import { setRequestLocale } from 'next-intl/server';
 import type { Metadata } from 'next';
 import { wallpaperApi } from '@/lib/api';
 import { WallpaperGrid } from '@/components/wallpaper/WallpaperGrid';
@@ -12,6 +13,7 @@ export async function generateMetadata({ params: { locale } }: Props): Promise<M
 }
 
 export default async function MostDownloadedPage({ params: { locale }, searchParams }: Props) {
+  setRequestLocale(locale);
   const isAr = locale === 'ar';
   const page = parseInt(searchParams.page || '1');
 

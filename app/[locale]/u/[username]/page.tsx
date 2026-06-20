@@ -1,3 +1,4 @@
+import { setRequestLocale } from 'next-intl/server';
 import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import Image from 'next/image';
@@ -25,6 +26,7 @@ export async function generateMetadata({ params: { locale, username } }: Props):
 }
 
 export default async function UploaderPage({ params: { locale, username } }: Props) {
+  setRequestLocale(locale);
   const t = await getTranslations({ locale, namespace: 'uploader' });
 
   let uploader;

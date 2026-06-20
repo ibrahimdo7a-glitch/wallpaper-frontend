@@ -1,3 +1,4 @@
+import { setRequestLocale } from 'next-intl/server';
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import Image from 'next/image';
@@ -12,6 +13,7 @@ export async function generateMetadata({ params: { locale } }: { params: { local
 }
 
 export default async function CategoriesPage({ params: { locale } }: { params: { locale: Locale } }) {
+  setRequestLocale(locale);
   const isAr = locale === 'ar';
   let categories: any[] = [];
   try {

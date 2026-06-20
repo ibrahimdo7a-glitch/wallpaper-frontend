@@ -1,3 +1,4 @@
+import { setRequestLocale } from 'next-intl/server';
 import type { Metadata } from 'next';
 import { getTranslations } from 'next-intl/server';
 import { wallpaperApi } from '@/lib/api';
@@ -17,6 +18,7 @@ export async function generateMetadata({ params: { locale }, searchParams }: Pro
 }
 
 export default async function SearchPage({ params: { locale }, searchParams }: Props) {
+  setRequestLocale(locale);
   const t = await getTranslations({ locale, namespace: 'page' });
   const q = searchParams.q || '';
   const page = parseInt(searchParams.page || '1');

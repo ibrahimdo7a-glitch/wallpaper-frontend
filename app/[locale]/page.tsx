@@ -1,3 +1,4 @@
+import { setRequestLocale } from 'next-intl/server';
 import type { Metadata } from 'next';
 import { getTranslations } from 'next-intl/server';
 import { wallpaperApi, categoryApi } from '@/lib/api';
@@ -45,6 +46,7 @@ export default async function HomePage({
 }: {
   params: { locale: Locale };
 }) {
+  setRequestLocale(locale);
   const t = await getTranslations({ locale, namespace: 'nav' });
   const data = await getHomeData();
 

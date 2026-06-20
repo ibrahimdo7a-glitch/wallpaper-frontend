@@ -1,3 +1,4 @@
+import { setRequestLocale } from 'next-intl/server';
 import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import Image from 'next/image';
@@ -42,6 +43,7 @@ export async function generateMetadata({ params: { locale, slug } }: Props): Pro
 }
 
 export default async function WallpaperPage({ params: { locale, slug } }: Props) {
+  setRequestLocale(locale);
   const t = await getTranslations({ locale, namespace: 'wallpaper' });
 
   let wallpaper;
