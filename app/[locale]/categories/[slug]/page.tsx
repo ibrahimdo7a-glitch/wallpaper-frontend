@@ -60,7 +60,7 @@ export default async function CategoryPage({ params: { locale, slug }, searchPar
           {category.breadcrumbs.map((crumb: any, i: number) => (
             <span key={crumb.id} className="flex items-center gap-2">
               <span>/</span>
-              {i === category.breadcrumbs.length - 1 ? (
+              {i === category.breadcrumbs!.length - 1 ? (
                 <span className="text-white">{isAr ? crumb.name_ar : crumb.name_en}</span>
               ) : (
                 <Link href={`/${locale}/categories/${crumb.slug}`} className="hover:text-white">
