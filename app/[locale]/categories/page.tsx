@@ -13,7 +13,7 @@ export async function generateMetadata({ params: { locale } }: { params: { local
 
 export default async function CategoriesPage({ params: { locale } }: { params: { locale: Locale } }) {
   const isAr = locale === 'ar';
-  let categories = [];
+  let categories: any[] = [];
   try {
     const res = await categoryApi.list();
     categories = res.data.data;
