@@ -33,14 +33,15 @@ const nextConfig = {
     ];
   },
   async rewrites() {
+    const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'https://api.qev.app';
     return [
       {
         source: '/sitemap.xml',
-        destination: `${process.env.NEXT_PUBLIC_API_URL}/sitemap.xml`,
+        destination: `${apiUrl}/sitemap.xml`,
       },
       {
         source: '/robots.txt',
-        destination: `${process.env.NEXT_PUBLIC_API_URL}/robots.txt`,
+        destination: `${apiUrl}/robots.txt`,
       },
     ];
   },
