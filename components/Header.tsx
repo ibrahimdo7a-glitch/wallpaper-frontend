@@ -8,9 +8,10 @@ import { translations } from '@/data/translations';
 
 interface HeaderProps {
   locale: Locale;
+  siteName?: string;
 }
 
-export function Header({ locale }: HeaderProps) {
+export function Header({ locale, siteName }: HeaderProps) {
   const t = translations[locale];
   const pathname = usePathname();
   const isRTL = locale === 'ar';
@@ -72,7 +73,7 @@ export function Header({ locale }: HeaderProps) {
               ))}
             </div>
             <span className="font-bold text-gray-900 dark:text-white text-sm tracking-tight">
-              {t.siteName}
+              {siteName || t.siteName}
             </span>
           </Link>
 

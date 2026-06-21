@@ -1,14 +1,23 @@
 import Link from 'next/link';
 import { type Locale } from '@/types';
 import { translations } from '@/data/translations';
+import { fetchSiteContent } from '@/lib/server-api';
 
 interface FooterProps {
   locale: Locale;
 }
 
-export function Footer({ locale }: FooterProps) {
+export async function Footer({ locale }: FooterProps) {
   const t = translations[locale];
   const isRTL = locale === 'ar';
+  const siteContent = await fetchSiteContent();
+
+  const siteName = isRTL
+    ? (siteContent?.site_name_ar || t.siteName)
+    : (siteContent?.site_name_en || t.siteName);
+  const copyright = isRTL
+    ? (siteContent?.footer_copyright_ar || t.footer.copyright)
+    : (siteContent?.footer_copyright_en || t.footer.copyright);
 
   return (
     <footer className="border-t border-gray-100 dark:border-gray-800 bg-white dark:bg-gray-950 py-5">
@@ -21,11 +30,11 @@ export function Footer({ locale }: FooterProps) {
                 <div key={i} className="w-1.5 h-1.5 rounded-full bg-gray-900 dark:bg-white" style={{ opacity: 1 - i * 0.2 }} />
               ))}
             </div>
-            <span className="font-bold text-gray-900 dark:text-white text-xs">{t.siteName}</span>
+            <span className="font-bold text-gray-900 dark:text-white text-xs">{siteName}</span>
           </div>
 
           {/* Copyright */}
-          <p className="text-gray-400 dark:text-gray-500 text-xs">{t.footer.copyright}</p>
+          <p className="text-gray-400 dark:text-gray-500 text-xs">{copyright}</p>
 
           {/* Links */}
           <div className={`flex items-center gap-4 ${isRTL ? 'flex-row-reverse' : ''}`}>

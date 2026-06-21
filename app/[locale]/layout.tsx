@@ -4,6 +4,7 @@ import { locales, type Locale } from '@/lib/i18n';
 import { Header } from '@/components/Header';
 import { Footer } from '@/components/Footer';
 import { translations } from '@/data/translations';
+import { fetchSiteContent } from '@/lib/server-api';
 import './globals.css';
 
 export function generateStaticParams() {
@@ -15,15 +16,23 @@ export async function generateMetadata({
 }: {
   params: { locale: Locale };
 }): Promise<Metadata> {
-  const t = translations[locale as Locale] ?? translations.en;
+  const [t, siteContent] = await Promise.all([
+    Promise.resolve(translations[locale as Locale] ?? translations.en),
+    fetchSiteContent(),
+  ]);
+  const siteName = locale === 'ar'
+    ? (siteContent?.site_name_ar || t.siteName)
+    : (siteContent?.site_name_en || t.siteName);
   return {
-    title: { default: t.siteName, template: `%s | ${t.siteName}` },
-    description: t.hero.subtitle,
+    title: { default: siteName, template: `%s | ${siteName}` },
+    description: locale === 'ar'
+      ? (siteContent?.hero_subtitle_ar || t.hero.subtitle)
+      : (siteContent?.hero_subtitle_en || t.hero.subtitle),
     metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || 'https://qev.app'),
   };
 }
 
-export default function LocaleLayout({
+export default async function LocaleLayout({
   children,
   params: { locale },
 }: {
@@ -33,6 +42,11 @@ export default function LocaleLayout({
   if (!locales.includes(locale as Locale)) notFound();
 
   const isRTL = locale === 'ar';
+  const siteContent = await fetchSiteContent();
+  const t = translations[locale as Locale] ?? translations.en;
+  const siteName = isRTL
+    ? (siteContent?.site_name_ar || t.siteName)
+    : (siteContent?.site_name_en || t.siteName);
 
   return (
     <html lang={locale} dir={isRTL ? 'rtl' : 'ltr'} suppressHydrationWarning>
@@ -43,10 +57,7 @@ export default function LocaleLayout({
             __html: `(function(){var s=localStorage.getItem('theme');var d=s==='dark'||(!s&&window.matchMedia('(prefers-color-scheme:dark)').matches);if(d)document.documentElement.classList.add('dark')})()`,
           }}
         />
-        <link
-          rel="preconnect"
-          href="https://fonts.googleapis.com"
-        />
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link
           href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Noto+Kufi+Arabic:wght@400;500;600;700;800;900&display=swap"
           rel="stylesheet"
@@ -57,7 +68,7 @@ export default function LocaleLayout({
           isRTL ? 'font-arabic' : 'font-sans'
         }`}
       >
-        <Header locale={locale as Locale} />
+        <Header locale={locale as Locale} siteName={siteName} />
         <main>{children}</main>
         <Footer locale={locale as Locale} />
       </body>

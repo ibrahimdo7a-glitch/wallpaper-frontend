@@ -4,16 +4,37 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { type Locale } from '@/types';
 import { translations } from '@/data/translations';
+import type { SiteContent } from '@/lib/server-api';
 
 interface HeroProps {
   locale: Locale;
+  siteContent?: SiteContent | null;
 }
 
-export function Hero({ locale }: HeroProps) {
+export function Hero({ locale, siteContent }: HeroProps) {
   const t = translations[locale];
   const router = useRouter();
   const [query, setQuery] = useState('');
   const isRTL = locale === 'ar';
+
+  // Use API content if available, else fallback to static translations
+  const title = isRTL
+    ? (siteContent?.hero_title_ar || t.hero.title)
+    : (siteContent?.hero_title_en || t.hero.title);
+  const subtitle = isRTL
+    ? (siteContent?.hero_subtitle_ar || t.hero.subtitle)
+    : (siteContent?.hero_subtitle_en || t.hero.subtitle);
+  const searchPlaceholder = isRTL
+    ? (siteContent?.search_placeholder_ar || t.hero.searchPlaceholder)
+    : (siteContent?.search_placeholder_en || t.hero.searchPlaceholder);
+  const popularTags = isRTL
+    ? (siteContent?.popular_tags_ar?.length ? siteContent.popular_tags_ar : t.hero.popularTags)
+    : (siteContent?.popular_tags_en?.length ? siteContent.popular_tags_en : t.hero.popularTags);
+  const features = [
+    { icon: '🚗', label: isRTL ? (siteContent?.feature_car_ar || t.hero.features[0]?.label) : (siteContent?.feature_car_en || t.hero.features[0]?.label) },
+    { icon: '🖼️', label: isRTL ? (siteContent?.feature_quality_ar || t.hero.features[1]?.label) : (siteContent?.feature_quality_en || t.hero.features[1]?.label) },
+    { icon: '⚡', label: isRTL ? (siteContent?.feature_fast_ar || t.hero.features[2]?.label) : (siteContent?.feature_fast_en || t.hero.features[2]?.label) },
+  ];
 
   function handleSearch(e: React.FormEvent) {
     e.preventDefault();
@@ -47,10 +68,10 @@ export function Hero({ locale }: HeroProps) {
       <div className={`relative z-20 max-w-7xl mx-auto px-4 sm:px-6 w-full py-14 ${isRTL ? 'text-right' : 'text-left'}`}>
         <div className={`max-w-lg ${isRTL ? 'mr-0' : 'ml-0'}`}>
           <h1 className="text-3xl sm:text-4xl md:text-5xl font-black leading-tight mb-3 tracking-tight">
-            {t.hero.title}
+            {title}
           </h1>
           <p className="text-gray-300 text-base mb-7 leading-relaxed">
-            {t.hero.subtitle}
+            {subtitle}
           </p>
 
           {/* Search */}
@@ -63,7 +84,7 @@ export function Hero({ locale }: HeroProps) {
                 type="search"
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
-                placeholder={t.hero.searchPlaceholder}
+                placeholder={searchPlaceholder}
                 className={`w-full bg-white text-gray-900 placeholder-gray-400 rounded-full py-3.5 text-sm font-medium outline-none focus:ring-2 focus:ring-white/30 ${
                   isRTL ? 'pr-12 pl-28 text-right' : 'pl-12 pr-28'
                 }`}
@@ -80,7 +101,7 @@ export function Hero({ locale }: HeroProps) {
           {/* Popular tags */}
           <div className={`flex flex-wrap items-center gap-2 ${isRTL ? 'flex-row-reverse justify-end' : ''}`}>
             <span className="text-gray-400 text-xs">{t.hero.popular}</span>
-            {t.hero.popularTags.map((tag) => (
+            {popularTags.map((tag) => (
               <button
                 key={tag}
                 onClick={() => router.push(`/${locale}/search?q=${encodeURIComponent(tag)}`)}
@@ -94,7 +115,7 @@ export function Hero({ locale }: HeroProps) {
 
         {/* Feature badges */}
         <div className={`flex flex-wrap gap-4 mt-8 ${isRTL ? 'flex-row-reverse justify-end' : ''}`}>
-          {t.hero.features.map((f) => (
+          {features.map((f) => f.label && (
             <div key={f.label} className="flex items-center gap-1.5 text-gray-300 text-xs font-medium">
               <span>{f.icon}</span>
               <span>{f.label}</span>
