@@ -5,13 +5,14 @@ import { type Locale } from '@/lib/i18n';
 export const revalidate = 300;
 import { Hero } from '@/components/Hero';
 import { MostDownloaded } from '@/components/MostDownloaded';
+import { LatestWallpapers } from '@/components/LatestWallpapers';
 import { Categories } from '@/components/Categories';
 import { ScreenSelector } from '@/components/ScreenSelector';
 import { FeatureStrip } from '@/components/FeatureStrip';
 import { mockWallpapers } from '@/data/wallpapers';
 import { mockCategories } from '@/data/categories';
 import { translations } from '@/data/translations';
-import { fetchCategories, fetchMostDownloaded, fetchSiteContent } from '@/lib/server-api';
+import { fetchCategories, fetchMostDownloaded, fetchLatestWallpapers, fetchSiteContent } from '@/lib/server-api';
 import type { Wallpaper, Category } from '@/types';
 
 export async function generateMetadata({
@@ -46,8 +47,9 @@ export default async function HomePage({ params: { locale } }: { params: { local
   const loc = (locale === 'ar' || locale === 'en') ? locale : 'en';
 
   // Fetch all data in parallel; individual functions already catch errors and return []/ null
-  const [apiWallpapers, apiCategories, siteContent] = await Promise.all([
+  const [apiWallpapers, apiLatest, apiCategories, siteContent] = await Promise.all([
     fetchMostDownloaded(5).catch(() => [] as Awaited<ReturnType<typeof fetchMostDownloaded>>),
+    fetchLatestWallpapers(10).catch(() => [] as Awaited<ReturnType<typeof fetchLatestWallpapers>>),
     fetchCategories().catch(() => [] as Awaited<ReturnType<typeof fetchCategories>>),
     fetchSiteContent().catch(() => null),
   ]);
@@ -66,6 +68,18 @@ export default async function HomePage({ params: { locale } }: { params: { local
         category: w.category ? (loc === 'ar' ? w.category.name_ar : w.category.name_en) : '',
       }))
     : mockWallpapers;
+
+  const latestWallpapers: Wallpaper[] = apiLatest.map((w, i): Wallpaper => ({
+    id: String(w.id),
+    slug: w.slug,
+    titleAr: w.title_ar || '',
+    titleEn: w.title_en || '',
+    downloads: w.downloads_count,
+    is4K: w.resolution_label === '4K' || w.resolution_label === '8K',
+    imageUrl: w.thumbnail_url ?? w.image_url ?? undefined,
+    gradient: gradients()[i % gradients().length],
+    category: w.category ? (loc === 'ar' ? w.category.name_ar : w.category.name_en) : '',
+  }));
 
   // Map API categories to local type (fallback to mock if empty)
   const categoryGradients = [
@@ -95,6 +109,7 @@ export default async function HomePage({ params: { locale } }: { params: { local
     <div>
       <Hero locale={loc} siteContent={siteContent} />
       <MostDownloaded wallpapers={wallpapers} locale={loc} />
+      <LatestWallpapers wallpapers={latestWallpapers} locale={loc} />
       <Categories categories={categories} locale={loc} />
       <ScreenSelector locale={loc} />
       <FeatureStrip locale={loc} siteContent={siteContent} />

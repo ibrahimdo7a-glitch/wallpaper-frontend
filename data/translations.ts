@@ -21,6 +21,7 @@ export const translations = {
       ],
     },
     mostDownloaded: { title: 'الأكثر تحميلًا', viewAll: 'عرض الكل' },
+    latestWallpapers: { title: 'أحدث الخلفيات', viewAll: 'عرض الكل' },
     categories: { title: 'الأقسام' },
     screenSelector: {
       title: 'اختر جهازك',
@@ -67,6 +68,7 @@ export const translations = {
       ],
     },
     mostDownloaded: { title: 'Most Downloaded', viewAll: 'View all' },
+    latestWallpapers: { title: 'Latest Wallpapers', viewAll: 'View all' },
     categories: { title: 'Categories' },
     screenSelector: {
       title: 'Choose Your Screen',
