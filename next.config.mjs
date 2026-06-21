@@ -9,6 +9,11 @@ const nextConfig = {
     remotePatterns: [
       {
         protocol: 'https',
+        hostname: 'api.qev.app',
+        pathname: '/storage/**',
+      },
+      {
+        protocol: 'https',
         hostname: '*.r2.dev',
         pathname: '/**',
       },
