@@ -69,7 +69,16 @@ export async function fetchCategories(): Promise<ApiCategory[]> {
 }
 
 export async function fetchMostDownloaded(limit = 5): Promise<ApiWallpaper[]> {
+  // Try most_downloaded first, fall back to newest if all counts are 0
   const res = await get<{ data: ApiWallpaper[] }>(`/wallpapers?sort=most_downloaded&per_page=${limit}`, 300);
+  const data = res?.data ?? [];
+  if (data.length > 0) return data;
+  const fallback = await get<{ data: ApiWallpaper[] }>(`/wallpapers?per_page=${limit}`, 300);
+  return fallback?.data ?? [];
+}
+
+export async function fetchLatestWallpapers(limit = 10): Promise<ApiWallpaper[]> {
+  const res = await get<{ data: ApiWallpaper[] }>(`/wallpapers?per_page=${limit}`, 300);
   return res?.data ?? [];
 }
 
