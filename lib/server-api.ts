@@ -69,7 +69,7 @@ export async function fetchCategories(): Promise<ApiCategory[]> {
 }
 
 export async function fetchMostDownloaded(limit = 5): Promise<ApiWallpaper[]> {
-  const res = await get<{ data: ApiWallpaper[] }>(`/wallpapers?sort=most_downloaded&per_page=${limit}`);
+  const res = await get<{ data: ApiWallpaper[] }>(`/wallpapers?sort=most_downloaded&per_page=${limit}`, 30);
   return res?.data ?? [];
 }
 

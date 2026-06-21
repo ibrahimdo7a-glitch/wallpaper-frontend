@@ -1,5 +1,7 @@
 import type { Metadata } from 'next';
 import { type Locale } from '@/lib/i18n';
+
+export const revalidate = 30;
 import { Hero } from '@/components/Hero';
 import { MostDownloaded } from '@/components/MostDownloaded';
 import { Categories } from '@/components/Categories';

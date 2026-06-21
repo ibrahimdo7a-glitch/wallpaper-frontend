@@ -12,7 +12,10 @@ export function WallpaperCard({ wallpaper, locale }: WallpaperCardProps) {
   const title = locale === 'ar' ? wallpaper.titleAr : wallpaper.titleEn;
 
   return (
-    <div className="group relative rounded-xl overflow-hidden bg-gray-100 dark:bg-gray-800 aspect-video cursor-pointer">
+    <Link
+      href={`/${locale}/wallpaper/${wallpaper.slug}`}
+      className="group relative rounded-xl overflow-hidden bg-gray-100 dark:bg-gray-800 aspect-video cursor-pointer block"
+    >
       {/* Image / gradient background */}
       {wallpaper.imageUrl ? (
         <Image
@@ -52,6 +55,6 @@ export function WallpaperCard({ wallpaper, locale }: WallpaperCardProps) {
           </button>
         </div>
       </div>
-    </div>
+    </Link>
   );
 }
