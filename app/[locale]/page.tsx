@@ -42,11 +42,11 @@ function gradients() {
 export default async function HomePage({ params: { locale } }: { params: { locale: Locale } }) {
   const loc = (locale === 'ar' || locale === 'en') ? locale : 'en';
 
-  // Fetch all data in parallel
+  // Fetch all data in parallel; individual functions already catch errors and return []/ null
   const [apiWallpapers, apiCategories, siteContent] = await Promise.all([
-    fetchMostDownloaded(5),
-    fetchCategories(),
-    fetchSiteContent(),
+    fetchMostDownloaded(5).catch(() => [] as Awaited<ReturnType<typeof fetchMostDownloaded>>),
+    fetchCategories().catch(() => [] as Awaited<ReturnType<typeof fetchCategories>>),
+    fetchSiteContent().catch(() => null),
   ]);
 
   // Map API wallpapers to local type (fallback to mock if empty)
@@ -60,7 +60,7 @@ export default async function HomePage({ params: { locale } }: { params: { local
         is4K: w.resolution_label === '4K' || w.resolution_label === '8K',
         imageUrl: w.thumbnail_url ?? w.image_url ?? undefined,
         gradient: gradients()[i % gradients().length],
-        category: '',
+        category: w.category ? (loc === 'ar' ? w.category.name_ar : w.category.name_en) : '',
       }))
     : mockWallpapers;
 

@@ -39,6 +39,7 @@ export interface ApiWallpaper {
   downloads_count: number;
   is_free: boolean;
   tags?: { name_ar: string; name_en: string; slug: string }[];
+  category?: { id: number; name_ar: string; name_en: string; slug: string } | null;
 }
 
 export interface SiteContent {

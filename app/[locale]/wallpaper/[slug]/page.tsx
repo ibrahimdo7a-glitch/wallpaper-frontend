@@ -22,7 +22,7 @@ export async function generateMetadata({ params: { locale, slug } }: Props): Pro
     const description = locale === 'ar' ? (w.description_ar || '') : (w.description_en || '');
 
     return {
-      title: `${title} - Wallpaper Platform`,
+      title: `${title} - ${process.env.NEXT_PUBLIC_SITE_NAME || 'Leopard Wallpapers'}`,
       description,
       openGraph: {
         title,
@@ -176,7 +176,7 @@ export default async function WallpaperPage({ params: { locale, slug } }: Props)
                 />
               ) : (
                 <div className="w-12 h-12 rounded-full bg-gray-700 flex items-center justify-center text-lg font-bold">
-                  {wallpaper.uploader.name[0]}
+                  {wallpaper.uploader.name?.[0] || '?'}
                 </div>
               )}
               <div>
