@@ -48,6 +48,11 @@ export default async function LocaleLayout({
     ? (siteContent?.site_name_ar || t.siteName)
     : (siteContent?.site_name_en || t.siteName);
 
+  const ilinkEnabled = siteContent?.ilink_enabled === true || siteContent?.ilink_enabled === '1';
+  const ilinkLabel   = isRTL ? siteContent?.ilink_label_ar   : siteContent?.ilink_label_en;
+  const ilinkTooltip = isRTL ? siteContent?.ilink_tooltip_ar : siteContent?.ilink_tooltip_en;
+  const ilinkFileUrl = siteContent?.ilink_file_url ?? '';
+
   return (
     <html lang={locale} dir={isRTL ? 'rtl' : 'ltr'} suppressHydrationWarning>
       <head>
@@ -68,7 +73,11 @@ export default async function LocaleLayout({
           isRTL ? 'font-arabic' : 'font-sans'
         }`}
       >
-        <Header locale={locale as Locale} siteName={siteName} />
+        <Header
+          locale={locale as Locale}
+          siteName={siteName}
+          ilink={ilinkEnabled ? { label: ilinkLabel || '', tooltip: ilinkTooltip || '', fileUrl: ilinkFileUrl } : undefined}
+        />
         <main>{children}</main>
         <Footer locale={locale as Locale} />
       </body>

@@ -6,12 +6,19 @@ import { useState, useEffect } from 'react';
 import { type Locale } from '@/types';
 import { translations } from '@/data/translations';
 
+interface ILink {
+  label: string;
+  tooltip: string;
+  fileUrl: string;
+}
+
 interface HeaderProps {
   locale: Locale;
   siteName?: string;
+  ilink?: ILink;
 }
 
-export function Header({ locale, siteName }: HeaderProps) {
+export function Header({ locale, siteName, ilink }: HeaderProps) {
   const t = translations[locale];
   const pathname = usePathname();
   const isRTL = locale === 'ar';
@@ -96,6 +103,29 @@ export function Header({ locale, siteName }: HeaderProps) {
 
           {/* Right actions */}
           <div className="flex items-center gap-2 ms-auto">
+            {/* iLink download button */}
+            {ilink && ilink.fileUrl && (
+              <div className="relative group">
+                <a
+                  href={ilink.fileUrl}
+                  download
+                  className="flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-orange-500 hover:bg-orange-600 text-white transition-colors"
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="w-3.5 h-3.5">
+                    <path d="M10.75 2.75a.75.75 0 0 0-1.5 0v8.614L6.295 8.235a.75.75 0 1 0-1.09 1.03l4.25 4.5a.75.75 0 0 0 1.09 0l4.25-4.5a.75.75 0 0 0-1.09-1.03l-2.955 3.129V2.75Z" />
+                    <path d="M3.5 12.75a.75.75 0 0 0-1.5 0v2.5A2.75 2.75 0 0 0 4.75 18h10.5A2.75 2.75 0 0 0 18 15.25v-2.5a.75.75 0 0 0-1.5 0v2.5c0 .69-.56 1.25-1.25 1.25H4.75c-.69 0-1.25-.56-1.25-1.25v-2.5Z" />
+                  </svg>
+                  {ilink.label || (locale === 'ar' ? 'تحميل' : 'Download')}
+                </a>
+                {ilink.tooltip && (
+                  <div className="absolute top-full mt-2 end-0 z-50 hidden group-hover:block w-48 rounded-lg bg-gray-900 dark:bg-gray-700 text-white text-xs p-2.5 shadow-lg text-center leading-relaxed pointer-events-none">
+                    {ilink.tooltip}
+                    <div className="absolute -top-1.5 end-4 w-3 h-3 bg-gray-900 dark:bg-gray-700 rotate-45" />
+                  </div>
+                )}
+              </div>
+            )}
+
             {/* Dark mode */}
             <button
               onClick={toggleDark}

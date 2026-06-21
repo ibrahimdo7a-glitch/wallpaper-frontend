@@ -61,6 +61,12 @@ export interface SiteContent {
   feature_fast_en: string;
   footer_copyright_ar: string;
   footer_copyright_en: string;
+  ilink_enabled: boolean | string;
+  ilink_label_ar: string;
+  ilink_label_en: string;
+  ilink_tooltip_ar: string;
+  ilink_tooltip_en: string;
+  ilink_file_url: string;
 }
 
 export async function fetchCategories(): Promise<ApiCategory[]> {
