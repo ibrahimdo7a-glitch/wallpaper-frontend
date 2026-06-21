@@ -64,16 +64,16 @@ export interface SiteContent {
 }
 
 export async function fetchCategories(): Promise<ApiCategory[]> {
-  const res = await get<{ data: ApiCategory[] }>('/categories', 30);
+  const res = await get<{ data: ApiCategory[] }>('/categories', 300);
   return res?.data ?? [];
 }
 
 export async function fetchMostDownloaded(limit = 5): Promise<ApiWallpaper[]> {
-  const res = await get<{ data: ApiWallpaper[] }>(`/wallpapers?sort=most_downloaded&per_page=${limit}`, 30);
+  const res = await get<{ data: ApiWallpaper[] }>(`/wallpapers?sort=most_downloaded&per_page=${limit}`, 300);
   return res?.data ?? [];
 }
 
 export async function fetchSiteContent(): Promise<SiteContent | null> {
-  const res = await get<{ data: SiteContent }>('/settings/site-content', 60);
+  const res = await get<{ data: SiteContent }>('/settings/site-content', 300);
   return res?.data ?? null;
 }
