@@ -4,6 +4,7 @@ const withNextIntl = createNextIntlPlugin('./lib/i18n.ts');
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  output: 'standalone',
   images: {
     remotePatterns: [
       {
