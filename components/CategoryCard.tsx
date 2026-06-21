@@ -14,7 +14,10 @@ export function CategoryCard({ category, locale }: CategoryCardProps) {
   const subcategories = locale === 'ar' ? category.subcategoriesAr : category.subcategoriesEn;
 
   return (
-    <div className={`flex items-start gap-4 p-4 rounded-2xl border border-gray-100 dark:border-gray-800 bg-white dark:bg-gray-900 hover:border-gray-300 dark:hover:border-gray-600 transition-colors ${isRTL ? 'flex-row-reverse' : ''}`}>
+    <div className={`relative flex items-start gap-4 p-4 rounded-2xl border border-gray-100 dark:border-gray-800 bg-white dark:bg-gray-900 hover:border-gray-300 dark:hover:border-gray-600 transition-colors cursor-pointer ${isRTL ? 'flex-row-reverse' : ''}`}>
+      {/* Stretched link — covers the whole card */}
+      <Link href={`/${locale}/categories/${category.slug}`} className="absolute inset-0 rounded-2xl" aria-label={name} />
+
       {/* Thumbnail */}
       <div className="shrink-0 w-20 h-20 rounded-xl overflow-hidden">
         {category.imageUrl ? (
@@ -35,19 +38,13 @@ export function CategoryCard({ category, locale }: CategoryCardProps) {
 
       {/* Info */}
       <div className={`flex-1 min-w-0 ${isRTL ? 'text-right' : 'text-left'}`}>
-        <div className={`flex items-center justify-between gap-2 mb-0.5 ${isRTL ? 'flex-row-reverse' : ''}`}>
+        <div className="mb-0.5">
           <h3 className="font-bold text-gray-900 dark:text-white text-sm">{name}</h3>
-          <Link
-            href={`/${locale}/categories/${category.slug}`}
-            className="w-7 h-7 rounded-full border border-gray-200 dark:border-gray-700 flex items-center justify-center text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors shrink-0"
-          >
-            <span className="text-xs">{isRTL ? '←' : '→'}</span>
-          </Link>
         </div>
         <p className="text-gray-500 dark:text-gray-400 text-xs mb-2">{description}</p>
 
-        {/* Subcategory chips */}
-        <div className={`flex flex-wrap gap-1 ${isRTL ? 'flex-row-reverse justify-end' : ''}`}>
+        {/* Subcategory chips — raised above stretched link */}
+        <div className={`relative z-10 flex flex-wrap gap-1 ${isRTL ? 'flex-row-reverse justify-end' : ''}`}>
           {subcategories.map((sub) => (
             <Link
               key={sub}
