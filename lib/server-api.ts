@@ -64,7 +64,7 @@ export interface SiteContent {
 }
 
 export async function fetchCategories(): Promise<ApiCategory[]> {
-  const res = await get<{ data: ApiCategory[] }>('/categories');
+  const res = await get<{ data: ApiCategory[] }>('/categories', 30);
   return res?.data ?? [];
 }
 
