@@ -1,10 +1,9 @@
 import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
-import { NextIntlClientProvider } from 'next-intl';
-import { getMessages, setRequestLocale } from 'next-intl/server';
 import { locales, type Locale } from '@/lib/i18n';
-import { Header } from '@/components/layout/Header';
-import { Footer } from '@/components/layout/Footer';
+import { Header } from '@/components/Header';
+import { Footer } from '@/components/Footer';
+import { translations } from '@/data/translations';
 import './globals.css';
 
 export function generateStaticParams() {
@@ -16,51 +15,51 @@ export async function generateMetadata({
 }: {
   params: { locale: Locale };
 }): Promise<Metadata> {
+  const t = translations[locale as Locale] ?? translations.en;
   return {
-    metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || 'https://example.com'),
-    alternates: {
-      canonical: `/${locale}`,
-      languages: {
-        ar: '/ar',
-        en: '/en',
-      },
-    },
+    title: { default: t.siteName, template: `%s | ${t.siteName}` },
+    description: t.hero.subtitle,
+    metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || 'https://qev.app'),
   };
 }
 
-export default async function LocaleLayout({
+export default function LocaleLayout({
   children,
   params: { locale },
 }: {
   children: React.ReactNode;
   params: { locale: string };
 }) {
-  if (!locales.includes(locale as Locale)) {
-    notFound();
-  }
+  if (!locales.includes(locale as Locale)) notFound();
 
-  setRequestLocale(locale);
-  const messages = await getMessages();
   const isRTL = locale === 'ar';
 
   return (
-    <html lang={locale} dir={isRTL ? 'rtl' : 'ltr'}>
+    <html lang={locale} dir={isRTL ? 'rtl' : 'ltr'} suppressHydrationWarning>
       <head>
+        {/* Prevent dark mode flash */}
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `(function(){var s=localStorage.getItem('theme');var d=s==='dark'||(!s&&window.matchMedia('(prefers-color-scheme:dark)').matches);if(d)document.documentElement.classList.add('dark')})()`,
+          }}
+        />
         <link
-          href="https://fonts.googleapis.com/css2?family=Noto+Kufi+Arabic:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600;700&display=swap"
+          rel="preconnect"
+          href="https://fonts.googleapis.com"
+        />
+        <link
+          href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Noto+Kufi+Arabic:wght@400;500;600;700;800;900&display=swap"
           rel="stylesheet"
         />
       </head>
       <body
-        className={`min-h-screen bg-gray-950 text-gray-100 antialiased ${
+        className={`min-h-screen bg-white dark:bg-gray-950 text-gray-900 dark:text-white antialiased ${
           isRTL ? 'font-arabic' : 'font-sans'
         }`}
       >
-        <NextIntlClientProvider messages={messages} locale={locale}>
-          <Header locale={locale as Locale} />
-          <main className="min-h-screen">{children}</main>
-          <Footer locale={locale as Locale} />
-        </NextIntlClientProvider>
+        <Header locale={locale as Locale} />
+        <main>{children}</main>
+        <Footer locale={locale as Locale} />
       </body>
     </html>
   );
