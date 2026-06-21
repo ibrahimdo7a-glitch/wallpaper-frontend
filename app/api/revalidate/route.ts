@@ -1,4 +1,4 @@
-import { revalidatePath } from 'next/cache';
+import { revalidatePath, revalidateTag } from 'next/cache';
 import { NextRequest, NextResponse } from 'next/server';
 
 export async function POST(req: NextRequest) {
@@ -8,9 +8,13 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 
-  // Revalidate both locales
-  revalidatePath('/ar', 'page');
-  revalidatePath('/en', 'page');
+  // Clear all data caches by tag
+  revalidateTag('site-content');
+  revalidateTag('wallpapers');
+  revalidateTag('categories');
+
+  // Also revalidate all pages (layout level = everything)
+  revalidatePath('/', 'layout');
 
   return NextResponse.json({ revalidated: true, at: new Date().toISOString() });
 }

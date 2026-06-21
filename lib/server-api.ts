@@ -2,10 +2,10 @@
 
 const API_BASE = (process.env.NEXT_PUBLIC_API_URL || 'https://api.qev.app').replace(/\/$/, '');
 
-async function get<T>(path: string, revalidate = 300): Promise<T | null> {
+async function get<T>(path: string, revalidate = 300, tags?: string[]): Promise<T | null> {
   try {
     const res = await fetch(`${API_BASE}/api/v1${path}`, {
-      next: { revalidate },
+      next: { revalidate, tags },
       headers: { Accept: 'application/json' },
     });
     if (!res.ok) return null;
@@ -64,25 +64,24 @@ export interface SiteContent {
 }
 
 export async function fetchCategories(): Promise<ApiCategory[]> {
-  const res = await get<{ data: ApiCategory[] }>('/categories', 300);
+  const res = await get<{ data: ApiCategory[] }>('/categories', 300, ['categories']);
   return res?.data ?? [];
 }
 
 export async function fetchMostDownloaded(limit = 5): Promise<ApiWallpaper[]> {
-  // Try most_downloaded first, fall back to newest if all counts are 0
-  const res = await get<{ data: ApiWallpaper[] }>(`/wallpapers?sort=most_downloaded&per_page=${limit}`, 300);
+  const res = await get<{ data: ApiWallpaper[] }>(`/wallpapers?sort=most_downloaded&per_page=${limit}`, 300, ['wallpapers']);
   const data = res?.data ?? [];
   if (data.length > 0) return data;
-  const fallback = await get<{ data: ApiWallpaper[] }>(`/wallpapers?per_page=${limit}`, 300);
+  const fallback = await get<{ data: ApiWallpaper[] }>(`/wallpapers?per_page=${limit}`, 300, ['wallpapers']);
   return fallback?.data ?? [];
 }
 
 export async function fetchLatestWallpapers(limit = 10): Promise<ApiWallpaper[]> {
-  const res = await get<{ data: ApiWallpaper[] }>(`/wallpapers?per_page=${limit}`, 300);
+  const res = await get<{ data: ApiWallpaper[] }>(`/wallpapers?per_page=${limit}`, 300, ['wallpapers']);
   return res?.data ?? [];
 }
 
 export async function fetchSiteContent(): Promise<SiteContent | null> {
-  const res = await get<{ data: SiteContent }>('/settings/site-content', 300);
+  const res = await get<{ data: SiteContent }>('/settings/site-content', 300, ['site-content']);
   return res?.data ?? null;
 }
