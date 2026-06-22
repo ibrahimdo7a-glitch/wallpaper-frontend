@@ -1,3 +1,4 @@
+import type { ReactNode } from 'react';
 import type { ApiHomepageSection, ApiStatItem } from '@/lib/server-api';
 
 function formatValue(v: number): string {
@@ -7,7 +8,7 @@ function formatValue(v: number): string {
 }
 
 // SVG icons matching the design
-const StatIcons: Record<string, JSX.Element> = {
+const StatIcons: Record<string, ReactNode> = {
   downloads: (
     <svg viewBox="0 0 40 40" className="w-10 h-10" fill="none">
       <circle cx="20" cy="20" r="20" fill="#EEF2FF"/>
