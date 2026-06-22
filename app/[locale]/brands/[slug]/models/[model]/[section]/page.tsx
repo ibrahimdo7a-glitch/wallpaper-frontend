@@ -5,6 +5,7 @@ import { notFound } from 'next/navigation';
 import { fetchBrand, fetchModelWithSections, fetchModelSectionContent } from '@/lib/server-api';
 import { type Locale } from '@/lib/i18n';
 import type { ApiContentItem, ApiBrandSection } from '@/lib/server-api';
+import { ContentLightbox } from '@/components/brand/ContentLightbox';
 
 type Props = {
   params: { locale: Locale; slug: string; model: string; section: string };
@@ -23,72 +24,8 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   return { title: `${sectionName} — ${modelName} | QEV` };
 }
 
-// ─── Layout renderers (same set as brand section page) ────────────────────────
-
-function GalleryLayout({ items, isAr }: { items: ApiContentItem[]; isAr: boolean }) {
-  return (
-    <div className="columns-2 sm:columns-3 md:columns-4 gap-3 space-y-3">
-      {items.map(item => (
-        <div key={item.id} className="break-inside-avoid rounded-xl overflow-hidden bg-gray-900">
-          {item.image_url && (
-            <Image src={item.image_url} alt={item.title_ar} width={400} height={600} className="w-full object-cover" />
-          )}
-          {(item.title_ar || item.title_en) && (
-            <div className="p-2 text-xs text-gray-300">{isAr ? item.title_ar : (item.title_en ?? item.title_ar)}</div>
-          )}
-        </div>
-      ))}
-    </div>
-  );
-}
-
-function GridLayout({ items, isAr }: { items: ApiContentItem[]; isAr: boolean }) {
-  return (
-    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
-      {items.map(item => (
-        <div key={item.id}
-          className="bg-gray-900 border border-gray-800 rounded-2xl overflow-hidden hover:border-gray-600 transition-all">
-          {(item.image_url ?? item.thumbnail_url) && (
-            <div className="relative h-36">
-              <Image src={(item.image_url ?? item.thumbnail_url)!} alt={item.title_ar} fill className="object-cover" />
-              {item.is_pinned && <span className="absolute top-1 start-1 text-xs bg-yellow-500 text-black px-1.5 rounded">📌</span>}
-            </div>
-          )}
-          <div className="p-3">
-            <h3 className="font-medium text-sm line-clamp-2">{isAr ? item.title_ar : (item.title_en ?? item.title_ar)}</h3>
-            {item.views_count > 0 && <p className="text-xs text-gray-500 mt-1">👁 {item.views_count.toLocaleString()}</p>}
-          </div>
-        </div>
-      ))}
-    </div>
-  );
-}
-
-function CardLayout({ items, isAr }: { items: ApiContentItem[]; isAr: boolean }) {
-  return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-      {items.map(item => (
-        <div key={item.id} className="bg-gray-900 border border-gray-800 rounded-2xl overflow-hidden hover:border-gray-600 transition-all">
-          {(item.image_url ?? item.thumbnail_url) && (
-            <div className="relative h-44">
-              <Image src={(item.image_url ?? item.thumbnail_url)!} alt={item.title_ar} fill className="object-cover" />
-              {item.is_featured && <span className="absolute top-2 end-2 text-xs bg-yellow-500 text-black px-2 py-0.5 rounded-full">⭐</span>}
-            </div>
-          )}
-          <div className="p-4">
-            <h3 className="font-semibold line-clamp-2">{isAr ? item.title_ar : (item.title_en ?? item.title_ar)}</h3>
-            {(isAr ? item.description_ar : item.description_en) && (
-              <p className="text-sm text-gray-400 line-clamp-2 mt-1">{isAr ? item.description_ar : item.description_en}</p>
-            )}
-            <p className="text-xs text-gray-500 mt-2">
-              {item.published_at && new Date(item.published_at).toLocaleDateString(isAr ? 'ar-SA' : 'en-US')}
-            </p>
-          </div>
-        </div>
-      ))}
-    </div>
-  );
-}
+// ─── Layout renderers ──────────────────────────────────────────────────────────
+// Image-based layouts (gallery/grid/cards) are handled by <ContentLightbox> (client).
 
 function ListLayout({ items, isAr }: { items: ApiContentItem[]; isAr: boolean }) {
   return (
@@ -206,13 +143,13 @@ function SectionContent({ section, items, isAr }: { section: ApiBrandSection; it
     </div>
   );
   switch (section.layout_type) {
-    case 'gallery':       return <GalleryLayout items={items} isAr={isAr} />;
+    case 'gallery':       return <ContentLightbox items={items} isAr={isAr} layout="gallery" />;
     case 'video_grid':    return <VideoGridLayout items={items} isAr={isAr} />;
     case 'download_list': return <DownloadListLayout items={items} isAr={isAr} />;
     case 'faq_accordion': return <FaqAccordionLayout items={items} isAr={isAr} />;
     case 'list':          return <ListLayout items={items} isAr={isAr} />;
-    case 'cards':         return <CardLayout items={items} isAr={isAr} />;
-    default:              return <GridLayout items={items} isAr={isAr} />;
+    case 'cards':         return <ContentLightbox items={items} isAr={isAr} layout="cards" />;
+    default:              return <ContentLightbox items={items} isAr={isAr} layout="grid" />;
   }
 }
 
