@@ -274,18 +274,38 @@ export async function fetchBrandSections(brandSlug: string): Promise<ApiBrandSec
   return res?.data ?? [];
 }
 
+export interface ApiCollection {
+  id: number;
+  name_ar: string;
+  name_en: string | null;
+  slug: string;
+  icon: string | null;
+  image_url: string | null;
+  description_ar: string | null;
+  description_en: string | null;
+  items_count: number;
+}
+
 export async function fetchSectionContent(
   brandSlug: string,
   sectionSlug: string,
   page = 1,
-  perPage = 20
-): Promise<{ section: ApiBrandSection | null; data: ApiContentItem[]; meta: any }> {
-  const res = await get<{ section: ApiBrandSection; data: ApiContentItem[]; meta: any }>(
-    `/brands/${brandSlug}/sections/${sectionSlug}?page=${page}&per_page=${perPage}`,
+  perPage = 20,
+  collection?: string
+): Promise<{ section: ApiBrandSection | null; collections: ApiCollection[]; activeCollection: ApiCollection | null; data: ApiContentItem[]; meta: any }> {
+  const collParam = collection ? `&collection=${encodeURIComponent(collection)}` : '';
+  const res = await get<{ section: ApiBrandSection; collections: ApiCollection[]; active_collection: ApiCollection | null; data: ApiContentItem[]; meta: any }>(
+    `/brands/${brandSlug}/sections/${sectionSlug}?page=${page}&per_page=${perPage}${collParam}`,
     120,
     [`section-${brandSlug}-${sectionSlug}`]
   );
-  return { section: res?.section ?? null, data: res?.data ?? [], meta: res?.meta ?? {} };
+  return {
+    section: res?.section ?? null,
+    collections: res?.collections ?? [],
+    activeCollection: res?.active_collection ?? null,
+    data: res?.data ?? [],
+    meta: res?.meta ?? {},
+  };
 }
 
 export async function fetchModelSections(brandSlug: string, modelSlug: string): Promise<ApiBrandSection[]> {

@@ -8,7 +8,7 @@ import type { ApiContentItem, ApiBrandSection } from '@/lib/server-api';
 
 type Props = {
   params: { locale: Locale; slug: string; section: string };
-  searchParams: { page?: string };
+  searchParams: { page?: string; collection?: string };
 };
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
@@ -223,9 +223,11 @@ export default async function BrandSectionPage({ params, searchParams }: Props) 
   const isAr = params.locale === 'ar';
   const page = Number(searchParams.page ?? 1);
 
-  const [brand, { section, data: items, meta }] = await Promise.all([
+  const activeColl = searchParams.collection;
+
+  const [brand, { section, collections, activeCollection, data: items, meta }] = await Promise.all([
     fetchBrand(params.slug),
-    fetchSectionContent(params.slug, params.section, page),
+    fetchSectionContent(params.slug, params.section, page, 20, activeColl),
   ]);
 
   if (!brand || !section) notFound();
@@ -233,6 +235,7 @@ export default async function BrandSectionPage({ params, searchParams }: Props) 
   const brandName = isAr ? brand.name_ar : (brand.name_en ?? brand.name_ar);
   const sectionName = isAr ? section.name_ar : section.name_en;
   const primaryColor = brand.primary_color ?? '#3b82f6';
+  const basePath = `/${params.locale}/brands/${params.slug}/${params.section}`;
 
   return (
     <main className="min-h-screen bg-black text-white" dir={isAr ? 'rtl' : 'ltr'}>
@@ -264,7 +267,41 @@ export default async function BrandSectionPage({ params, searchParams }: Props) 
         {(isAr ? section.description_ar : section.description_en) && (
           <p className="text-gray-400 text-sm mb-6">{isAr ? section.description_ar : section.description_en}</p>
         )}
-        <p className="text-gray-500 text-sm mb-8">{meta.total ?? items.length} {isAr ? 'عنصر' : 'items'}</p>
+
+        {/* Collections (sub-folders) */}
+        {collections.length > 0 && (
+          <div className="mb-8">
+            <div className="flex gap-2 flex-wrap">
+              {/* "All" chip */}
+              <Link href={basePath}
+                className={`text-sm px-4 py-1.5 rounded-full border transition-colors ${!activeCollection ? 'text-black font-semibold border-transparent' : 'border-gray-700 text-gray-300 hover:bg-gray-800'}`}
+                style={!activeCollection ? { backgroundColor: primaryColor } : {}}>
+                {isAr ? 'الكل' : 'All'}
+              </Link>
+              {collections.map(c => {
+                const active = activeCollection?.id === c.id;
+                return (
+                  <Link key={c.id} href={`${basePath}?collection=${c.slug}`}
+                    className={`text-sm px-4 py-1.5 rounded-full border transition-colors flex items-center gap-1.5 ${active ? 'text-black font-semibold border-transparent' : 'border-gray-700 text-gray-300 hover:bg-gray-800'}`}
+                    style={active ? { backgroundColor: primaryColor } : {}}>
+                    {c.icon && <span>{c.icon}</span>}
+                    {isAr ? c.name_ar : (c.name_en ?? c.name_ar)}
+                    <span className="text-xs opacity-60">{c.items_count}</span>
+                  </Link>
+                );
+              })}
+            </div>
+          </div>
+        )}
+
+        <p className="text-gray-500 text-sm mb-8">
+          {activeCollection && (
+            <span className="text-white font-medium">
+              {activeCollection.icon} {isAr ? activeCollection.name_ar : (activeCollection.name_en ?? activeCollection.name_ar)} —{' '}
+            </span>
+          )}
+          {meta.total ?? items.length} {isAr ? 'عنصر' : 'items'}
+        </p>
 
         {/* Dynamic content */}
         <SectionContent section={section} items={items} isAr={isAr} />
@@ -274,7 +311,7 @@ export default async function BrandSectionPage({ params, searchParams }: Props) 
           <div className="flex justify-center gap-2 mt-10 flex-wrap">
             {Array.from({ length: meta.last_page }, (_, i) => i + 1).map(p => (
               <Link key={p}
-                href={`/${params.locale}/brands/${params.slug}/${params.section}?page=${p}`}
+                href={`${basePath}?page=${p}${activeColl ? `&collection=${activeColl}` : ''}`}
                 className={`w-9 h-9 flex items-center justify-center rounded-lg text-sm ${p === page ? 'text-black font-bold' : 'bg-gray-800 hover:bg-gray-700'}`}
                 style={p === page ? { backgroundColor: primaryColor } : {}}>
                 {p}
