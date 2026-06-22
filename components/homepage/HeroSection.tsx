@@ -11,92 +11,74 @@ interface Props {
 }
 
 export function HeroSection({ data, brands, isAr, locale, searchPlaceholder }: Props) {
-  const bgColor   = data.bg_color   ?? '#ffffff';
-  const textColor = data.text_color ?? '#111827';
   const topBrands = brands.slice(0, 6);
 
   return (
-    <section style={{ backgroundColor: bgColor, color: textColor }} className="relative overflow-hidden">
-      <div className="max-w-7xl mx-auto px-4 py-12 md:py-16">
-        <div className="grid md:grid-cols-2 gap-8 items-center">
-          {/* Text side */}
-          <div className={isAr ? 'order-2 md:order-2 text-right' : 'order-2 md:order-1'}>
-            {data.subtitle_ar && (
-              <p className="text-sm font-medium mb-3 opacity-70">
-                {isAr ? data.subtitle_ar : (data.subtitle_en ?? data.subtitle_ar)}
-              </p>
-            )}
-            <h1 className="text-3xl md:text-5xl font-bold leading-tight mb-4">
-              {isAr ? data.title_ar : (data.title_en ?? data.title_ar)}
-            </h1>
-            {data.description_ar && (
-              <p className="text-sm md:text-base opacity-60 mb-6 leading-relaxed">
-                {isAr ? data.description_ar : (data.description_en ?? data.description_ar)}
-              </p>
-            )}
+    <section className="bg-white border-b border-gray-100">
+      <div className="max-w-7xl mx-auto px-4 py-10 md:py-14">
+        <div className="grid md:grid-cols-2 gap-6 items-center">
 
-            {/* Search bar */}
-            <form action={`/${locale}/search`} method="get" className="relative mb-6">
-              <input
-                name="q"
-                type="text"
-                placeholder={searchPlaceholder ?? (isAr ? 'ابحث...' : 'Search...')}
-                className="w-full rounded-2xl border border-gray-200 bg-white text-gray-900 px-5 py-3 pr-12 text-sm shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-                dir={isAr ? 'rtl' : 'ltr'}
-              />
-              <button type="submit" className="absolute inset-y-0 end-3 flex items-center text-gray-400 hover:text-blue-500">
-                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>
-              </button>
-            </form>
-
-            {/* Popular brand tags */}
-            {topBrands.length > 0 && (
-              <div className="flex items-center gap-2 flex-wrap">
-                <span className="text-xs opacity-50">{isAr ? 'الأكثر بحثاً:' : 'Popular:'}</span>
-                {topBrands.map(b => (
-                  <Link key={b.id} href={`/${locale}/brands/${b.slug}`}
-                    className="text-xs px-3 py-1 rounded-full border border-gray-200 hover:bg-gray-100 transition-colors opacity-80 hover:opacity-100"
-                    style={{ color: textColor }}>
-                    {isAr ? b.name_ar : (b.name_en ?? b.name_ar)}
-                  </Link>
-                ))}
-              </div>
-            )}
-
-            {/* CTAs */}
-            {(data.primary_btn_url || data.secondary_btn_url) && (
-              <div className="flex gap-3 mt-6 flex-wrap">
-                {data.primary_btn_url && (
-                  <Link href={data.primary_btn_url}
-                    className="bg-blue-600 text-white px-6 py-2.5 rounded-xl text-sm font-semibold hover:bg-blue-700 transition-colors">
-                    {isAr ? (data.primary_btn_label_ar ?? '') : (data.primary_btn_label_en ?? data.primary_btn_label_ar ?? '')}
-                  </Link>
-                )}
-                {data.secondary_btn_url && (
-                  <Link href={data.secondary_btn_url}
-                    className="border border-current px-6 py-2.5 rounded-xl text-sm font-semibold hover:bg-black/5 transition-colors"
-                    style={{ color: textColor }}>
-                    {isAr ? (data.secondary_btn_label_ar ?? '') : (data.secondary_btn_label_en ?? data.secondary_btn_label_ar ?? '')}
-                  </Link>
-                )}
-              </div>
-            )}
-          </div>
-
-          {/* Image side */}
+          {/* Image — left on RTL */}
           {data.image_url && (
-            <div className={isAr ? 'order-1 md:order-1' : 'order-1 md:order-2'}>
-              <div className="relative h-64 md:h-96">
+            <div className={`${isAr ? 'order-1' : 'order-2'}`}>
+              <div className="relative h-56 md:h-80">
                 <Image
                   src={data.image_url}
                   alt={data.title_ar}
                   fill
-                  className="object-contain drop-shadow-2xl"
+                  className="object-contain"
                   priority
                 />
               </div>
             </div>
           )}
+
+          {/* Text — right on RTL */}
+          <div className={`${isAr ? 'order-2 text-right' : 'order-1 text-left'}`}>
+            <h1 className="text-3xl md:text-4xl font-bold text-gray-900 mb-2 leading-tight">
+              {isAr ? data.title_ar : (data.title_en ?? data.title_ar)}
+            </h1>
+            {data.subtitle_ar && (
+              <h2 className="text-xl md:text-2xl font-bold mb-3" style={{ color: '#2563eb' }}>
+                {isAr ? data.subtitle_ar : (data.subtitle_en ?? data.subtitle_ar)}
+              </h2>
+            )}
+            {data.description_ar && (
+              <p className="text-sm text-gray-500 mb-5 leading-relaxed">
+                {isAr ? data.description_ar : (data.description_en ?? data.description_ar)}
+              </p>
+            )}
+
+            {/* Search */}
+            <form action={`/${locale}/search`} method="get" className="relative mb-4">
+              <input
+                name="q"
+                type="text"
+                placeholder={searchPlaceholder ?? (isAr ? 'ابحث...' : 'Search...')}
+                className="w-full rounded-2xl border border-gray-200 bg-white text-gray-700 px-4 py-3 text-sm shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 placeholder:text-gray-400"
+                dir={isAr ? 'rtl' : 'ltr'}
+              />
+              <button type="submit" className="absolute inset-y-0 end-3 flex items-center text-gray-400 hover:text-blue-500">
+                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                </svg>
+              </button>
+            </form>
+
+            {/* Popular tags */}
+            {topBrands.length > 0 && (
+              <div className={`flex items-center gap-2 flex-wrap ${isAr ? 'justify-end' : 'justify-start'}`}>
+                <span className="text-xs text-gray-400 whitespace-nowrap">{isAr ? 'الأكثر بحثاً:' : 'Popular:'}</span>
+                {topBrands.map(b => (
+                  <Link key={b.id} href={`/${locale}/brands/${b.slug}`}
+                    className="text-xs px-3 py-1 rounded-full border border-gray-200 text-gray-600 hover:bg-gray-50 transition-colors">
+                    {isAr ? b.name_ar : (b.name_en ?? b.name_ar)}
+                  </Link>
+                ))}
+              </div>
+            )}
+          </div>
+
         </div>
       </div>
     </section>
