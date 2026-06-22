@@ -162,3 +162,152 @@ export async function fetchApp(slug: string): Promise<ApiAppFull | null> {
   const res = await get<{ data: ApiAppFull }>(`/apps/${slug}`, 300, ['apps']);
   return res?.data ?? null;
 }
+
+// ─── Brands & Car Models ───────────────────────────────────────────────────────
+
+export interface ApiBrand {
+  id: number;
+  name_ar: string;
+  name_en: string | null;
+  slug: string;
+  logo_url: string | null;
+  cover_image_url: string | null;
+  description_ar: string | null;
+  description_en: string | null;
+  country: string | null;
+  website_url?: string | null;
+  models_count: number;
+  wallpapers_count: number;
+  apps_count: number;
+  is_featured: boolean;
+  meta_title?: string | null;
+  meta_description?: string | null;
+}
+
+export interface ApiCarModel {
+  id: number;
+  name_ar: string;
+  name_en: string | null;
+  slug: string;
+  image_url: string | null;
+  cover_image_url: string | null;
+  description_ar: string | null;
+  description_en: string | null;
+  car_type: string | null;
+  fuel_type: string | null;
+  year_from: number | null;
+  year_to: number | null;
+  year_label: string | null;
+  wallpapers_count: number;
+  apps_count: number;
+  tutorials_count: number;
+  is_featured: boolean;
+  brand?: { name_ar: string; name_en: string | null; slug: string; logo_url: string | null };
+  meta_title?: string | null;
+  meta_description?: string | null;
+}
+
+export interface ApiNewsCategory {
+  id: number;
+  name_ar: string;
+  name_en: string | null;
+  slug: string;
+  color: string | null;
+  icon: string | null;
+  articles_count: number;
+}
+
+export interface ApiNewsArticle {
+  id: number;
+  title_ar: string;
+  title_en: string | null;
+  slug: string;
+  summary_ar: string | null;
+  summary_en: string | null;
+  cover_image_url: string | null;
+  is_breaking: boolean;
+  is_featured: boolean;
+  views_count: number;
+  published_at: string | null;
+  category: { name_ar: string; slug: string; color: string | null } | null;
+  brands: { name_ar: string; slug: string }[];
+}
+
+export interface ApiNewsArticleFull extends ApiNewsArticle {
+  content_ar: string | null;
+  content_en: string | null;
+  source_url: string | null;
+  source_name: string | null;
+  author_name: string | null;
+  car_models: { name_ar: string; slug: string }[];
+  meta_title: string | null;
+  meta_description: string | null;
+}
+
+export async function fetchBrands(featured = false): Promise<ApiBrand[]> {
+  const q = featured ? '?featured=1' : '';
+  const res = await get<{ data: ApiBrand[] }>(`/brands${q}`, 300, ['brands']);
+  return res?.data ?? [];
+}
+
+export async function fetchBrand(slug: string): Promise<ApiBrand | null> {
+  const res = await get<{ data: ApiBrand }>(`/brands/${slug}`, 300, ['brands', `brand-${slug}`]);
+  return res?.data ?? null;
+}
+
+export async function fetchBrandModels(brandSlug: string): Promise<ApiCarModel[]> {
+  const res = await get<{ data: ApiCarModel[] }>(`/brands/${brandSlug}/models`, 300, ['car-models', `brand-${brandSlug}`]);
+  return res?.data ?? [];
+}
+
+export async function fetchCarModel(brandSlug: string, modelSlug: string): Promise<ApiCarModel | null> {
+  const res = await get<{ data: ApiCarModel }>(`/brands/${brandSlug}/models/${modelSlug}`, 300, ['car-models', `model-${modelSlug}`]);
+  return res?.data ?? null;
+}
+
+export async function fetchModelWallpapers(brandSlug: string, modelSlug: string, page = 1): Promise<{ data: ApiWallpaper[]; meta: any }> {
+  const res = await get<{ data: ApiWallpaper[]; meta: any }>(`/brands/${brandSlug}/models/${modelSlug}/wallpapers?page=${page}`, 60, ['wallpapers', `model-${modelSlug}`]);
+  return { data: res?.data ?? [], meta: res?.meta ?? { current_page: 1, last_page: 1, total: 0 } };
+}
+
+export async function fetchModelApps(brandSlug: string, modelSlug: string): Promise<ApiApp[]> {
+  const res = await get<{ data: ApiApp[] }>(`/brands/${brandSlug}/models/${modelSlug}/apps`, 300, ['apps', `model-${modelSlug}`]);
+  return res?.data ?? [];
+}
+
+export async function fetchModelImportantApps(brandSlug: string, modelSlug: string): Promise<ApiApp[]> {
+  const res = await get<{ data: ApiApp[] }>(`/brands/${brandSlug}/models/${modelSlug}/important-apps`, 300, ['apps', `model-${modelSlug}`]);
+  return res?.data ?? [];
+}
+
+export async function fetchModelTutorials(brandSlug: string, modelSlug: string): Promise<any[]> {
+  const res = await get<{ data: any[] }>(`/brands/${brandSlug}/models/${modelSlug}/tutorials`, 300, ['tutorials', `model-${modelSlug}`]);
+  return res?.data ?? [];
+}
+
+export async function fetchModelFiles(brandSlug: string, modelSlug: string): Promise<any[]> {
+  const res = await get<{ data: any[] }>(`/brands/${brandSlug}/models/${modelSlug}/files`, 300, ['files', `model-${modelSlug}`]);
+  return res?.data ?? [];
+}
+
+export async function fetchNews(params: { category?: string; brand?: string; model?: string; featured?: boolean; search?: string; page?: number } = {}): Promise<{ data: ApiNewsArticle[]; meta: any }> {
+  const q = new URLSearchParams();
+  if (params.category) q.set('category', params.category);
+  if (params.brand)    q.set('brand', params.brand);
+  if (params.model)    q.set('model', params.model);
+  if (params.featured) q.set('featured', '1');
+  if (params.search)   q.set('search', params.search);
+  if (params.page)     q.set('page', String(params.page));
+  const res = await get<{ data: ApiNewsArticle[]; meta: any }>(`/news?${q}`, 120, ['news']);
+  return { data: res?.data ?? [], meta: res?.meta ?? { current_page: 1, last_page: 1, total: 0 } };
+}
+
+export async function fetchNewsArticle(slug: string): Promise<ApiNewsArticleFull | null> {
+  const res = await get<{ data: ApiNewsArticleFull }>(`/news/${slug}`, 120, ['news', `news-${slug}`]);
+  return res?.data ?? null;
+}
+
+export async function fetchNewsCategories(): Promise<ApiNewsCategory[]> {
+  const res = await get<{ data: ApiNewsCategory[] }>('/news/categories', 300, ['news-categories']);
+  return res?.data ?? [];
+}

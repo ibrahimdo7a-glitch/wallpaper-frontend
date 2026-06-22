@@ -50,11 +50,11 @@ export function Header({ locale, siteName, ilink }: HeaderProps) {
 
   const navLinks = [
     { href: `/${locale}`, label: t.nav.home },
-    { href: `/${locale}/categories`, label: t.nav.categories },
+    { href: `/${locale}/brands`, label: isRTL ? 'الماركات' : 'Brands' },
+    { href: `/${locale}/news`, label: isRTL ? 'الأخبار' : 'News' },
     { href: `/${locale}/apps`, label: isRTL ? 'التطبيقات' : 'Apps' },
+    { href: `/${locale}/categories`, label: t.nav.categories },
     { href: `/${locale}/most-downloaded`, label: t.nav.mostDownloaded },
-    { href: `/${locale}/latest`, label: t.nav.latest },
-    { href: `/${locale}/about`, label: t.nav.about },
   ];
 
   const isActive = (href: string) => pathname === href;
