@@ -164,6 +164,70 @@ export async function fetchApp(slug: string): Promise<ApiAppFull | null> {
   return res?.data ?? null;
 }
 
+// ─── Homepage Builder ─────────────────────────────────────────────────────────
+
+export interface ApiNavItem {
+  id: number;
+  label_ar: string;
+  label_en: string | null;
+  url: string | null;
+  icon: string | null;
+  open_in_new_tab: boolean;
+  children: Omit<ApiNavItem, 'children'>[];
+}
+
+export interface ApiHeroData {
+  title_ar: string;
+  title_en: string | null;
+  subtitle_ar: string | null;
+  subtitle_en: string | null;
+  description_ar: string | null;
+  description_en: string | null;
+  image_url: string | null;
+  bg_color: string | null;
+  text_color: string | null;
+  primary_btn_label_ar: string | null;
+  primary_btn_label_en: string | null;
+  primary_btn_url: string | null;
+  secondary_btn_label_ar: string | null;
+  secondary_btn_label_en: string | null;
+  secondary_btn_url: string | null;
+}
+
+export interface ApiStatItem {
+  key: string;
+  icon: string;
+  label_ar: string;
+  label_en: string;
+  value: number;
+  prefix: string;
+}
+
+export interface ApiHomepageSection {
+  id: number;
+  type: 'hero' | 'brands' | 'featured_brands' | 'featured_wallpapers' | 'featured_apps' | 'news' | 'tutorials' | 'statistics' | 'cta' | 'custom_html' | 'custom_content';
+  name: string;
+  title_ar: string | null;
+  title_en: string | null;
+  subtitle_ar: string | null;
+  subtitle_en: string | null;
+  layout: 'grid' | 'slider' | 'carousel' | 'cards' | 'list' | 'masonry' | 'hero_cards';
+  visibility: 'all' | 'desktop' | 'mobile' | 'tablet';
+  settings: Record<string, any> | null;
+  sort_order: number;
+  data: any;
+}
+
+export async function fetchHomepage(): Promise<ApiHomepageSection[]> {
+  const res = await get<{ data: ApiHomepageSection[] }>('/homepage', 120, ['homepage']);
+  return res?.data ?? [];
+}
+
+export async function fetchNavigation(): Promise<ApiNavItem[]> {
+  const res = await get<{ data: ApiNavItem[] }>('/navigation', 300, ['navigation']);
+  return res?.data ?? [];
+}
+
 // ─── Brand Builder (Dynamic Sections) ─────────────────────────────────────────
 
 export interface ApiBrandSection {
