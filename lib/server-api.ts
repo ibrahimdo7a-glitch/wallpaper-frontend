@@ -116,6 +116,7 @@ export interface ApiApp {
   file_size_label: string;
   is_free: boolean;
   is_featured: boolean;
+  safety_status: string | null;
   downloads_count: number;
   published_at: string | null;
   category: { id: number; name_ar: string; name_en: string; slug: string; icon: string | null } | null;
