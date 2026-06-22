@@ -163,6 +163,90 @@ export async function fetchApp(slug: string): Promise<ApiAppFull | null> {
   return res?.data ?? null;
 }
 
+// ─── Brand Builder (Dynamic Sections) ─────────────────────────────────────────
+
+export interface ApiBrandSection {
+  id: number;
+  slug: string;
+  name_ar: string;
+  name_en: string;
+  icon: string;
+  description_ar: string | null;
+  description_en: string | null;
+  cover_image_url: string | null;
+  layout_type: 'grid' | 'list' | 'cards' | 'gallery' | 'video_grid' | 'download_list' | 'faq_accordion';
+  is_model_specific: boolean;
+  show_in_navigation: boolean;
+  show_in_brand_home: boolean;
+  sort_order: number;
+  settings: Record<string, any> | null;
+}
+
+export interface ApiContentItem {
+  id: number;
+  title_ar: string;
+  title_en: string | null;
+  slug: string | null;
+  description_ar: string | null;
+  description_en: string | null;
+  image_url: string | null;
+  thumbnail_url: string | null;
+  file_url: string | null;
+  file_size_label: string;
+  video_url: string | null;
+  external_url: string | null;
+  metadata: Record<string, any> | null;
+  content_type: string;
+  is_featured: boolean;
+  is_pinned: boolean;
+  views_count: number;
+  downloads_count: number;
+  published_at: string | null;
+}
+
+export async function fetchBrandSections(brandSlug: string): Promise<ApiBrandSection[]> {
+  const res = await get<{ data: ApiBrandSection[] }>(`/brands/${brandSlug}/sections`, 300, ['brand-sections', `brand-${brandSlug}`]);
+  return res?.data ?? [];
+}
+
+export async function fetchSectionContent(
+  brandSlug: string,
+  sectionSlug: string,
+  page = 1,
+  perPage = 20
+): Promise<{ section: ApiBrandSection | null; data: ApiContentItem[]; meta: any }> {
+  const res = await get<{ section: ApiBrandSection; data: ApiContentItem[]; meta: any }>(
+    `/brands/${brandSlug}/sections/${sectionSlug}?page=${page}&per_page=${perPage}`,
+    120,
+    [`section-${brandSlug}-${sectionSlug}`]
+  );
+  return { section: res?.section ?? null, data: res?.data ?? [], meta: res?.meta ?? {} };
+}
+
+export async function fetchModelSections(brandSlug: string, modelSlug: string): Promise<ApiBrandSection[]> {
+  const res = await get<{ data: ApiCarModel; sections: ApiBrandSection[] }>(`/brands/${brandSlug}/models/${modelSlug}`, 300, [`model-${modelSlug}`]);
+  return res?.sections ?? [];
+}
+
+export async function fetchModelWithSections(brandSlug: string, modelSlug: string): Promise<{ model: ApiCarModel | null; sections: ApiBrandSection[] }> {
+  const res = await get<{ data: ApiCarModel; sections: ApiBrandSection[] }>(`/brands/${brandSlug}/models/${modelSlug}`, 300, [`model-${modelSlug}`, `brand-${brandSlug}`]);
+  return { model: res?.data ?? null, sections: res?.sections ?? [] };
+}
+
+export async function fetchModelSectionContent(
+  brandSlug: string,
+  modelSlug: string,
+  sectionSlug: string,
+  page = 1
+): Promise<{ section: ApiBrandSection | null; data: ApiContentItem[]; meta: any }> {
+  const res = await get<{ section: ApiBrandSection; data: ApiContentItem[]; meta: any }>(
+    `/brands/${brandSlug}/models/${modelSlug}/sections/${sectionSlug}?page=${page}`,
+    120,
+    [`model-section-${modelSlug}-${sectionSlug}`]
+  );
+  return { section: res?.section ?? null, data: res?.data ?? [], meta: res?.meta ?? {} };
+}
+
 // ─── Brands & Car Models ───────────────────────────────────────────────────────
 
 export interface ApiBrand {
@@ -179,7 +263,19 @@ export interface ApiBrand {
   models_count: number;
   wallpapers_count: number;
   apps_count: number;
+  news_count: number;
+  tutorials_count: number;
+  total_downloads: number;
+  total_views: number;
   is_featured: boolean;
+  primary_color: string | null;
+  accent_color: string | null;
+  telegram_url: string | null;
+  whatsapp_url: string | null;
+  channel_url: string | null;
+  download_cta_url: string | null;
+  download_cta_label_ar: string | null;
+  download_cta_label_en: string | null;
   meta_title?: string | null;
   meta_description?: string | null;
 }
