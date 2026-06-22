@@ -5,7 +5,7 @@ import { notFound } from 'next/navigation';
 import { fetchBrand, fetchSectionContent } from '@/lib/server-api';
 import { type Locale } from '@/lib/i18n';
 import type { ApiContentItem, ApiBrandSection } from '@/lib/server-api';
-import { ContentLightbox } from '@/components/brand/ContentLightbox';
+import { ContentImageGrid } from '@/components/brand/ContentImageGrid';
 
 type Props = {
   params: { locale: Locale; slug: string; section: string };
@@ -25,7 +25,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 }
 
 // ─── Layout components ────────────────────────────────────────────────────────
-// Image-based layouts (gallery/grid/cards) are handled by <ContentLightbox> (client).
+// Image-based layouts (gallery/grid/cards) are handled by <ContentImageGrid> (links to detail page).
 
 function ListLayout({ items, isAr }: { items: ApiContentItem[]; isAr: boolean }) {
   return (
@@ -136,7 +136,10 @@ function FaqAccordionLayout({ items, isAr }: { items: ApiContentItem[]; isAr: bo
 }
 
 // ─── Layout dispatcher ────────────────────────────────────────────────────────
-function SectionContent({ section, items, isAr }: { section: ApiBrandSection; items: ApiContentItem[]; isAr: boolean }) {
+function SectionContent({ section, items, isAr, locale, brandSlug, sectionSlug }: {
+  section: ApiBrandSection; items: ApiContentItem[]; isAr: boolean;
+  locale: string; brandSlug: string; sectionSlug: string;
+}) {
   if (items.length === 0) return (
     <div className="text-center py-20 text-gray-500">
       <p className="text-5xl mb-3">{section.icon}</p>
@@ -144,14 +147,16 @@ function SectionContent({ section, items, isAr }: { section: ApiBrandSection; it
     </div>
   );
 
+  const gridProps = { items, isAr, locale, brandSlug, sectionSlug };
+
   switch (section.layout_type) {
-    case 'gallery':       return <ContentLightbox items={items} isAr={isAr} layout="gallery" />;
+    case 'gallery':       return <ContentImageGrid {...gridProps} layout="gallery" />;
     case 'video_grid':    return <VideoGridLayout items={items} isAr={isAr} />;
     case 'download_list': return <DownloadListLayout items={items} isAr={isAr} />;
     case 'faq_accordion': return <FaqAccordionLayout items={items} isAr={isAr} />;
     case 'list':          return <ListLayout items={items} isAr={isAr} />;
-    case 'cards':         return <ContentLightbox items={items} isAr={isAr} layout="cards" />;
-    default:              return <ContentLightbox items={items} isAr={isAr} layout="grid" />;
+    case 'cards':         return <ContentImageGrid {...gridProps} layout="cards" />;
+    default:              return <ContentImageGrid {...gridProps} layout="grid" />;
   }
 }
 
@@ -241,7 +246,8 @@ export default async function BrandSectionPage({ params, searchParams }: Props) 
         </p>
 
         {/* Dynamic content */}
-        <SectionContent section={section} items={items} isAr={isAr} />
+        <SectionContent section={section} items={items} isAr={isAr}
+          locale={params.locale} brandSlug={params.slug} sectionSlug={params.section} />
 
         {/* Pagination */}
         {(meta.last_page ?? 1) > 1 && (

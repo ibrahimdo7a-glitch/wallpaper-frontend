@@ -5,7 +5,7 @@ import { notFound } from 'next/navigation';
 import { fetchBrand, fetchModelWithSections, fetchModelSectionContent } from '@/lib/server-api';
 import { type Locale } from '@/lib/i18n';
 import type { ApiContentItem, ApiBrandSection } from '@/lib/server-api';
-import { ContentLightbox } from '@/components/brand/ContentLightbox';
+import { ContentImageGrid } from '@/components/brand/ContentImageGrid';
 
 type Props = {
   params: { locale: Locale; slug: string; model: string; section: string };
@@ -25,7 +25,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 }
 
 // ─── Layout renderers ──────────────────────────────────────────────────────────
-// Image-based layouts (gallery/grid/cards) are handled by <ContentLightbox> (client).
+// Image-based layouts (gallery/grid/cards) are handled by <ContentImageGrid> (links to detail page).
 
 function ListLayout({ items, isAr }: { items: ApiContentItem[]; isAr: boolean }) {
   return (
@@ -135,21 +135,25 @@ function FaqAccordionLayout({ items, isAr }: { items: ApiContentItem[]; isAr: bo
   );
 }
 
-function SectionContent({ section, items, isAr }: { section: ApiBrandSection; items: ApiContentItem[]; isAr: boolean }) {
+function SectionContent({ section, items, isAr, locale, brandSlug, sectionSlug, modelSlug }: {
+  section: ApiBrandSection; items: ApiContentItem[]; isAr: boolean;
+  locale: string; brandSlug: string; sectionSlug: string; modelSlug: string;
+}) {
   if (items.length === 0) return (
     <div className="text-center py-20 text-gray-500">
       <p className="text-5xl mb-3">{section.icon}</p>
       <p>{isAr ? 'لا يوجد محتوى بعد' : 'No content yet'}</p>
     </div>
   );
+  const gridProps = { items, isAr, locale, brandSlug, sectionSlug, modelSlug };
   switch (section.layout_type) {
-    case 'gallery':       return <ContentLightbox items={items} isAr={isAr} layout="gallery" />;
+    case 'gallery':       return <ContentImageGrid {...gridProps} layout="gallery" />;
     case 'video_grid':    return <VideoGridLayout items={items} isAr={isAr} />;
     case 'download_list': return <DownloadListLayout items={items} isAr={isAr} />;
     case 'faq_accordion': return <FaqAccordionLayout items={items} isAr={isAr} />;
     case 'list':          return <ListLayout items={items} isAr={isAr} />;
-    case 'cards':         return <ContentLightbox items={items} isAr={isAr} layout="cards" />;
-    default:              return <ContentLightbox items={items} isAr={isAr} layout="grid" />;
+    case 'cards':         return <ContentImageGrid {...gridProps} layout="cards" />;
+    default:              return <ContentImageGrid {...gridProps} layout="grid" />;
   }
 }
 
@@ -205,7 +209,8 @@ export default async function ModelSectionPage({ params, searchParams }: Props) 
         )}
         <p className="text-gray-500 text-sm mb-8">{meta.total ?? items.length} {isAr ? 'عنصر' : 'items'}</p>
 
-        <SectionContent section={section} items={items} isAr={isAr} />
+        <SectionContent section={section} items={items} isAr={isAr}
+          locale={params.locale} brandSlug={params.slug} sectionSlug={params.section} modelSlug={params.model} />
 
         {/* Pagination */}
         {(meta.last_page ?? 1) > 1 && (

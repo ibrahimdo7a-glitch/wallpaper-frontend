@@ -269,6 +269,19 @@ export interface ApiContentItem {
   published_at: string | null;
 }
 
+export interface ApiContentDetail extends ApiContentItem {
+  author_name: string | null;
+  likes_count: number;
+  brand: { name_ar: string; name_en: string | null; slug: string; logo_url: string | null; primary_color: string | null } | null;
+  section: { name_ar: string; name_en: string | null; slug: string; icon: string | null } | null;
+  collection: { name_ar: string; name_en: string | null; slug: string; icon: string | null } | null;
+}
+
+export async function fetchContentItem(id: string | number): Promise<{ item: ApiContentDetail | null; related: ApiContentItem[] }> {
+  const res = await get<{ data: ApiContentDetail; related: ApiContentItem[] }>(`/content/${id}`, 60, [`content-${id}`]);
+  return { item: res?.data ?? null, related: res?.related ?? [] };
+}
+
 export async function fetchBrandSections(brandSlug: string): Promise<ApiBrandSection[]> {
   const res = await get<{ data: ApiBrandSection[] }>(`/brands/${brandSlug}/sections`, 300, ['brand-sections', `brand-${brandSlug}`]);
   return res?.data ?? [];
