@@ -20,9 +20,13 @@ const typeConfig: Record<string, { ar: string; en: string; color: string }> = {
 };
 
 function itemHref(item: any, locale: string): string {
-  if (item.type === 'app')      return `/${locale}/apps/${item.slug}`;
-  if (item.type === 'news')     return `/${locale}/news/${item.slug}`;
-  if (item.type === 'wallpaper') return `/${locale}/wallpaper/${item.slug}`;
+  if (item.type === 'app')   return `/${locale}/apps/${item.slug}`;
+  if (item.type === 'news')  return `/${locale}/news/${item.slug}`;
+  if (item.type === 'wallpaper') {
+    return item.brand_slug && item.section_slug
+      ? `/${locale}/brands/${item.brand_slug}/${item.section_slug}/${item.id}`
+      : `/${locale}/brands`;
+  }
   return '#';
 }
 

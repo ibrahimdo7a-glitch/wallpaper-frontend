@@ -228,6 +228,21 @@ export async function fetchNavigation(): Promise<ApiNavItem[]> {
   return res?.data ?? [];
 }
 
+export interface ApiSearchResult {
+  type: 'brand' | 'model' | 'app' | 'news';
+  id: number;
+  title: string;
+  slug: string;
+  brand_slug?: string;
+  image: string | null;
+}
+
+export async function fetchSearch(q: string): Promise<ApiSearchResult[]> {
+  if (!q || q.trim().length < 2) return [];
+  const res = await get<{ data: ApiSearchResult[] }>(`/search?q=${encodeURIComponent(q)}`, 60);
+  return res?.data ?? [];
+}
+
 // ─── Brand Builder (Dynamic Sections) ─────────────────────────────────────────
 
 export interface ApiBrandSection {
