@@ -14,7 +14,7 @@ export function HeroSection({ data, brands, isAr, locale, searchPlaceholder }: P
   const topBrands = brands.slice(0, 6);
 
   return (
-    <section className="bg-white border-b border-gray-100">
+    <section className="bg-white dark:bg-gray-950 border-b border-gray-100 dark:border-gray-800">
       <div className="max-w-7xl mx-auto px-4 py-10 md:py-14">
         <div className="grid md:grid-cols-2 gap-6 items-center">
 
@@ -35,7 +35,7 @@ export function HeroSection({ data, brands, isAr, locale, searchPlaceholder }: P
 
           {/* Text — right on RTL */}
           <div className={`${isAr ? 'order-2 text-right' : 'order-1 text-left'}`}>
-            <h1 className="text-3xl md:text-4xl font-bold text-gray-900 mb-2 leading-tight">
+            <h1 className="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white mb-2 leading-tight">
               {isAr ? data.title_ar : (data.title_en ?? data.title_ar)}
             </h1>
             {data.subtitle_ar && (
@@ -44,7 +44,7 @@ export function HeroSection({ data, brands, isAr, locale, searchPlaceholder }: P
               </h2>
             )}
             {data.description_ar && (
-              <p className="text-sm text-gray-500 mb-5 leading-relaxed">
+              <p className="text-sm text-gray-500 dark:text-gray-400 mb-5 leading-relaxed">
                 {isAr ? data.description_ar : (data.description_en ?? data.description_ar)}
               </p>
             )}
@@ -55,7 +55,7 @@ export function HeroSection({ data, brands, isAr, locale, searchPlaceholder }: P
                 name="q"
                 type="text"
                 placeholder={searchPlaceholder ?? (isAr ? 'ابحث...' : 'Search...')}
-                className="w-full rounded-2xl border border-gray-200 bg-white text-gray-700 px-4 py-3 text-sm shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 placeholder:text-gray-400"
+                className="w-full rounded-2xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 text-gray-700 dark:text-gray-100 px-4 py-3 text-sm shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 placeholder:text-gray-400"
                 dir={isAr ? 'rtl' : 'ltr'}
               />
               <button type="submit" className="absolute inset-y-0 end-3 flex items-center text-gray-400 hover:text-blue-500">
@@ -71,7 +71,7 @@ export function HeroSection({ data, brands, isAr, locale, searchPlaceholder }: P
                 <span className="text-xs text-gray-400 whitespace-nowrap">{isAr ? 'الأكثر بحثاً:' : 'Popular:'}</span>
                 {topBrands.map(b => (
                   <Link key={b.id} href={`/${locale}/brands/${b.slug}`}
-                    className="text-xs px-3 py-1 rounded-full border border-gray-200 text-gray-600 hover:bg-gray-50 transition-colors">
+                    className="text-xs px-3 py-1 rounded-full border border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors">
                     {isAr ? b.name_ar : (b.name_en ?? b.name_ar)}
                   </Link>
                 ))}

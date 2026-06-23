@@ -20,15 +20,15 @@ export function LatestContentSection({ section, isAr, locale }: Props) {
       : '#';
 
   return (
-    <section className="py-8 px-4 bg-white border-b border-gray-100">
+    <section className="py-8 px-4 bg-white dark:bg-gray-950 border-b border-gray-100 dark:border-gray-800">
       <div className="max-w-7xl mx-auto">
         {/* Header */}
         <div className={`flex items-center justify-between mb-5 ${isAr ? 'flex-row-reverse' : ''}`}>
-          <h2 className="text-base font-bold text-gray-900">
+          <h2 className="text-base font-bold text-gray-900 dark:text-white">
             🆕 {title ?? (isAr ? 'آخر الخلفيات المضافة' : 'Latest Wallpapers')}
           </h2>
           <Link href={`/${locale}/brands`}
-            className="text-xs text-gray-500 border border-gray-200 rounded-full px-3 py-1 hover:bg-gray-50 transition-colors">
+            className="text-xs text-gray-500 dark:text-gray-400 border border-gray-200 dark:border-gray-700 rounded-full px-3 py-1 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors">
             {isAr ? 'عرض الكل' : 'View all'}
           </Link>
         </div>
@@ -61,8 +61,8 @@ export function LatestContentSection({ section, isAr, locale }: Props) {
                     </span>
                   )}
                 </div>
-                <div className="p-2.5 bg-white">
-                  <p className="text-xs font-semibold text-gray-900 line-clamp-1">
+                <div className="p-2.5 bg-white dark:bg-gray-900">
+                  <p className="text-xs font-semibold text-gray-900 dark:text-white line-clamp-1">
                     {isAr ? item.title_ar : (item.title_en ?? item.title_ar)}
                   </p>
                 </div>

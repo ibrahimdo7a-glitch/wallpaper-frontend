@@ -15,11 +15,11 @@ export function NewsSection({ section, isAr, locale }: Props) {
   const title = isAr ? section.title_ar : (section.title_en ?? section.title_ar);
 
   return (
-    <section className="py-10 px-4 bg-gray-50 border-t border-gray-100">
+    <section className="py-10 px-4 bg-gray-50 dark:bg-gray-900 border-t border-gray-100 dark:border-gray-800">
       <div className="max-w-7xl mx-auto">
         {title && (
           <div className="flex items-center justify-between mb-6">
-            <h2 className="text-lg font-bold text-gray-900">{title}</h2>
+            <h2 className="text-lg font-bold text-gray-900 dark:text-white">{title}</h2>
             <Link href={`/${locale}/news`} className="text-xs text-blue-600 hover:underline">
               {isAr ? 'كل الأخبار' : 'All news'}
             </Link>
@@ -29,7 +29,7 @@ export function NewsSection({ section, isAr, locale }: Props) {
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
           {items.map((article: any) => (
             <Link key={article.id} href={`/${locale}/news/${article.slug}`}
-              className="group bg-white rounded-2xl overflow-hidden border border-gray-100 hover:border-gray-200 hover:shadow-sm transition-all block">
+              className="group bg-white dark:bg-gray-950 rounded-2xl overflow-hidden border border-gray-100 dark:border-gray-800 hover:border-gray-200 dark:hover:border-gray-700 hover:shadow-sm transition-all block">
               {article.cover_image_url && (
                 <div className="relative h-40 overflow-hidden">
                   <Image src={article.cover_image_url} alt={article.title_ar} fill
@@ -47,11 +47,11 @@ export function NewsSection({ section, isAr, locale }: Props) {
                     {article.category.name_ar}
                   </span>
                 )}
-                <h3 className="font-semibold text-gray-900 line-clamp-2 text-sm">
+                <h3 className="font-semibold text-gray-900 dark:text-white line-clamp-2 text-sm">
                   {isAr ? article.title_ar : (article.title_en ?? article.title_ar)}
                 </h3>
                 {article.published_at && (
-                  <p className="text-xs text-gray-400 mt-2">
+                  <p className="text-xs text-gray-400 dark:text-gray-500 mt-2">
                     {new Date(article.published_at).toLocaleDateString(isAr ? 'ar-SA' : 'en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
                   </p>
                 )}

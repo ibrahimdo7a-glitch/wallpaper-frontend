@@ -28,7 +28,7 @@ export default async function HomePage({ params: { locale } }: { params: { local
     : (site?.search_placeholder_en || 'Search brands, models, apps, wallpapers...');
 
   return (
-    <div dir={isAr ? 'rtl' : 'ltr'} className="bg-white min-h-screen">
+    <div dir={isAr ? 'rtl' : 'ltr'} className="bg-white dark:bg-gray-950 min-h-screen">
       {sections.map(section => (
         <SectionRenderer
           key={section.id}

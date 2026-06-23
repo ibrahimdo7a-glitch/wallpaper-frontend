@@ -54,20 +54,20 @@ export function StatisticsSection({ section, isAr }: Props) {
   if (items.length === 0) return null;
 
   return (
-    <section className="py-6 px-4 bg-white border-b border-gray-100">
+    <section className="py-6 px-4 bg-white dark:bg-gray-950 border-b border-gray-100 dark:border-gray-800">
       <div className="max-w-7xl mx-auto">
         <div className="grid grid-cols-3 sm:grid-cols-5 gap-2">
           {items.map(stat => (
             <div key={stat.key}
-              className="flex flex-col items-center text-center gap-2 py-4 px-3 rounded-2xl bg-gray-50 hover:bg-gray-100 transition-colors">
+              className="flex flex-col items-center text-center gap-2 py-4 px-3 rounded-2xl bg-gray-50 dark:bg-gray-900 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors">
               <div className="flex-shrink-0">
                 {StatIcons[stat.key] ?? <span className="text-2xl">{stat.icon}</span>}
               </div>
               <div>
-                <p className="text-lg md:text-xl font-bold text-gray-900">
+                <p className="text-lg md:text-xl font-bold text-gray-900 dark:text-white">
                   {stat.prefix}{formatValue(stat.value)}
                 </p>
-                <p className="text-xs text-gray-500 mt-0.5">{isAr ? stat.label_ar : stat.label_en}</p>
+                <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">{isAr ? stat.label_ar : stat.label_en}</p>
               </div>
             </div>
           ))}
