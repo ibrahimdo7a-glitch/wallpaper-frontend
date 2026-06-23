@@ -5,6 +5,7 @@ import { StatisticsSection }      from './StatisticsSection';
 import { FeaturedContentSection } from './FeaturedContentSection';
 import { NewsSection }            from './NewsSection';
 import { FeaturesStrip }          from './FeaturesStrip';
+import { LatestContentSection }   from './LatestContentSection';
 
 interface Props {
   section: ApiHomepageSection;
@@ -23,6 +24,8 @@ export function SectionRenderer({ section, isAr, locale, allBrands = [], searchP
       return <BrandsSection section={section} isAr={isAr} locale={locale} />;
     case 'statistics':
       return <StatisticsSection section={section} isAr={isAr} />;
+    case 'latest_wallpapers':
+      return <LatestContentSection section={section} isAr={isAr} locale={locale} />;
     case 'featured_wallpapers':
     case 'featured_apps':
     case 'tutorials':

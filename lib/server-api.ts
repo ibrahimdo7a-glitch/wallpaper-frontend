@@ -205,7 +205,7 @@ export interface ApiStatItem {
 
 export interface ApiHomepageSection {
   id: number;
-  type: 'hero' | 'brands' | 'featured_brands' | 'featured_wallpapers' | 'featured_apps' | 'news' | 'tutorials' | 'statistics' | 'cta' | 'custom_html' | 'custom_content';
+  type: 'hero' | 'brands' | 'featured_brands' | 'latest_wallpapers' | 'featured_wallpapers' | 'featured_apps' | 'news' | 'tutorials' | 'statistics' | 'cta' | 'custom_html' | 'custom_content';
   name: string;
   title_ar: string | null;
   title_en: string | null;
