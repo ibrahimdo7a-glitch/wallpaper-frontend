@@ -3,11 +3,23 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { notFound } from 'next/navigation';
 import { setRequestLocale } from 'next-intl/server';
-import { fetchBrand, fetchBrandSections, fetchBrandModels } from '@/lib/server-api';
-import { type Locale } from '@/lib/i18n';
+import { fetchBrand, fetchBrandSections, fetchBrandModels, fetchBrands } from '@/lib/server-api';
+import { locales, type Locale } from '@/lib/i18n';
 import type { ApiBrandSection } from '@/lib/server-api';
 
 type Props = { params: { locale: Locale; slug: string } };
+
+// Pre-render every brand so the page is ISR-cached instead of rendered on each
+// request. New brands are generated on-demand and then cached.
+export const revalidate = 60;
+export async function generateStaticParams() {
+  try {
+    const brands = await fetchBrands();
+    return locales.flatMap((locale) => brands.map((b) => ({ locale, slug: b.slug })));
+  } catch {
+    return [];
+  }
+}
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const brand = await fetchBrand(params.slug);

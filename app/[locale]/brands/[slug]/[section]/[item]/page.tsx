@@ -11,6 +11,13 @@ type Props = {
   params: { locale: Locale; slug: string; section: string; item: string };
 };
 
+// Empty list = nothing pre-built, but pages render on-demand and are then ISR-
+// cached (instead of dynamic SSR on every request).
+export const revalidate = 60;
+export async function generateStaticParams() {
+  return [];
+}
+
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { item } = await fetchContentItem(params.item);
   if (!item) return { title: 'Not Found' };

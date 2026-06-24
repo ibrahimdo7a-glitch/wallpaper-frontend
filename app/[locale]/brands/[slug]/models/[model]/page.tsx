@@ -3,10 +3,29 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { notFound } from 'next/navigation';
 import { setRequestLocale } from 'next-intl/server';
-import { fetchBrand, fetchModelWithSections } from '@/lib/server-api';
-import { type Locale } from '@/lib/i18n';
+import { fetchBrand, fetchModelWithSections, fetchBrands, fetchBrandModels } from '@/lib/server-api';
+import { locales, type Locale } from '@/lib/i18n';
 
 type Props = { params: { locale: Locale; slug: string; model: string } };
+
+// Pre-render every brand/model combo for ISR caching (rest on-demand + cached).
+export const revalidate = 60;
+export async function generateStaticParams() {
+  try {
+    const brands = await fetchBrands();
+    const pairs = (
+      await Promise.all(
+        brands.map(async (b) => {
+          const models = await fetchBrandModels(b.slug);
+          return models.map((m) => ({ slug: b.slug, model: m.slug }));
+        }),
+      )
+    ).flat();
+    return locales.flatMap((locale) => pairs.map((p) => ({ locale, ...p })));
+  } catch {
+    return [];
+  }
+}
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { model } = await fetchModelWithSections(params.slug, params.model);
