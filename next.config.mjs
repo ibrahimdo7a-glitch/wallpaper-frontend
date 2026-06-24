@@ -14,6 +14,11 @@ const nextConfig = {
       },
       {
         protocol: 'https',
+        hostname: 'cdn.qev.app',
+        pathname: '/**',
+      },
+      {
+        protocol: 'https',
         hostname: '*.r2.dev',
         pathname: '/**',
       },
