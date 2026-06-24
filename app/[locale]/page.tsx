@@ -26,6 +26,7 @@ export default async function HomePage({ params: { locale } }: { params: { local
   const searchPlaceholder = isAr
     ? (site?.search_placeholder_ar || 'ابحث عن ماركة أو موديل أو تطبيق أو خلفية...')
     : (site?.search_placeholder_en || 'Search brands, models, apps, wallpapers...');
+  const searchEnabled = site?.search_enabled ?? true;
 
   return (
     <div dir={isAr ? 'rtl' : 'ltr'} className="bg-white dark:bg-gray-950 min-h-screen">
@@ -37,6 +38,7 @@ export default async function HomePage({ params: { locale } }: { params: { local
           locale={locale}
           allBrands={brands}
           searchPlaceholder={searchPlaceholder}
+          searchEnabled={searchEnabled}
         />
       ))}
     </div>

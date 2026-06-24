@@ -13,12 +13,13 @@ interface Props {
   locale: string;
   allBrands?: ApiBrand[];
   searchPlaceholder?: string;
+  searchEnabled?: boolean | string;
 }
 
-export function SectionRenderer({ section, isAr, locale, allBrands = [], searchPlaceholder }: Props) {
+export function SectionRenderer({ section, isAr, locale, allBrands = [], searchPlaceholder, searchEnabled = true }: Props) {
   switch (section.type) {
     case 'hero':
-      return <HeroSection data={section.data} brands={allBrands} isAr={isAr} locale={locale} searchPlaceholder={searchPlaceholder} />;
+      return <HeroSection data={section.data} brands={allBrands} isAr={isAr} locale={locale} searchPlaceholder={searchPlaceholder} searchEnabled={searchEnabled} />;
     case 'brands':
     case 'featured_brands':
       return <BrandsSection section={section} isAr={isAr} locale={locale} />;

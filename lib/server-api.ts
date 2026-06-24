@@ -49,6 +49,7 @@ export interface SiteContent {
   hero_title_en: string;
   hero_subtitle_ar: string;
   hero_subtitle_en: string;
+  search_enabled: boolean | string;
   search_placeholder_ar: string;
   search_placeholder_en: string;
   popular_tags_ar: string[];
