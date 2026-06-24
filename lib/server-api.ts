@@ -300,7 +300,7 @@ export async function fetchContentItem(id: string | number): Promise<{ item: Api
 }
 
 export async function fetchBrandSections(brandSlug: string): Promise<ApiBrandSection[]> {
-  const res = await get<{ data: ApiBrandSection[] }>(`/brands/${brandSlug}/sections`, 300, ['brand-sections', `brand-${brandSlug}`]);
+  const res = await get<{ data: ApiBrandSection[] }>(`/brands/${brandSlug}/sections`, 60, ['brand-sections', `brand-${brandSlug}`]);
   return res?.data ?? [];
 }
 
@@ -470,17 +470,17 @@ export async function fetchBrands(featured = false): Promise<ApiBrand[]> {
 }
 
 export async function fetchBrand(slug: string): Promise<ApiBrand | null> {
-  const res = await get<{ data: ApiBrand }>(`/brands/${slug}`, 300, ['brands', `brand-${slug}`]);
+  const res = await get<{ data: ApiBrand }>(`/brands/${slug}`, 60, ['brands', `brand-${slug}`]);
   return res?.data ?? null;
 }
 
 export async function fetchBrandModels(brandSlug: string): Promise<ApiCarModel[]> {
-  const res = await get<{ data: ApiCarModel[] }>(`/brands/${brandSlug}/models`, 300, ['car-models', `brand-${brandSlug}`]);
+  const res = await get<{ data: ApiCarModel[] }>(`/brands/${brandSlug}/models`, 60, ['car-models', `brand-${brandSlug}`]);
   return res?.data ?? [];
 }
 
 export async function fetchCarModel(brandSlug: string, modelSlug: string): Promise<ApiCarModel | null> {
-  const res = await get<{ data: ApiCarModel }>(`/brands/${brandSlug}/models/${modelSlug}`, 300, ['car-models', `model-${modelSlug}`]);
+  const res = await get<{ data: ApiCarModel }>(`/brands/${brandSlug}/models/${modelSlug}`, 60, ['car-models', `model-${modelSlug}`]);
   return res?.data ?? null;
 }
 
