@@ -152,19 +152,6 @@ export default async function ContentDetailPage({ params }: Props) {
               </div>
             </div>
 
-            {/* Designer */}
-            {item.author_name && (
-              <div className="flex items-center gap-3 p-4 bg-gray-900 rounded-xl">
-                <div className="w-12 h-12 rounded-full bg-gray-700 flex items-center justify-center text-lg font-bold flex-shrink-0">
-                  {item.author_name.charAt(0)}
-                </div>
-                <div>
-                  <div className="text-xs text-gray-400">{isAr ? 'تصميم' : 'Designed by'}</div>
-                  <div className="font-semibold text-white">{item.author_name}</div>
-                </div>
-              </div>
-            )}
-
             {/* Brand */}
             {item.brand && (
               <Link href={`/${params.locale}/brands/${item.brand.slug}`}
@@ -177,6 +164,30 @@ export default async function ContentDetailPage({ params }: Props) {
                   <div className="font-semibold text-white">{brandName}</div>
                 </div>
               </Link>
+            )}
+
+            {/* Designer — below the brand, same style */}
+            {(item.designer || item.author_name) && (
+              <div className="flex items-center gap-3 p-4 bg-gray-900 rounded-xl">
+                {item.designer?.avatar_url ? (
+                  <Image src={item.designer.avatar_url} alt={item.designer.name_ar} width={40} height={40}
+                    className="w-10 h-10 rounded-full object-cover flex-shrink-0" />
+                ) : (
+                  <div className="w-10 h-10 rounded-full bg-gray-700 flex items-center justify-center text-lg font-bold flex-shrink-0">
+                    {(item.designer ? (isAr ? item.designer.name_ar : (item.designer.name_en ?? item.designer.name_ar)) : item.author_name!)?.charAt(0)}
+                  </div>
+                )}
+                <div className="flex-1 min-w-0">
+                  <div className="text-xs text-gray-400">{isAr ? 'المصمّم' : 'Designer'}</div>
+                  <div className="font-semibold text-white truncate">
+                    {item.designer ? (isAr ? item.designer.name_ar : (item.designer.name_en ?? item.designer.name_ar)) : item.author_name}
+                  </div>
+                </div>
+                {item.designer?.telegram_url && (
+                  <a href={item.designer.telegram_url} target="_blank" rel="noopener noreferrer"
+                    className="text-blue-400 hover:text-blue-300 text-sm flex-shrink-0">✈️</a>
+                )}
+              </div>
             )}
           </div>
         </div>

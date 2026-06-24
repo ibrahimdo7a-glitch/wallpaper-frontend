@@ -286,6 +286,7 @@ export interface ApiContentItem {
 
 export interface ApiContentDetail extends ApiContentItem {
   author_name: string | null;
+  designer: { id: number; name_ar: string; name_en: string | null; avatar_url: string | null; telegram_url: string | null } | null;
   likes_count: number;
   brand: { name_ar: string; name_en: string | null; slug: string; logo_url: string | null; primary_color: string | null } | null;
   section: { name_ar: string; name_en: string | null; slug: string; icon: string | null } | null;
