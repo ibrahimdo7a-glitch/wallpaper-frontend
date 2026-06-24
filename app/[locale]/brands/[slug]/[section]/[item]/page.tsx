@@ -33,7 +33,14 @@ export default async function ContentDetailPage({ params }: Props) {
   const brandName = item.brand ? (isAr ? item.brand.name_ar : (item.brand.name_en ?? item.brand.name_ar)) : '';
   const sectionName = item.section ? (isAr ? item.section.name_ar : (item.section.name_en ?? item.section.name_ar)) : '';
   const primaryColor = item.brand?.primary_color ?? '#3b82f6';
-  const sectionBase = `/${params.locale}/brands/${params.slug}/${params.section}`;
+  const modelName = item.model ? (isAr ? item.model.name_ar : (item.model.name_en ?? item.model.name_ar)) : '';
+  // Detail pages only exist at the brand-level route, so links to OTHER items
+  // (related) stay brand-level. But the "back to the section list" links go to
+  // the model's section page when this item belongs to a model.
+  const detailBase  = `/${params.locale}/brands/${params.slug}/${params.section}`;
+  const sectionList = item.model
+    ? `/${params.locale}/brands/${params.slug}/models/${item.model.slug}/${params.section}`
+    : detailBase;
 
   const resolution = item.metadata?.resolution;
   const width = item.metadata?.width;
@@ -50,7 +57,13 @@ export default async function ContentDetailPage({ params }: Props) {
           <span>/</span>
           <Link href={`/${params.locale}/brands/${params.slug}`} className="hover:text-white">{brandName}</Link>
           <span>/</span>
-          <Link href={sectionBase} className="hover:text-white">{item.section?.icon} {sectionName}</Link>
+          {item.model && (
+            <>
+              <Link href={`/${params.locale}/brands/${params.slug}/models/${item.model.slug}`} className="hover:text-white">{modelName}</Link>
+              <span>/</span>
+            </>
+          )}
+          <Link href={sectionList} className="hover:text-white">{item.section?.icon} {sectionName}</Link>
           <span>/</span>
           <span className="text-white">{title}</span>
         </div>
@@ -97,7 +110,7 @@ export default async function ContentDetailPage({ params }: Props) {
                   {isAr ? 'مجاني' : 'Free'}
                 </span>
                 {item.collection && (
-                  <Link href={`${sectionBase}?collection=${item.collection.slug}`}
+                  <Link href={`${sectionList}?collection=${item.collection.slug}`}
                     className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-gray-800 text-gray-300 hover:bg-gray-700">
                     {item.collection.icon} {isAr ? item.collection.name_ar : (item.collection.name_en ?? item.collection.name_ar)}
                   </Link>
@@ -148,7 +161,7 @@ export default async function ContentDetailPage({ params }: Props) {
               )}
               <div className="flex justify-between">
                 <span className="text-gray-400">{isAr ? 'القسم' : 'Section'}</span>
-                <Link href={sectionBase} className="text-white hover:underline">{item.section?.icon} {sectionName}</Link>
+                <Link href={sectionList} className="text-white hover:underline">{item.section?.icon} {sectionName}</Link>
               </div>
             </div>
 
@@ -201,7 +214,7 @@ export default async function ContentDetailPage({ params }: Props) {
                 const thumb = r.thumbnail_url ?? r.image_url;
                 if (!thumb) return null;
                 return (
-                  <Link key={r.id} href={`${sectionBase}/${r.id}`}
+                  <Link key={r.id} href={`${detailBase}/${r.id}`}
                     className="group relative block break-inside-avoid rounded-xl overflow-hidden bg-gray-900">
                     <Image src={thumb} alt={r.title_ar} width={400} height={600}
                       className="w-full object-cover group-hover:scale-105 transition-transform duration-300" />

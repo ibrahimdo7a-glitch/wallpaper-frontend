@@ -292,6 +292,7 @@ export interface ApiContentDetail extends ApiContentItem {
   brand: { name_ar: string; name_en: string | null; slug: string; logo_url: string | null; primary_color: string | null } | null;
   section: { name_ar: string; name_en: string | null; slug: string; icon: string | null } | null;
   collection: { name_ar: string; name_en: string | null; slug: string; icon: string | null } | null;
+  model: { name_ar: string; name_en: string | null; slug: string } | null;
 }
 
 export async function fetchContentItem(id: string | number): Promise<{ item: ApiContentDetail | null; related: ApiContentItem[] }> {
