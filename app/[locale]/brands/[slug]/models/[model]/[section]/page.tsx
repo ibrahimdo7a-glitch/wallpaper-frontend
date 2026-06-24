@@ -9,7 +9,7 @@ import { ContentImageGrid } from '@/components/brand/ContentImageGrid';
 
 type Props = {
   params: { locale: Locale; slug: string; model: string; section: string };
-  searchParams: { page?: string };
+  searchParams: { page?: string; collection?: string };
 };
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
@@ -162,10 +162,12 @@ export default async function ModelSectionPage({ params, searchParams }: Props) 
   const isAr = params.locale === 'ar';
   const page = Number(searchParams.page ?? 1);
 
-  const [brand, { model }, { section, data: items, meta }] = await Promise.all([
+  const activeColl = searchParams.collection;
+
+  const [brand, { model }, { section, collections, activeCollection, data: items, meta }] = await Promise.all([
     fetchBrand(params.slug),
     fetchModelWithSections(params.slug, params.model),
-    fetchModelSectionContent(params.slug, params.model, params.section, page),
+    fetchModelSectionContent(params.slug, params.model, params.section, page, activeColl),
   ]);
 
   if (!model || !section) notFound();
@@ -174,6 +176,7 @@ export default async function ModelSectionPage({ params, searchParams }: Props) 
   const brandName = brand ? (isAr ? brand.name_ar : (brand.name_en ?? brand.name_ar)) : '';
   const sectionName = isAr ? section.name_ar : section.name_en;
   const primaryColor = brand?.primary_color ?? '#3b82f6';
+  const basePath = `/${params.locale}/brands/${params.slug}/models/${params.model}/${params.section}`;
 
   return (
     <main className="min-h-screen bg-black text-white" dir={isAr ? 'rtl' : 'ltr'}>
@@ -205,9 +208,40 @@ export default async function ModelSectionPage({ params, searchParams }: Props) 
         </div>
         <p className="text-gray-500 text-sm mb-2">{modelName}</p>
         {(isAr ? section.description_ar : section.description_en) && (
-          <p className="text-gray-400 text-sm mb-6">{isAr ? section.description_ar : section.description_en}</p>
+          <p className="text-gray-400 text-sm mb-4">{isAr ? section.description_ar : section.description_en}</p>
         )}
-        <p className="text-gray-500 text-sm mb-8">{meta.total ?? items.length} {isAr ? 'عنصر' : 'items'}</p>
+
+        {/* Sub-sections (collections) */}
+        {collections.length > 0 && (
+          <div className="flex gap-2 flex-wrap mb-6">
+            <Link href={basePath}
+              className={`text-sm px-4 py-1.5 rounded-full border transition-colors ${!activeCollection ? 'text-black font-semibold border-transparent' : 'border-gray-700 text-gray-300 hover:bg-gray-800'}`}
+              style={!activeCollection ? { backgroundColor: primaryColor } : {}}>
+              {isAr ? 'الكل' : 'All'}
+            </Link>
+            {collections.map(c => {
+              const active = activeCollection?.id === c.id;
+              return (
+                <Link key={c.id} href={`${basePath}?collection=${c.slug}`}
+                  className={`text-sm px-4 py-1.5 rounded-full border transition-colors flex items-center gap-1.5 ${active ? 'text-black font-semibold border-transparent' : 'border-gray-700 text-gray-300 hover:bg-gray-800'}`}
+                  style={active ? { backgroundColor: primaryColor } : {}}>
+                  {c.icon && <span>{c.icon}</span>}
+                  {isAr ? c.name_ar : (c.name_en ?? c.name_ar)}
+                  <span className="text-xs opacity-60">{c.items_count}</span>
+                </Link>
+              );
+            })}
+          </div>
+        )}
+
+        <p className="text-gray-500 text-sm mb-8">
+          {activeCollection && (
+            <span className="text-white font-medium">
+              {activeCollection.icon} {isAr ? activeCollection.name_ar : (activeCollection.name_en ?? activeCollection.name_ar)} —{' '}
+            </span>
+          )}
+          {meta.total ?? items.length} {isAr ? 'عنصر' : 'items'}
+        </p>
 
         <SectionContent section={section} items={items} isAr={isAr}
           locale={params.locale} brandSlug={params.slug} sectionSlug={params.section} modelSlug={params.model} />
@@ -217,7 +251,7 @@ export default async function ModelSectionPage({ params, searchParams }: Props) 
           <div className="flex justify-center gap-2 mt-10 flex-wrap">
             {Array.from({ length: meta.last_page }, (_, i) => i + 1).map(p => (
               <Link key={p}
-                href={`/${params.locale}/brands/${params.slug}/models/${params.model}/${params.section}?page=${p}`}
+                href={`${basePath}?page=${p}${activeColl ? `&collection=${activeColl}` : ''}`}
                 className={`w-9 h-9 flex items-center justify-center rounded-lg text-sm ${p === page ? 'text-black font-bold' : 'bg-gray-800 hover:bg-gray-700'}`}
                 style={p === page ? { backgroundColor: primaryColor } : {}}>
                 {p}

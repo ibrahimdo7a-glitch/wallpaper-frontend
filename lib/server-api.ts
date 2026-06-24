@@ -350,14 +350,22 @@ export async function fetchModelSectionContent(
   brandSlug: string,
   modelSlug: string,
   sectionSlug: string,
-  page = 1
-): Promise<{ section: ApiBrandSection | null; data: ApiContentItem[]; meta: any }> {
-  const res = await get<{ section: ApiBrandSection; data: ApiContentItem[]; meta: any }>(
-    `/brands/${brandSlug}/models/${modelSlug}/sections/${sectionSlug}?page=${page}`,
+  page = 1,
+  collection?: string
+): Promise<{ section: ApiBrandSection | null; collections: ApiCollection[]; activeCollection: ApiCollection | null; data: ApiContentItem[]; meta: any }> {
+  const collParam = collection ? `&collection=${encodeURIComponent(collection)}` : '';
+  const res = await get<{ section: ApiBrandSection; collections: ApiCollection[]; active_collection: ApiCollection | null; data: ApiContentItem[]; meta: any }>(
+    `/brands/${brandSlug}/models/${modelSlug}/sections/${sectionSlug}?page=${page}${collParam}`,
     120,
     [`model-section-${modelSlug}-${sectionSlug}`]
   );
-  return { section: res?.section ?? null, data: res?.data ?? [], meta: res?.meta ?? {} };
+  return {
+    section: res?.section ?? null,
+    collections: res?.collections ?? [],
+    activeCollection: res?.active_collection ?? null,
+    data: res?.data ?? [],
+    meta: res?.meta ?? {},
+  };
 }
 
 // ─── Brands & Car Models ───────────────────────────────────────────────────────
