@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
+import { setRequestLocale } from 'next-intl/server';
 import { locales, type Locale } from '@/lib/i18n';
 import { Header } from '@/components/Header';
 import { Footer } from '@/components/Footer';
@@ -40,6 +41,7 @@ export default async function LocaleLayout({
   params: { locale: string };
 }) {
   if (!locales.includes(locale as Locale)) notFound();
+  setRequestLocale(locale);
 
   const isRTL = locale === 'ar';
   const siteContent = await fetchSiteContent();

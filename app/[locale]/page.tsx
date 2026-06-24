@@ -1,4 +1,5 @@
 import type { Metadata } from 'next';
+import { setRequestLocale } from 'next-intl/server';
 import { type Locale } from '@/lib/i18n';
 import { fetchHomepage, fetchBrands, fetchSiteContent } from '@/lib/server-api';
 import { SectionRenderer } from '@/components/homepage/SectionRenderer';
@@ -15,6 +16,7 @@ export async function generateMetadata({ params: { locale } }: { params: { local
 }
 
 export default async function HomePage({ params: { locale } }: { params: { locale: Locale } }) {
+  setRequestLocale(locale);
   const isAr = locale === 'ar';
 
   const [sections, brands, site] = await Promise.all([

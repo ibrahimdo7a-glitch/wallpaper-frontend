@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 import Image from 'next/image';
 import { notFound } from 'next/navigation';
+import { setRequestLocale } from 'next-intl/server';
 import { fetchBrand, fetchBrandSections, fetchBrandModels } from '@/lib/server-api';
 import { type Locale } from '@/lib/i18n';
 import type { ApiBrandSection } from '@/lib/server-api';
@@ -19,6 +20,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 }
 
 export default async function BrandPage({ params }: Props) {
+  setRequestLocale(params.locale);
   const isAr = params.locale === 'ar';
 
   const [brand, sections, models] = await Promise.all([
