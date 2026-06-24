@@ -37,68 +37,68 @@ export default async function BrandPage({ params }: Props) {
 
   return (
     <main className="min-h-screen bg-black text-white" dir={isAr ? 'rtl' : 'ltr'}>
-      {/* ─── Hero / Cover ─── */}
-      <div className="relative h-52 md:h-72 w-full overflow-hidden">
+      {/* ─── Cover (compact) ─── */}
+      <div className="relative h-32 md:h-44 w-full overflow-hidden">
         {brand.cover_image_url ? (
           <Image src={brand.cover_image_url} alt={brandName} fill className="object-cover" />
         ) : (
-          <div className="w-full h-full" style={{ background: `linear-gradient(135deg, ${primaryColor}33, ${primaryColor}11)` }} />
+          <div className="w-full h-full" style={{ background: `linear-gradient(135deg, ${primaryColor}40, ${primaryColor}10)` }} />
         )}
-        <div className="absolute inset-0 bg-gradient-to-b from-black/20 to-black" />
+        <div className="absolute inset-0 bg-gradient-to-b from-black/10 to-black" />
       </div>
 
       <div className="max-w-7xl mx-auto px-4">
-        {/* ─── Brand Header ─── */}
-        <div className="flex items-end gap-5 -mt-12 mb-6 relative z-10">
-          {brand.logo_url && (
-            <div className="w-20 h-20 rounded-2xl bg-gray-900 border-2 border-gray-700 p-2 flex-shrink-0">
-              <Image src={brand.logo_url} alt={brandName} width={72} height={72} className="object-contain w-full h-full" />
+        {/* ─── Brand header band: logo + name + stats on one side, CTAs on the other ─── */}
+        <div className="flex flex-wrap items-end justify-between gap-4 -mt-10 mb-5 relative z-10">
+          <div className="flex items-end gap-4">
+            {brand.logo_url && (
+              <div className="w-20 h-20 rounded-2xl bg-gray-900 border-2 border-gray-700 p-2 flex-shrink-0">
+                <Image src={brand.logo_url} alt={brandName} width={72} height={72} className="object-contain w-full h-full" />
+              </div>
+            )}
+            <div className="pb-1">
+              <h1 className="text-2xl md:text-3xl font-bold leading-tight">{brandName}</h1>
+              <div className="flex items-center gap-3 mt-1 text-sm text-gray-400 flex-wrap">
+                {brand.country && <span>{brand.country}</span>}
+                {brand.models_count > 0     && <span>🚗 {brand.models_count}</span>}
+                {brand.wallpapers_count > 0 && <span>🖼️ {brand.wallpapers_count}</span>}
+                {brand.apps_count > 0       && <span>📱 {brand.apps_count}</span>}
+                {brand.news_count > 0       && <span>📰 {brand.news_count}</span>}
+              </div>
+            </div>
+          </div>
+
+          {/* CTAs — pushed to the opposite side to fill the width */}
+          {(brand.telegram_url || brand.whatsapp_url || brand.channel_url || brand.download_cta_url) && (
+            <div className="flex gap-2 flex-wrap pb-1">
+              {brand.telegram_url && (
+                <a href={brand.telegram_url} target="_blank" rel="noopener noreferrer"
+                  className="flex items-center gap-2 bg-blue-600 hover:bg-blue-500 px-4 py-2 rounded-xl text-sm font-medium transition-colors">
+                  ✈️ {isAr ? 'تليجرام' : 'Telegram'}
+                </a>
+              )}
+              {brand.whatsapp_url && (
+                <a href={brand.whatsapp_url} target="_blank" rel="noopener noreferrer"
+                  className="flex items-center gap-2 bg-green-700 hover:bg-green-600 px-4 py-2 rounded-xl text-sm font-medium transition-colors">
+                  💬 {isAr ? 'واتساب' : 'WhatsApp'}
+                </a>
+              )}
+              {brand.download_cta_url && (
+                <a href={brand.download_cta_url} target="_blank" rel="noopener noreferrer"
+                  className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium transition-colors text-black"
+                  style={{ backgroundColor: primaryColor }}>
+                  ⬇️ {isAr ? (brand.download_cta_label_ar ?? 'تحميل') : (brand.download_cta_label_en ?? 'Download')}
+                </a>
+              )}
             </div>
           )}
-          <div className="pb-1">
-            <h1 className="text-2xl md:text-3xl font-bold">{brandName}</h1>
-            {brand.country && <p className="text-gray-400 text-sm">{brand.country}</p>}
-          </div>
-        </div>
-
-        {/* ─── Stats bar ─── */}
-        <div className="flex gap-4 flex-wrap text-sm text-gray-400 mb-4">
-          {brand.models_count > 0     && <span>🚗 {brand.models_count} {isAr ? 'موديل' : 'models'}</span>}
-          {brand.wallpapers_count > 0 && <span>🖼️ {brand.wallpapers_count} {isAr ? 'خلفية' : 'wallpapers'}</span>}
-          {brand.apps_count > 0       && <span>📱 {brand.apps_count} {isAr ? 'تطبيق' : 'apps'}</span>}
-          {brand.news_count > 0       && <span>📰 {brand.news_count} {isAr ? 'خبر' : 'news'}</span>}
         </div>
 
         {/* ─── Description ─── */}
         {(isAr ? brand.description_ar : brand.description_en) && (
-          <p className="text-gray-300 mb-6 max-w-3xl leading-relaxed">
+          <p className="text-gray-300 mb-5 max-w-3xl leading-relaxed text-sm">
             {isAr ? brand.description_ar : brand.description_en}
           </p>
-        )}
-
-        {/* ─── CTA buttons ─── */}
-        {(brand.telegram_url || brand.whatsapp_url || brand.channel_url || brand.download_cta_url) && (
-          <div className="flex gap-2 flex-wrap mb-8">
-            {brand.telegram_url && (
-              <a href={brand.telegram_url} target="_blank" rel="noopener noreferrer"
-                className="flex items-center gap-2 bg-blue-600 hover:bg-blue-500 px-4 py-2 rounded-xl text-sm font-medium transition-colors">
-                ✈️ {isAr ? 'تليجرام' : 'Telegram'}
-              </a>
-            )}
-            {brand.whatsapp_url && (
-              <a href={brand.whatsapp_url} target="_blank" rel="noopener noreferrer"
-                className="flex items-center gap-2 bg-green-700 hover:bg-green-600 px-4 py-2 rounded-xl text-sm font-medium transition-colors">
-                💬 {isAr ? 'واتساب' : 'WhatsApp'}
-              </a>
-            )}
-            {brand.download_cta_url && (
-              <a href={brand.download_cta_url} target="_blank" rel="noopener noreferrer"
-                className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium transition-colors text-black"
-                style={{ backgroundColor: primaryColor }}>
-                ⬇️ {isAr ? (brand.download_cta_label_ar ?? 'تحميل') : (brand.download_cta_label_en ?? 'Download')}
-              </a>
-            )}
-          </div>
         )}
 
         {/* ─── Dynamic Sections Navigation ─── */}
