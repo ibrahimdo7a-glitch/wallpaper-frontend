@@ -47,6 +47,11 @@ const StatIcon: Record<string, ReactNode> = {
       <path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7z" /><circle cx="12" cy="12" r="3" />
     </svg>
   ),
+  news: (
+    <svg viewBox="0 0 24 24" className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M4 5h13v14H5a1 1 0 0 1-1-1V5zM17 8h2.5a1 1 0 0 1 1 1v8.5a1.5 1.5 0 0 1-3 0V8zM7 8h7M7 11.5h7M7 15h4" />
+    </svg>
+  ),
 };
 
 const StatAccent: Record<string, string> = {
@@ -56,11 +61,12 @@ const StatAccent: Record<string, string> = {
   apps: 'text-sky-500 bg-sky-500/10',
   likes: 'text-rose-500 bg-rose-500/10',
   views: 'text-cyan-500 bg-cyan-500/10',
+  news: 'text-amber-500 bg-amber-500/10',
 };
 
 export function BrandsStatsRow({ brandsSection, statsSection, isAr, locale }: Props) {
   const brands: any[] = (brandsSection.data?.items ?? []).slice(0, 6);
-  const stats: ApiStatItem[] = (statsSection?.data?.items ?? []).slice(0, 6);
+  const stats: ApiStatItem[] = (statsSection?.data?.items ?? []).slice(0, 8);
   const title = isAr ? brandsSection.title_ar : (brandsSection.title_en ?? brandsSection.title_ar);
 
   if (brands.length === 0) return null;

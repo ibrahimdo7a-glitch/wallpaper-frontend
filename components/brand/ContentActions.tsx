@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 
 const API_BASE = (process.env.NEXT_PUBLIC_API_URL || 'https://api.qev.app').replace(/\/$/, '');
 
@@ -20,6 +20,16 @@ export function ContentActions({ contentId, fileUrl, imageUrl, slug, initialLike
   const [liked, setLiked] = useState(false);
   const [downloads, setDownloads] = useState(initialDownloads);
   const [downloading, setDownloading] = useState(false);
+
+  // Count one real (human) view per browser session — server renders no longer inflate it.
+  useEffect(() => {
+    const key = `qev_viewed_${contentId}`;
+    try {
+      if (sessionStorage.getItem(key)) return;
+      sessionStorage.setItem(key, '1');
+    } catch { /* sessionStorage unavailable */ }
+    fetch(`${API_BASE}/api/v1/content/${contentId}/view`, { method: 'POST', keepalive: true }).catch(() => {});
+  }, [contentId]);
 
   async function handleLike() {
     if (liked) return;
