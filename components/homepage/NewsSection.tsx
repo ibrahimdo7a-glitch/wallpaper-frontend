@@ -15,13 +15,15 @@ export function NewsSection({ section, isAr, locale }: Props) {
   const title = isAr ? section.title_ar : (section.title_en ?? section.title_ar);
 
   return (
-    <section className="py-12 px-4 bg-gray-50 dark:bg-[#0a0c11] border-t border-gray-100 dark:border-white/5">
+    <section className="pt-6 pb-12 px-4 bg-gray-50 dark:bg-[#0a0c11] border-t border-gray-100 dark:border-white/5">
       <div className="max-w-7xl mx-auto">
         <div className="flex items-end justify-between mb-7">
           <div>
-            <h2 className="text-2xl font-extrabold text-gray-900 dark:text-white tracking-tight">
-              {title || (isAr ? 'آخر الأخبار' : 'Latest news')}
-            </h2>
+            <Link href={`/${locale}/news`} className="group/title inline-block">
+              <h2 className="text-2xl font-extrabold text-gray-900 dark:text-white tracking-tight group-hover/title:text-blue-600 dark:group-hover/title:text-blue-400 transition-colors">
+                {title || (isAr ? 'آخر الأخبار' : 'Latest news')}
+              </h2>
+            </Link>
             <p className="text-sm text-gray-500 dark:text-neutral-400 mt-1">
               {isAr ? 'أحدث ما يدور في عالم السيارات الكهربائية' : 'Fresh from the EV world'}
             </p>
