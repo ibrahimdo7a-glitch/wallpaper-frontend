@@ -18,22 +18,22 @@ function formatValue(v: number): string {
 
 const StatIcon: Record<string, ReactNode> = {
   visitors: (
-    <svg viewBox="0 0 24 24" className="w-6 h-6" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+    <svg viewBox="0 0 24 24" className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
       <path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7z" /><circle cx="12" cy="12" r="3" />
     </svg>
   ),
   downloads: (
-    <svg viewBox="0 0 24 24" className="w-6 h-6" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+    <svg viewBox="0 0 24 24" className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
       <path d="M12 4v12m0 0l-4-4m4 4l4-4M5 20h14" />
     </svg>
   ),
   wallpapers: (
-    <svg viewBox="0 0 24 24" className="w-6 h-6" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+    <svg viewBox="0 0 24 24" className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
       <rect x="3" y="5" width="18" height="14" rx="2" /><circle cx="8.5" cy="10" r="1.5" /><path d="M21 16l-5-4-4 3-2-1.5L3 18" />
     </svg>
   ),
   apps: (
-    <svg viewBox="0 0 24 24" className="w-6 h-6" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+    <svg viewBox="0 0 24 24" className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
       <rect x="4" y="4" width="7" height="7" rx="1.5" /><rect x="13" y="4" width="7" height="7" rx="1.5" /><rect x="4" y="13" width="7" height="7" rx="1.5" /><rect x="13" y="13" width="7" height="7" rx="1.5" />
     </svg>
   ),
@@ -55,7 +55,7 @@ export function BrandsStatsRow({ brandsSection, statsSection, isAr, locale }: Pr
   const hasStats = stats.length > 0;
 
   return (
-    <section className="py-8 px-4 bg-white dark:bg-gray-950 border-b border-gray-100 dark:border-gray-800">
+    <section className="py-6 px-4 bg-white dark:bg-gray-950 border-b border-gray-100 dark:border-gray-800">
       <div className={`max-w-7xl mx-auto grid grid-cols-1 gap-6 ${hasStats ? 'lg:grid-cols-2' : ''}`}>
 
         {/* ─── Brands (right in RTL) ─── */}
@@ -68,14 +68,14 @@ export function BrandsStatsRow({ brandsSection, statsSection, isAr, locale }: Pr
             </Link>
           </div>
 
-          <div className="grid grid-cols-3 gap-x-3 gap-y-5">
+          <div className="grid grid-cols-3 gap-x-3 gap-y-3">
             {brands.map((brand) => (
               <Link key={brand.id} href={`/${locale}/brands/${brand.slug}`}
-                className="group flex flex-col items-center gap-2 py-1">
-                <div className="w-16 h-16 flex items-center justify-center transition-transform group-hover:scale-105">
+                className="group flex flex-col items-center gap-1.5 py-0.5">
+                <div className="w-11 h-11 flex items-center justify-center transition-transform group-hover:scale-105">
                   {brand.logo_url
-                    ? <Image src={brand.logo_url} alt={brand.name_ar} width={64} height={64} className="object-contain max-h-16 w-auto" />
-                    : <span className="text-2xl font-bold text-gray-400">{brand.name_ar.charAt(0)}</span>}
+                    ? <Image src={brand.logo_url} alt={brand.name_ar} width={44} height={44} className="object-contain max-h-11 w-auto" />
+                    : <span className="text-xl font-bold text-gray-400">{brand.name_ar.charAt(0)}</span>}
                 </div>
                 <span className="text-sm font-semibold text-gray-800 dark:text-gray-100 text-center leading-tight line-clamp-1 group-hover:text-gray-900 dark:group-hover:text-white">
                   {isAr ? brand.name_ar : (brand.name_en ?? brand.name_ar)}
@@ -90,18 +90,18 @@ export function BrandsStatsRow({ brandsSection, statsSection, isAr, locale }: Pr
 
         {/* ─── Statistics 2×2 (left in RTL) ─── */}
         {hasStats && (
-          <div className="grid grid-cols-2 gap-3 content-start">
+          <div className="grid grid-cols-2 gap-2 content-start">
             {stats.map((stat) => (
               <div key={stat.key}
-                className="flex items-center gap-3 p-4 rounded-2xl bg-gray-50 dark:bg-gray-900 border border-gray-100 dark:border-gray-800">
-                <div className={`flex-shrink-0 w-11 h-11 rounded-xl flex items-center justify-center ${StatAccent[stat.key] ?? 'text-gray-500 bg-gray-500/10'}`}>
-                  {StatIcon[stat.key] ?? <span className="text-xl">{stat.icon}</span>}
+                className="flex items-center justify-center gap-2.5 px-3 py-2.5 rounded-xl bg-gray-50 dark:bg-gray-900 border border-gray-100 dark:border-gray-800">
+                <div className={`flex-shrink-0 w-9 h-9 rounded-lg flex items-center justify-center ${StatAccent[stat.key] ?? 'text-gray-500 bg-gray-500/10'}`}>
+                  {StatIcon[stat.key] ?? <span className="text-lg">{stat.icon}</span>}
                 </div>
                 <div className="min-w-0">
-                  <p className="text-xl md:text-2xl font-extrabold text-gray-900 dark:text-white leading-none tabular-nums">
+                  <p className="text-lg md:text-xl font-extrabold text-gray-900 dark:text-white leading-none tabular-nums">
                     {stat.prefix}{formatValue(stat.value)}
                   </p>
-                  <p className="text-xs text-gray-500 dark:text-gray-400 mt-1 truncate">{isAr ? stat.label_ar : stat.label_en}</p>
+                  <p className="text-[11px] text-gray-500 dark:text-gray-400 mt-0.5 truncate">{isAr ? stat.label_ar : stat.label_en}</p>
                 </div>
               </div>
             ))}
