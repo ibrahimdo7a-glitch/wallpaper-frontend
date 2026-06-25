@@ -21,7 +21,7 @@ export default async function NewsPage({ params, searchParams }: Props) {
   const isAr = params.locale === 'ar';
   const page = Math.max(1, Number(searchParams.page ?? 1));
 
-  const [{ data: articles, meta }, mostLiked, categories] = await Promise.all([
+  const [{ data: articles, meta }, { data: mostLiked }, categories] = await Promise.all([
     fetchNews({ category: searchParams.category, page, perPage: 10 }),
     fetchNews({ sort: 'likes', perPage: 10 }),
     fetchNewsCategories(),
