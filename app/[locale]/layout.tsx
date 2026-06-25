@@ -71,7 +71,7 @@ export default async function LocaleLayout({
         />
       </head>
       <body
-        className={`min-h-screen bg-white dark:bg-gray-950 text-gray-900 dark:text-white antialiased ${
+        className={`min-h-screen overflow-x-hidden bg-white dark:bg-gray-950 text-gray-900 dark:text-white antialiased ${
           isRTL ? 'font-arabic' : 'font-sans'
         }`}
       >
