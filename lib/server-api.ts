@@ -448,6 +448,7 @@ export interface ApiNewsArticle {
   is_breaking: boolean;
   is_featured: boolean;
   views_count: number;
+  likes_count: number;
   published_at: string | null;
   category: { name_ar: string; slug: string; color: string | null } | null;
   brands: { name_ar: string; slug: string }[];
@@ -510,7 +511,7 @@ export async function fetchModelFiles(brandSlug: string, modelSlug: string): Pro
   return res?.data ?? [];
 }
 
-export async function fetchNews(params: { category?: string; brand?: string; model?: string; featured?: boolean; search?: string; page?: number } = {}): Promise<{ data: ApiNewsArticle[]; meta: any }> {
+export async function fetchNews(params: { category?: string; brand?: string; model?: string; featured?: boolean; search?: string; page?: number; perPage?: number; sort?: 'likes' | 'latest' } = {}): Promise<{ data: ApiNewsArticle[]; meta: any }> {
   const q = new URLSearchParams();
   if (params.category) q.set('category', params.category);
   if (params.brand)    q.set('brand', params.brand);
@@ -518,6 +519,8 @@ export async function fetchNews(params: { category?: string; brand?: string; mod
   if (params.featured) q.set('featured', '1');
   if (params.search)   q.set('search', params.search);
   if (params.page)     q.set('page', String(params.page));
+  if (params.perPage)  q.set('per_page', String(params.perPage));
+  if (params.sort)     q.set('sort', params.sort);
   const res = await get<{ data: ApiNewsArticle[]; meta: any }>(`/news?${q}`, 120, ['news']);
   return { data: res?.data ?? [], meta: res?.meta ?? { current_page: 1, last_page: 1, total: 0 } };
 }
