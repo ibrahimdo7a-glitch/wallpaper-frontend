@@ -110,7 +110,13 @@ export interface ApiApp {
   title_ar: string;
   title_en: string | null;
   slug: string;
+  short_description_ar: string | null;
+  short_description_en: string | null;
+  badge_text_ar: string | null;
+  badge_text_en: string | null;
+  works_on_car_screen: boolean;
   icon_url: string | null;
+  cover_image_url: string | null;
   version: string | null;
   developer: string | null;
   min_android: string | null;

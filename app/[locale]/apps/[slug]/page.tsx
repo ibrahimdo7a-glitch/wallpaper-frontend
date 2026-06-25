@@ -28,9 +28,11 @@ export default async function AppPage({ params: { locale, slug } }: Props) {
   const isAr = locale === 'ar';
   const title = isAr ? app.title_ar : (app.title_en || app.title_ar);
   const description = isAr ? app.description_ar : (app.description_en || app.description_ar);
+  const badge = (isAr ? app.badge_text_ar : (app.badge_text_en || app.badge_text_ar))
+    || (app.works_on_car_screen ? (isAr ? 'يعمل على شاشة السيارة' : 'Works on car screen') : null);
 
   return (
-    <div className="min-h-screen bg-gray-950 text-white">
+    <div className="min-h-screen bg-[#0a0c11] text-white">
       <div className="container mx-auto px-4 py-10 max-w-4xl">
 
         {/* Breadcrumb */}
@@ -74,6 +76,21 @@ export default async function AppPage({ params: { locale, slug } }: Props) {
 
             {/* Badges */}
             <div className="flex flex-wrap gap-2 mb-4">
+              {badge && (
+                <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium bg-blue-500/15 text-blue-300 border border-blue-500/25">
+                  <svg className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    {app.works_on_car_screen ? (
+                      <>
+                        <path d="M5 17a2 2 0 1 0 4 0 2 2 0 0 0-4 0M15 17a2 2 0 1 0 4 0 2 2 0 0 0-4 0" />
+                        <path d="M5 17H3v-6l2-5h9l4 5h1a2 2 0 0 1 2 2v4h-2M9 17h6" />
+                      </>
+                    ) : (
+                      <path d="M5 12l5 5L20 7" />
+                    )}
+                  </svg>
+                  {badge}
+                </span>
+              )}
               {app.is_free && (
                 <span className="px-3 py-1 rounded-full text-xs bg-green-900/40 text-green-400 border border-green-800">
                   {isAr ? '✓ مجاني' : '✓ Free'}
