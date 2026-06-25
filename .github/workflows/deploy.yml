@@ -1,0 +1,65 @@
+name: Deploy Frontend → Vercel
+
+# Auto-deploys the Next.js site to Vercel (production) on every push to master.
+#
+# One-time setup — add these in GitHub → repo → Settings → Secrets and variables → Actions → Secrets:
+#   VERCEL_TOKEN        – Vercel → Account Settings → Tokens
+#   VERCEL_ORG_ID       – run `vercel link` locally, then read .vercel/project.json
+#   VERCEL_PROJECT_ID   – same .vercel/project.json (or Vercel → Project → Settings → General)
+#
+# Until all three secrets exist, the deploy job is skipped (no failures).
+# NOTE: Vercel's native Git integration also auto-deploys on push — disable it in
+# Vercel → Project → Settings → Git once this workflow is live, to avoid double deploys.
+
+on:
+  push:
+    branches: [master]
+  workflow_dispatch:
+
+concurrency:
+  group: vercel-deploy-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    outputs:
+      ready: ${{ steps.guard.outputs.ready }}
+    steps:
+      - id: guard
+        run: |
+          if [ -n "${{ secrets.VERCEL_TOKEN }}" ] && [ -n "${{ secrets.VERCEL_ORG_ID }}" ] && [ -n "${{ secrets.VERCEL_PROJECT_ID }}" ]; then
+            echo "ready=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "ready=false" >> "$GITHUB_OUTPUT"
+            echo "::warning title=Setup needed::Add VERCEL_TOKEN, VERCEL_ORG_ID and VERCEL_PROJECT_ID in repo Settings → Secrets to enable auto-deploy."
+          fi
+
+  deploy:
+    needs: check
+    if: needs.check.outputs.ready == 'true'
+    runs-on: ubuntu-latest
+    env:
+      VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+      VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+      VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Install Vercel CLI
+        run: npm install --global vercel@latest
+
+      - name: Pull Vercel project settings
+        run: vercel pull --yes --environment=production --token="$VERCEL_TOKEN"
+
+      - name: Build (production)
+        run: vercel build --prod --token="$VERCEL_TOKEN"
+
+      - name: Deploy prebuilt to production
+        run: vercel deploy --prebuilt --prod --token="$VERCEL_TOKEN"
