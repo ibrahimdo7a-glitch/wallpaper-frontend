@@ -68,20 +68,20 @@ export function BrandsStatsRow({ brandsSection, statsSection, isAr, locale }: Pr
             </Link>
           </div>
 
-          <div className="grid grid-cols-3 gap-3">
+          <div className="grid grid-cols-3 gap-x-3 gap-y-5">
             {brands.map((brand) => (
               <Link key={brand.id} href={`/${locale}/brands/${brand.slug}`}
-                className="group flex flex-col items-center gap-2 py-4 px-2 rounded-2xl bg-gray-50 dark:bg-gray-900 hover:bg-gray-100 dark:hover:bg-gray-800 border border-gray-100 dark:border-gray-800 transition-colors">
-                <div className="w-14 h-14 rounded-2xl bg-white dark:bg-gray-950 border border-gray-100 dark:border-gray-800 flex items-center justify-center overflow-hidden p-1.5">
+                className="group flex flex-col items-center gap-2 py-1">
+                <div className="w-16 h-16 flex items-center justify-center transition-transform group-hover:scale-105">
                   {brand.logo_url
-                    ? <Image src={brand.logo_url} alt={brand.name_ar} width={48} height={48} className="object-contain" />
-                    : <span className="text-xl font-bold text-gray-400">{brand.name_ar.charAt(0)}</span>}
+                    ? <Image src={brand.logo_url} alt={brand.name_ar} width={64} height={64} className="object-contain max-h-16 w-auto" />
+                    : <span className="text-2xl font-bold text-gray-400">{brand.name_ar.charAt(0)}</span>}
                 </div>
-                <span className="text-xs font-semibold text-gray-800 dark:text-gray-100 text-center leading-tight line-clamp-1">
+                <span className="text-sm font-semibold text-gray-800 dark:text-gray-100 text-center leading-tight line-clamp-1 group-hover:text-gray-900 dark:group-hover:text-white">
                   {isAr ? brand.name_ar : (brand.name_en ?? brand.name_ar)}
                 </span>
-                {brand.models_count > 0 && (
-                  <span className="text-[11px] text-gray-400">{brand.models_count} {isAr ? 'موديل' : 'models'}</span>
+                {brand.sections_count > 0 && (
+                  <span className="text-[11px] text-gray-400 dark:text-gray-500">{brand.sections_count} {isAr ? 'قسم' : 'sections'}</span>
                 )}
               </Link>
             ))}
