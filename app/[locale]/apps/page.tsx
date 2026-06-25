@@ -2,7 +2,7 @@ import { setRequestLocale } from 'next-intl/server';
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import Image from 'next/image';
-import { fetchAppCategories, fetchApps, type ApiApp } from '@/lib/server-api';
+import { fetchAppCategories, fetchApps, fetchSiteContent, type ApiApp } from '@/lib/server-api';
 import { type Locale } from '@/lib/i18n';
 
 type Props = { params: { locale: Locale }; searchParams: { category?: string; sort?: string } };
@@ -26,10 +26,16 @@ export default async function AppsPage({ params: { locale }, searchParams }: Pro
   setRequestLocale(locale);
   const isAr = locale === 'ar';
 
-  const [categories, { data: apps }] = await Promise.all([
+  const [categories, { data: apps }, site] = await Promise.all([
     fetchAppCategories(),
     fetchApps({ category: searchParams.category, sort: searchParams.sort, per_page: 24 }),
+    fetchSiteContent().catch(() => null),
   ]);
+
+  const ilinkEnabled = site?.ilink_enabled === true || site?.ilink_enabled === '1';
+  const ilinkUrl = site?.ilink_file_url ?? '';
+  const ilinkLabel = isAr ? site?.ilink_label_ar : site?.ilink_label_en;
+  const ilinkTooltip = isAr ? site?.ilink_tooltip_ar : site?.ilink_tooltip_en;
 
   return (
     <main className="min-h-screen bg-[#0a0c11] text-neutral-100" dir={isAr ? 'rtl' : 'ltr'}>
@@ -44,6 +50,26 @@ export default async function AppsPage({ params: { locale }, searchParams }: Pro
             {isAr ? 'تطبيقات مختارة للسيارات الكهربائية والصينية، مع خطوات التنصيب.' : 'Curated car apps with installation guides.'}
           </p>
         </header>
+
+        {/* iLink — prominent download banner */}
+        {ilinkEnabled && ilinkUrl && (
+          <a href={ilinkUrl} download
+            className="group flex items-center gap-4 mb-8 p-5 rounded-2xl border border-orange-500/30 bg-orange-500/[0.08] hover:bg-orange-500/[0.14] transition-colors">
+            <div className="flex-shrink-0 w-14 h-14 rounded-2xl bg-orange-500 flex items-center justify-center text-white">
+              <svg className="w-7 h-7" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M12 3v12m0 0l-4-4m4 4l4-4M5 21h14" />
+              </svg>
+            </div>
+            <div className="flex-1 min-w-0">
+              <p className="text-lg font-bold text-white">{ilinkLabel || (isAr ? 'حمّل تطبيق iLink' : 'Download iLink app')}</p>
+              {ilinkTooltip && <p className="text-sm text-neutral-400 mt-0.5 line-clamp-2">{ilinkTooltip}</p>}
+            </div>
+            <span className="flex-shrink-0 inline-flex items-center gap-2 px-4 py-2 rounded-full bg-orange-500 group-hover:bg-orange-600 text-white text-sm font-semibold transition-colors">
+              {isAr ? 'تحميل' : 'Download'}
+              <span className="transition-transform group-hover:translate-x-0.5 rtl:group-hover:-translate-x-0.5">↓</span>
+            </span>
+          </a>
+        )}
 
         {/* Category tabs */}
         <nav className="flex gap-2 flex-wrap mb-6">
