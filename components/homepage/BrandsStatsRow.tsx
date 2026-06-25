@@ -102,7 +102,7 @@ export function BrandsStatsRow({ brandsSection, statsSection, isAr, locale }: Pr
 
         {/* ─── Statistics 2×2 (left in RTL) ─── */}
         {hasStats && (
-          <div className="grid grid-cols-2 lg:grid-cols-3 gap-2 content-start">
+          <div className="grid grid-cols-2 gap-2 content-start">
             {stats.map((stat) => (
               <div key={stat.key}
                 className="flex items-center justify-center gap-2.5 px-3 py-2.5 rounded-xl bg-gray-50 dark:bg-gray-900 border border-gray-100 dark:border-gray-800">
