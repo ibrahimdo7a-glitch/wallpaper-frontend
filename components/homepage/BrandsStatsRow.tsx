@@ -19,7 +19,7 @@ function formatValue(v: number): string {
 const StatIcon: Record<string, ReactNode> = {
   visitors: (
     <svg viewBox="0 0 24 24" className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-      <path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7z" /><circle cx="12" cy="12" r="3" />
+      <circle cx="9" cy="8" r="3.2" /><path d="M3.5 20a5.5 5.5 0 0 1 11 0M16 5.2a3.2 3.2 0 0 1 0 5.6M17.6 20a5.5 5.5 0 0 0-3-4.9" />
     </svg>
   ),
   downloads: (
@@ -37,6 +37,16 @@ const StatIcon: Record<string, ReactNode> = {
       <rect x="4" y="4" width="7" height="7" rx="1.5" /><rect x="13" y="4" width="7" height="7" rx="1.5" /><rect x="4" y="13" width="7" height="7" rx="1.5" /><rect x="13" y="13" width="7" height="7" rx="1.5" />
     </svg>
   ),
+  likes: (
+    <svg viewBox="0 0 24 24" className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M12 20.5s-6.6-4.2-9-8.3C1.4 9.3 2.8 5.8 6.2 5.8c2 0 3.2 1.2 3.8 2.2.6-1 1.8-2.2 3.8-2.2 3.4 0 4.8 3.5 3.2 6.4-2.4 4.1-9 8.3-9 8.3z" />
+    </svg>
+  ),
+  views: (
+    <svg viewBox="0 0 24 24" className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7z" /><circle cx="12" cy="12" r="3" />
+    </svg>
+  ),
 };
 
 const StatAccent: Record<string, string> = {
@@ -44,11 +54,13 @@ const StatAccent: Record<string, string> = {
   downloads: 'text-indigo-500 bg-indigo-500/10',
   wallpapers: 'text-emerald-500 bg-emerald-500/10',
   apps: 'text-sky-500 bg-sky-500/10',
+  likes: 'text-rose-500 bg-rose-500/10',
+  views: 'text-cyan-500 bg-cyan-500/10',
 };
 
 export function BrandsStatsRow({ brandsSection, statsSection, isAr, locale }: Props) {
   const brands: any[] = (brandsSection.data?.items ?? []).slice(0, 6);
-  const stats: ApiStatItem[] = (statsSection?.data?.items ?? []).slice(0, 4);
+  const stats: ApiStatItem[] = (statsSection?.data?.items ?? []).slice(0, 6);
   const title = isAr ? brandsSection.title_ar : (brandsSection.title_en ?? brandsSection.title_ar);
 
   if (brands.length === 0) return null;
@@ -90,7 +102,7 @@ export function BrandsStatsRow({ brandsSection, statsSection, isAr, locale }: Pr
 
         {/* ─── Statistics 2×2 (left in RTL) ─── */}
         {hasStats && (
-          <div className="grid grid-cols-2 gap-2 content-start">
+          <div className="grid grid-cols-2 lg:grid-cols-3 gap-2 content-start">
             {stats.map((stat) => (
               <div key={stat.key}
                 className="flex items-center justify-center gap-2.5 px-3 py-2.5 rounded-xl bg-gray-50 dark:bg-gray-900 border border-gray-100 dark:border-gray-800">
