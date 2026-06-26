@@ -10,6 +10,7 @@ export interface Member {
   photo_url: string | null;
   tier: string;
   is_premium: boolean;
+  news_telegram: boolean;
 }
 
 interface MemberContextValue {
