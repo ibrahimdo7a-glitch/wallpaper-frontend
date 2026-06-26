@@ -202,8 +202,9 @@ export default function SellPage() {
                 <input value={whatsapp} onChange={(e) => setWhatsapp(e.target.value)} className={input} placeholder="974XXXXXXXX" />
               </div>
               <div>
-                <label className={lbl}>{isAr ? 'تلجرام' : 'Telegram'}</label>
-                <input value={telegram} onChange={(e) => setTelegram(e.target.value)} className={input} placeholder="@username" />
+                <label className={lbl}>{isAr ? 'تلجرام 🔒 (من حسابك)' : 'Telegram 🔒 (your account)'}</label>
+                <input value={telegram ? `@${telegram}` : '—'} readOnly title={isAr ? 'مرتبط بحسابك ولا يمكن تغييره' : 'Linked to your account'}
+                  className={`${input} opacity-70 cursor-not-allowed`} />
               </div>
             </div>
 
