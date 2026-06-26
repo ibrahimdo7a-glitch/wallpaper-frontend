@@ -4,7 +4,9 @@ import { type Locale } from '@/lib/i18n';
 import { fetchHomepage, fetchBrands, fetchSiteContent } from '@/lib/server-api';
 import { SectionRenderer } from '@/components/homepage/SectionRenderer';
 import { BrandsStatsRow } from '@/components/homepage/BrandsStatsRow';
+import { StatsBlock } from '@/components/homepage/StatsBlock';
 import { VisitTracker } from '@/components/homepage/VisitTracker';
+import { Fragment } from 'react';
 
 export const revalidate = 120;
 
@@ -32,30 +34,20 @@ export default async function HomePage({ params: { locale } }: { params: { local
     : (site?.search_placeholder_en || 'Search brands, models, apps, wallpapers...');
   const searchEnabled = site?.search_enabled ?? true;
 
-  // Merge the statistics section into the brands row (brands right, stats 2×2 left).
-  // Only pull stats out of the normal flow when a brands section exists to host it.
-  const brandsExists = sections.some(s => s.type === 'brands' || s.type === 'featured_brands');
-  const statsSection = brandsExists ? sections.find(s => s.type === 'statistics') : undefined;
-  const visibleSections = statsSection ? sections.filter(s => s.type !== 'statistics') : sections;
+  // Brands render as a single row at the top; statistics move down to their own
+  // block (3×2) just above the features strip (custom_content).
+  const statsSection = sections.find(s => s.type === 'statistics');
+  const visibleSections = sections.filter(s => s.type !== 'statistics');
+  const hasFeatures = visibleSections.some(s => s.type === 'custom_content');
 
   return (
     <div dir={isAr ? 'rtl' : 'ltr'} className="bg-white dark:bg-gray-950 min-h-screen">
       <VisitTracker />
       {visibleSections.map(section => {
-        if (section.type === 'brands' || section.type === 'featured_brands') {
-          return (
-            <BrandsStatsRow
-              key={section.id}
-              brandsSection={section}
-              statsSection={statsSection}
-              isAr={isAr}
-              locale={locale}
-            />
-          );
-        }
-        return (
+        const node = (section.type === 'brands' || section.type === 'featured_brands') ? (
+          <BrandsStatsRow brandsSection={section} isAr={isAr} locale={locale} />
+        ) : (
           <SectionRenderer
-            key={section.id}
             section={section}
             isAr={isAr}
             locale={locale}
@@ -64,7 +56,21 @@ export default async function HomePage({ params: { locale } }: { params: { local
             searchEnabled={searchEnabled}
           />
         );
+
+        // Drop the stats block right before the features strip.
+        if (section.type === 'custom_content' && statsSection) {
+          return (
+            <Fragment key={section.id}>
+              <StatsBlock statsSection={statsSection} isAr={isAr} />
+              {node}
+            </Fragment>
+          );
+        }
+        return <Fragment key={section.id}>{node}</Fragment>;
       })}
+
+      {/* Fallback: if there's no features strip, show stats at the end. */}
+      {statsSection && !hasFeatures && <StatsBlock statsSection={statsSection} isAr={isAr} />}
     </div>
   );
 }
