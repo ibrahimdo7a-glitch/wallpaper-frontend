@@ -602,7 +602,7 @@ export interface ApiMarketListingFull extends ApiMarketListing {
   car_model: string | null;
   category: string | null;
   views_count: number;
-  contact: { name: string | null; phone: string | null; whatsapp: string | null; telegram: string | null };
+  contact: { name: string | null; has_phone: boolean; whatsapp: string | null; telegram: string | null };
 }
 
 export async function fetchMarketConfig(): Promise<ApiMarketConfig> {
