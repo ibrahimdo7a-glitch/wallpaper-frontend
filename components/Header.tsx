@@ -5,6 +5,8 @@ import { usePathname } from 'next/navigation';
 import { useState, useEffect } from 'react';
 import { type Locale } from '@/types';
 import { translations } from '@/data/translations';
+import { useMember } from '@/lib/member-auth';
+import { LoginModal } from '@/components/auth/LoginModal';
 
 interface ILink {
   label: string;
@@ -28,6 +30,8 @@ export function Header({ locale, siteName, marketLinks = [] }: HeaderProps) {
   const [menuOpen, setMenuOpen] = useState(false);
   const [dark, setDark] = useState(false);
   const [scrolled, setScrolled] = useState(false);
+  const [loginOpen, setLoginOpen] = useState(false);
+  const { member, loading: memberLoading, logout } = useMember();
 
   useEffect(() => {
     const stored = localStorage.getItem('theme');
@@ -123,6 +127,26 @@ export function Header({ locale, siteName, marketLinks = [] }: HeaderProps) {
               {otherLocale === 'ar' ? 'عربي' : 'EN'}
             </Link>
 
+            {/* Member / login */}
+            {!memberLoading && (member ? (
+              <div className="flex items-center gap-1.5">
+                <Link href={`/${locale}/account`} className="flex items-center gap-1.5 ps-1 pe-2 py-1 rounded-full border border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors">
+                  {member.photo_url ? (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img src={member.photo_url} alt="" className="w-6 h-6 rounded-full object-cover" />
+                  ) : (
+                    <span className="w-6 h-6 rounded-full bg-sky-600 text-white text-xs font-bold flex items-center justify-center">{(member.name || member.username || 'ع').charAt(0)}</span>
+                  )}
+                  <span className="text-xs font-semibold text-gray-700 dark:text-gray-300 max-w-[80px] truncate hidden sm:block">{member.name || member.username}</span>
+                </Link>
+                <button onClick={logout} title={isRTL ? 'خروج' : 'Logout'} className="w-7 h-7 rounded-full text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 flex items-center justify-center">⎋</button>
+              </div>
+            ) : (
+              <button onClick={() => setLoginOpen(true)} className="px-3 py-1.5 rounded-full text-xs font-semibold bg-sky-600 hover:bg-sky-500 text-white transition-colors whitespace-nowrap">
+                {isRTL ? 'دخول' : 'Sign in'}
+              </button>
+            ))}
+
             {/* Mobile menu */}
             <button
               onClick={() => setMenuOpen(!menuOpen)}
@@ -153,6 +177,8 @@ export function Header({ locale, siteName, marketLinks = [] }: HeaderProps) {
           </div>
         )}
       </div>
+
+      <LoginModal open={loginOpen} onOpenChange={setLoginOpen} isAr={isRTL} />
     </header>
   );
 }

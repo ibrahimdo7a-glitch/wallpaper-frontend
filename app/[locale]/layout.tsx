@@ -4,6 +4,7 @@ import { setRequestLocale } from 'next-intl/server';
 import { locales, type Locale } from '@/lib/i18n';
 import { Header } from '@/components/Header';
 import { Footer } from '@/components/Footer';
+import { MemberProvider } from '@/lib/member-auth';
 import { translations } from '@/data/translations';
 import { fetchSiteContent, fetchMarketConfig } from '@/lib/server-api';
 import './globals.css';
@@ -84,14 +85,16 @@ export default async function LocaleLayout({
           isRTL ? 'font-arabic' : 'font-sans'
         }`}
       >
-        <Header
-          locale={locale as Locale}
-          siteName={siteName}
-          marketLinks={marketLinks}
-          ilink={ilinkEnabled ? { label: ilinkLabel || '', tooltip: ilinkTooltip || '', fileUrl: ilinkFileUrl } : undefined}
-        />
-        <main>{children}</main>
-        <Footer locale={locale as Locale} />
+        <MemberProvider>
+          <Header
+            locale={locale as Locale}
+            siteName={siteName}
+            marketLinks={marketLinks}
+            ilink={ilinkEnabled ? { label: ilinkLabel || '', tooltip: ilinkTooltip || '', fileUrl: ilinkFileUrl } : undefined}
+          />
+          <main>{children}</main>
+          <Footer locale={locale as Locale} />
+        </MemberProvider>
       </body>
     </html>
   );
