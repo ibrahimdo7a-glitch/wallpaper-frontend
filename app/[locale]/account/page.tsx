@@ -83,10 +83,13 @@ export default function AccountPage() {
               <Link href={`/${locale}/sell`} className="px-4 py-2 rounded-full bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-sm">➕ {isAr ? 'أضف إعلان' : 'Post listing'}</Link>
             </div>
 
-            <button onClick={toggleNews} className="w-full flex items-center justify-between gap-3 p-4 rounded-2xl bg-white/[0.03] border border-white/10 hover:bg-white/[0.05] transition-colors">
-              <span className="flex items-center gap-2 text-sm font-semibold">📩 {isAr ? 'وصّلني الأخبار في تلجرام' : 'Get news in Telegram'}</span>
-              <span className={`px-3 py-1 rounded-full text-xs font-bold ${newsTg ? 'bg-emerald-500 text-black' : 'bg-white/10 text-neutral-400'}`}>
-                {newsTg ? (isAr ? 'مفعّل ✓' : 'On') : (isAr ? 'متوقّف' : 'Off')}
+            <button onClick={toggleNews} className="w-full flex items-center justify-between gap-3 p-4 rounded-2xl bg-white/[0.03] border border-white/10 hover:bg-white/[0.05] transition-colors text-start">
+              <div className="min-w-0">
+                <p className="text-sm font-semibold flex items-center gap-2">📩 {isAr ? 'تنبيهات الأخبار على تلجرام' : 'News alerts on Telegram'}</p>
+                <p className="text-xs text-neutral-500 mt-0.5">{isAr ? 'يوصلك كل خبر جديد برسالة من البوت' : 'Get every new article as a bot message'}</p>
+              </div>
+              <span className={`shrink-0 px-3 py-1 rounded-full text-xs font-bold ${newsTg ? 'bg-emerald-500 text-black' : 'bg-white/10 text-neutral-400'}`}>
+                {newsTg ? (isAr ? 'مُفعّل' : 'On') : (isAr ? 'إيقاف' : 'Off')}
               </span>
             </button>
 
