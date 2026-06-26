@@ -5,7 +5,7 @@ import { locales, type Locale } from '@/lib/i18n';
 import { Header } from '@/components/Header';
 import { Footer } from '@/components/Footer';
 import { translations } from '@/data/translations';
-import { fetchSiteContent } from '@/lib/server-api';
+import { fetchSiteContent, fetchMarketConfig } from '@/lib/server-api';
 import './globals.css';
 
 export function generateStaticParams() {
@@ -45,6 +45,10 @@ export default async function LocaleLayout({
 
   const isRTL = locale === 'ar';
   const siteContent = await fetchSiteContent();
+  const marketConfig = await fetchMarketConfig();
+  const market = marketConfig.enabled
+    ? { label: isRTL ? marketConfig.label_ar : marketConfig.label_en }
+    : null;
   const t = translations[locale as Locale] ?? translations.en;
   const siteName = isRTL
     ? (siteContent?.site_name_ar || t.siteName)
@@ -78,6 +82,7 @@ export default async function LocaleLayout({
         <Header
           locale={locale as Locale}
           siteName={siteName}
+          market={market}
           ilink={ilinkEnabled ? { label: ilinkLabel || '', tooltip: ilinkTooltip || '', fileUrl: ilinkFileUrl } : undefined}
         />
         <main>{children}</main>

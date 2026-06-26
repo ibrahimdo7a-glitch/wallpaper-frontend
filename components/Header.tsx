@@ -16,9 +16,10 @@ interface HeaderProps {
   locale: Locale;
   siteName?: string;
   ilink?: ILink;
+  market?: { label: string } | null;
 }
 
-export function Header({ locale, siteName }: HeaderProps) {
+export function Header({ locale, siteName, market }: HeaderProps) {
   const t = translations[locale];
   const pathname = usePathname();
   const isRTL = locale === 'ar';
@@ -51,6 +52,7 @@ export function Header({ locale, siteName }: HeaderProps) {
   const navLinks = [
     { href: `/${locale}`, label: t.nav.home },
     { href: `/${locale}/brands`, label: isRTL ? 'الماركات' : 'Brands' },
+    ...(market ? [{ href: `/${locale}/market`, label: market.label }] : []),
     { href: `/${locale}/news`, label: isRTL ? 'الأخبار' : 'News' },
     { href: `/${locale}/apps`, label: isRTL ? 'التطبيقات' : 'Apps' },
     { href: `/${locale}/categories`, label: t.nav.categories },

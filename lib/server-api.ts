@@ -540,3 +540,62 @@ export async function fetchNewsCategories(): Promise<ApiNewsCategory[]> {
   const res = await get<{ data: ApiNewsCategory[] }>('/news/categories', 300, ['news-categories']);
   return res?.data ?? [];
 }
+
+// ─── Marketplace (السوق) ───
+export interface ApiMarketConfig {
+  enabled: boolean;
+  types: string[];
+  label_ar: string;
+  label_en: string;
+}
+
+export interface ApiMarketListing {
+  id: number;
+  listing_type: string;
+  title_ar: string;
+  title_en: string | null;
+  slug: string;
+  price: number | null;
+  currency: string;
+  is_negotiable: boolean;
+  condition: string | null;
+  country: string | null;
+  city: string | null;
+  cover_url: string | null;
+  is_featured: boolean;
+  published_at: string | null;
+}
+
+export interface ApiMarketListingFull extends ApiMarketListing {
+  description_ar: string | null;
+  description_en: string | null;
+  images: string[];
+  year: number | null;
+  mileage: number | null;
+  specs: Record<string, any> | null;
+  brand: { name_ar: string; slug: string } | null;
+  car_model: string | null;
+  category: string | null;
+  views_count: number;
+  contact: { name: string | null; phone: string | null; whatsapp: string | null; telegram: string | null };
+}
+
+export async function fetchMarketConfig(): Promise<ApiMarketConfig> {
+  const res = await get<ApiMarketConfig>('/market/config', 60, ['market']);
+  return res ?? { enabled: false, types: [], label_ar: 'السوق', label_en: 'Marketplace' };
+}
+
+export async function fetchMarket(params: {
+  type?: string; category?: string; brand?: string; city?: string; country?: string;
+  condition?: string; sort?: string; search?: string; page?: number; per_page?: number;
+} = {}): Promise<{ data: ApiMarketListing[]; meta: any }> {
+  const q = new URLSearchParams();
+  Object.entries(params).forEach(([k, v]) => { if (v !== undefined && v !== '') q.set(k, String(v)); });
+  const res = await get<{ data: ApiMarketListing[]; meta: any }>(`/market?${q.toString()}`, 60, ['market']);
+  return res ?? { data: [], meta: { enabled: false, types: [] } };
+}
+
+export async function fetchMarketListing(slug: string): Promise<ApiMarketListingFull | null> {
+  const res = await get<{ data: ApiMarketListingFull }>(`/market/${slug}`, 120, ['market', `market-${slug}`]);
+  return res?.data ?? null;
+}
