@@ -19,6 +19,7 @@ export function LoginModal({ open, onOpenChange, isAr }: Props) {
   const { login } = useMember();
   const [session, setSession] = useState<Session>(null);
   const [status, setStatus] = useState<'idle' | 'waiting' | 'expired' | 'error'>('idle');
+  const [errorDetail, setErrorDetail] = useState('');
   const pollRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   const stopPoll = () => {
@@ -32,9 +33,14 @@ export function LoginModal({ open, onOpenChange, isAr }: Props) {
     stopPoll();
     setStatus('waiting');
     setSession(null);
+    setErrorDetail('');
     try {
       const res = await fetch(`${API_BASE}/api/v1/auth/telegram/start`, { method: 'POST', headers: { Accept: 'application/json' } });
-      if (!res.ok) { setStatus('error'); return; }
+      if (!res.ok) {
+        setErrorDetail(res.status === 429 ? 'محاولات كثيرة، انتظر دقيقة' : `HTTP ${res.status}`);
+        setStatus('error');
+        return;
+      }
       const s = await res.json();
       setSession(s);
 
@@ -52,7 +58,8 @@ export function LoginModal({ open, onOpenChange, isAr }: Props) {
           }
         } catch { /* keep polling */ }
       }, 2500);
-    } catch {
+    } catch (e) {
+      setErrorDetail(e instanceof Error ? `شبكة: ${e.message}` : 'تعذّر الاتصال بالخادم');
       setStatus('error');
     }
   };
@@ -80,6 +87,7 @@ export function LoginModal({ open, onOpenChange, isAr }: Props) {
           {status === 'error' && (
             <div className="mt-6 text-center space-y-3">
               <p className="text-rose-400 text-sm">{isAr ? 'تعذّر بدء الدخول. حاول مرة ثانية.' : 'Could not start. Try again.'}</p>
+              {errorDetail && <p className="text-xs text-neutral-500 font-mono break-all">{errorDetail}</p>}
               <button onClick={begin} className="px-4 py-2 rounded-lg bg-sky-600 hover:bg-sky-500 font-semibold">{isAr ? 'إعادة المحاولة' : 'Retry'}</button>
             </div>
           )}
