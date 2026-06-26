@@ -27,7 +27,6 @@ export function Header({ locale, siteName, marketLinks = [] }: HeaderProps) {
   const isRTL = locale === 'ar';
   const otherLocale: Locale = locale === 'ar' ? 'en' : 'ar';
   const otherPath = pathname.replace(`/${locale}`, `/${otherLocale}`);
-  const [menuOpen, setMenuOpen] = useState(false);
   const [dark, setDark] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const [loginOpen, setLoginOpen] = useState(false);
@@ -146,36 +145,25 @@ export function Header({ locale, siteName, marketLinks = [] }: HeaderProps) {
                 {isRTL ? 'دخول' : 'Sign in'}
               </button>
             ))}
-
-            {/* Mobile menu */}
-            <button
-              onClick={() => setMenuOpen(!menuOpen)}
-              className="md:hidden w-8 h-8 flex items-center justify-center rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
-            >
-              <span className="text-gray-700 dark:text-gray-300 text-lg">{menuOpen ? '✕' : '☰'}</span>
-            </button>
           </div>
         </div>
 
-        {/* Mobile menu */}
-        {menuOpen && (
-          <div className="md:hidden border-t border-gray-100 dark:border-gray-800 py-3 space-y-1">
-            {navLinks.map((link) => (
-              <Link
-                key={link.href}
-                href={link.href}
-                onClick={() => setMenuOpen(false)}
-                className={`block px-3 py-2.5 rounded-lg text-sm font-medium transition-colors ${
-                  isActive(link.href)
-                    ? 'bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-white'
-                    : 'text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800'
-                }`}
-              >
-                {link.label}
-              </Link>
-            ))}
-          </div>
-        )}
+        {/* Mobile nav — always-visible horizontal scroll bar */}
+        <nav className="md:hidden flex items-center gap-1 overflow-x-auto pb-2 -mt-0.5 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+          {navLinks.map((link) => (
+            <Link
+              key={link.href}
+              href={link.href}
+              className={`shrink-0 whitespace-nowrap px-3 py-1.5 rounded-full text-sm font-medium transition-colors ${
+                isActive(link.href)
+                  ? 'bg-gray-900 dark:bg-white text-white dark:text-gray-900'
+                  : 'bg-gray-100 dark:bg-gray-800/60 text-gray-600 dark:text-gray-300'
+              }`}
+            >
+              {link.label}
+            </Link>
+          ))}
+        </nav>
       </div>
 
       <LoginModal open={loginOpen} onOpenChange={setLoginOpen} isAr={isRTL} />
