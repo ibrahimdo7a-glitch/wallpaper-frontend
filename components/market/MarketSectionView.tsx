@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import Image from 'next/image';
 import type { ApiMarketListing } from '@/lib/server-api';
+import { AddListingButton } from './AddListingButton';
 
 interface Props {
   basePath: string;
@@ -34,8 +35,9 @@ export function MarketSectionView({ basePath, label, locale, isAr, listings, met
   return (
     <main className="min-h-screen bg-[#0a0c11] text-neutral-100" dir={isAr ? 'rtl' : 'ltr'}>
       <div className="max-w-7xl mx-auto px-4 py-10">
-        <header className="mb-6">
+        <header className="mb-6 flex items-center justify-between gap-3 flex-wrap">
           <h1 className="text-3xl md:text-4xl font-extrabold tracking-tight">{label}</h1>
+          <AddListingButton locale={locale} isAr={isAr} />
         </header>
 
         {tabs.length > 0 && (
