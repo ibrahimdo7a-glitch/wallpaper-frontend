@@ -46,9 +46,14 @@ export default async function LocaleLayout({
   const isRTL = locale === 'ar';
   const siteContent = await fetchSiteContent();
   const marketConfig = await fetchMarketConfig();
-  const market = marketConfig.enabled
-    ? { label: isRTL ? marketConfig.label_ar : marketConfig.label_en }
-    : null;
+  const marketLinks = [
+    ...(marketConfig.cars.enabled
+      ? [{ href: `/${locale}/cars`, label: isRTL ? marketConfig.cars.label_ar : marketConfig.cars.label_en }]
+      : []),
+    ...(marketConfig.parts.enabled
+      ? [{ href: `/${locale}/parts`, label: isRTL ? marketConfig.parts.label_ar : marketConfig.parts.label_en }]
+      : []),
+  ];
   const t = translations[locale as Locale] ?? translations.en;
   const siteName = isRTL
     ? (siteContent?.site_name_ar || t.siteName)
@@ -82,7 +87,7 @@ export default async function LocaleLayout({
         <Header
           locale={locale as Locale}
           siteName={siteName}
-          market={market}
+          marketLinks={marketLinks}
           ilink={ilinkEnabled ? { label: ilinkLabel || '', tooltip: ilinkTooltip || '', fileUrl: ilinkFileUrl } : undefined}
         />
         <main>{children}</main>

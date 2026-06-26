@@ -25,6 +25,9 @@ export default async function MarketDetailPage({ params: { locale, slug } }: Pro
   const title = isAr ? l.title_ar : (l.title_en ?? l.title_ar);
   const desc = isAr ? l.description_ar : (l.description_en ?? l.description_ar);
 
+  const isCar = l.listing_type === 'car_sale' || l.listing_type === 'car_request';
+  const section = { base: isCar ? '/cars' : '/parts', label: isCar ? (isAr ? 'سوق السيارات' : 'Cars') : (isAr ? 'قطع وأكسسوارات' : 'Parts & Accessories') };
+
   const specs: { label: string; value: string }[] = [];
   if (l.condition) specs.push({ label: isAr ? 'الحالة' : 'Condition', value: l.condition === 'new' ? (isAr ? 'جديد' : 'New') : l.condition === 'used' ? (isAr ? 'مستعمل' : 'Used') : '—' });
   if (l.year) specs.push({ label: isAr ? 'السنة' : 'Year', value: String(l.year) });
@@ -38,7 +41,7 @@ export default async function MarketDetailPage({ params: { locale, slug } }: Pro
     <main className="min-h-screen bg-[#0a0c11] text-neutral-100" dir={isAr ? 'rtl' : 'ltr'}>
       <div className="max-w-6xl mx-auto px-4 py-8">
         <nav className="text-xs text-neutral-500 mb-6 flex gap-2">
-          <Link href={`/${locale}/market`} className="hover:text-white transition-colors">{isAr ? 'السوق' : 'Market'}</Link>
+          <Link href={`/${locale}${section.base}`} className="hover:text-white transition-colors">{section.label}</Link>
           <span>/</span>
           <span className="text-neutral-300 truncate">{title}</span>
         </nav>

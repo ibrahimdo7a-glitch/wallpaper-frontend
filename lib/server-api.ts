@@ -541,12 +541,16 @@ export async function fetchNewsCategories(): Promise<ApiNewsCategory[]> {
   return res?.data ?? [];
 }
 
-// ─── Marketplace (السوق) ───
-export interface ApiMarketConfig {
+// ─── Marketplace (cars + parts, two separate sections) ───
+export interface ApiMarketSection {
   enabled: boolean;
-  types: string[];
   label_ar: string;
   label_en: string;
+}
+
+export interface ApiMarketConfig {
+  cars: ApiMarketSection;
+  parts: ApiMarketSection;
 }
 
 export interface ApiMarketListing {
@@ -582,11 +586,14 @@ export interface ApiMarketListingFull extends ApiMarketListing {
 
 export async function fetchMarketConfig(): Promise<ApiMarketConfig> {
   const res = await get<ApiMarketConfig>('/market/config', 60, ['market']);
-  return res ?? { enabled: false, types: [], label_ar: 'السوق', label_en: 'Marketplace' };
+  return res ?? {
+    cars: { enabled: false, label_ar: 'سوق السيارات', label_en: 'Cars' },
+    parts: { enabled: false, label_ar: 'قطع وأكسسوارات', label_en: 'Parts & Accessories' },
+  };
 }
 
 export async function fetchMarket(params: {
-  type?: string; category?: string; brand?: string; city?: string; country?: string;
+  section?: string; type?: string; category?: string; brand?: string; city?: string; country?: string;
   condition?: string; sort?: string; search?: string; page?: number; per_page?: number;
 } = {}): Promise<{ data: ApiMarketListing[]; meta: any }> {
   const q = new URLSearchParams();
