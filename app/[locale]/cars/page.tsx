@@ -18,11 +18,17 @@ export default async function CarsPage({ params: { locale }, searchParams }: Pro
   const page = Math.max(1, Number(searchParams.page ?? 1));
   const { data, meta } = await fetchMarket({ section: 'cars', type: searchParams.type, sort: searchParams.sort, page, per_page: 24 });
 
+  const tabs = [
+    { value: 'car_sale', label: isAr ? '🚗 للبيع' : 'For sale' },
+    { value: 'car_request', label: isAr ? '🔎 طلبات' : 'Requests' },
+  ];
+
   return (
     <MarketSectionView
-      section="cars" basePath="/cars"
+      basePath="/cars"
       label={isAr ? config.cars.label_ar : config.cars.label_en}
-      locale={locale} isAr={isAr} listings={data} meta={meta} searchParams={searchParams}
+      locale={locale} isAr={isAr} listings={data} meta={meta}
+      tabs={tabs} tabParam="type" activeTab={searchParams.type} sort={searchParams.sort}
     />
   );
 }

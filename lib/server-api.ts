@@ -542,10 +542,30 @@ export async function fetchNewsCategories(): Promise<ApiNewsCategory[]> {
 }
 
 // ─── Marketplace (cars + parts, two separate sections) ───
+export interface ApiMarketFieldDef {
+  key: string;
+  label_ar: string;
+  label_en: string | null;
+  type: string;
+  unit: string | null;
+  options: { value: string; label_ar: string }[] | null;
+  is_filterable: boolean;
+}
+
+export interface ApiMarketSectionCat {
+  id: number;
+  slug: string;
+  name_ar: string;
+  name_en: string | null;
+  icon: string | null;
+}
+
 export interface ApiMarketSection {
   enabled: boolean;
   label_ar: string;
   label_en: string;
+  fields?: ApiMarketFieldDef[];      // cars
+  sections?: ApiMarketSectionCat[];  // parts
 }
 
 export interface ApiMarketConfig {
@@ -577,6 +597,7 @@ export interface ApiMarketListingFull extends ApiMarketListing {
   year: number | null;
   mileage: number | null;
   specs: Record<string, any> | null;
+  spec_fields: { key: string; label: string; unit: string | null; type: string; value: any }[];
   brand: { name_ar: string; slug: string } | null;
   car_model: string | null;
   category: string | null;

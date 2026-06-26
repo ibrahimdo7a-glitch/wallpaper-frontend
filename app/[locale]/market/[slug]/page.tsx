@@ -29,12 +29,15 @@ export default async function MarketDetailPage({ params: { locale, slug } }: Pro
   const section = { base: isCar ? '/cars' : '/parts', label: isCar ? (isAr ? 'سوق السيارات' : 'Cars') : (isAr ? 'قطع وأكسسوارات' : 'Parts & Accessories') };
 
   const specs: { label: string; value: string }[] = [];
-  if (l.condition) specs.push({ label: isAr ? 'الحالة' : 'Condition', value: l.condition === 'new' ? (isAr ? 'جديد' : 'New') : l.condition === 'used' ? (isAr ? 'مستعمل' : 'Used') : '—' });
-  if (l.year) specs.push({ label: isAr ? 'السنة' : 'Year', value: String(l.year) });
-  if (l.mileage) specs.push({ label: isAr ? 'الممشى' : 'Mileage', value: `${l.mileage.toLocaleString()} ${isAr ? 'كم' : 'km'}` });
+  // Dynamic fields resolved by the admin's field config (labels + units come from the API).
+  for (const f of l.spec_fields ?? []) {
+    if (f.value === null || f.value === '') continue;
+    specs.push({ label: f.label, value: `${f.value}${f.unit ? ' ' + f.unit : ''}` });
+  }
+  // Structured catalog relations.
   if (l.brand) specs.push({ label: isAr ? 'الماركة' : 'Brand', value: l.brand.name_ar });
   if (l.car_model) specs.push({ label: isAr ? 'الموديل' : 'Model', value: l.car_model });
-  if (l.category) specs.push({ label: isAr ? 'التصنيف' : 'Category', value: l.category });
+  if (l.category) specs.push({ label: isAr ? 'القسم' : 'Section', value: l.category });
   if (l.city) specs.push({ label: isAr ? 'الموقع' : 'Location', value: `${l.country ? l.country + ' · ' : ''}${l.city}` });
 
   return (
