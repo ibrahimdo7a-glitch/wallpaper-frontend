@@ -36,17 +36,39 @@ export function MarketContact({ listingId, contact, title, isAr }: Props) {
   const msg = encodeURIComponent((isAr ? 'مرحبًا، بخصوص إعلان: ' : 'Hi, about: ') + title);
   const wa = contact.whatsapp ? `https://wa.me/${contact.whatsapp.replace(/\D/g, '')}?text=${msg}` : null;
   const tgUser = contact.telegram ? tgUsername(contact.telegram) : '';
-  const tg = tgUser ? `https://t.me/${tgUser}` : null;
+
+  // Open the Telegram app via the tg:// scheme; fall back to the web only if the
+  // app didn't take over (tab stays visible).
+  const openTelegram = () => {
+    if (!tgUser) return;
+    let cancelled = false;
+    const onHide = () => { cancelled = true; };
+    document.addEventListener('visibilitychange', onHide, { once: true });
+    setTimeout(() => {
+      document.removeEventListener('visibilitychange', onHide);
+      if (!cancelled && !document.hidden) window.open(`https://t.me/${tgUser}`, '_blank', 'noopener');
+    }, 1200);
+    window.location.href = `tg://resolve?domain=${tgUser}`;
+  };
 
   // ─── Phone reveal: hidden until a simple human check is solved ───
   const [phase, setPhase] = useState<'hidden' | 'asking' | 'revealed'>('hidden');
-  const [challenge, setChallenge] = useState<{ a: number; b: number } | null>(null);
+  const [challenge, setChallenge] = useState<{ sum: number; text: string } | null>(null);
   const [answer, setAnswer] = useState('');
   const [error, setError] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [phone, setPhone] = useState<string | null>(null);
+  const [phone, setPhone] = useState<{ dial_code: string; number: string; tel: string } | null>(null);
 
-  const newChallenge = () => setChallenge({ a: 2 + Math.floor(Math.random() * 8), b: 2 + Math.floor(Math.random() * 8) });
+  const newChallenge = () => {
+    const a = 2 + Math.floor(Math.random() * 8);
+    const b = 2 + Math.floor(Math.random() * 8);
+    const words = isAr
+      ? ['', 'واحد', 'اثنان', 'ثلاثة', 'أربعة', 'خمسة', 'ستة', 'سبعة', 'ثمانية', 'تسعة']
+      : ['', 'one', 'two', 'three', 'four', 'five', 'six', 'seven', 'eight', 'nine'];
+    const plus = isAr ? 'زائد' : 'plus';
+    const render = (n: number) => (Math.random() < 0.5 ? words[n] : String(n)); // mix words & digits
+    setChallenge({ sum: a + b, text: `${render(a)} ${plus} ${render(b)}` });
+  };
 
   const startReveal = () => {
     setError(false);
@@ -57,7 +79,7 @@ export function MarketContact({ listingId, contact, title, isAr }: Props) {
 
   const submitAnswer = async () => {
     if (!challenge) return;
-    if (parseInt(answer, 10) !== challenge.a + challenge.b) {
+    if (parseInt(answer, 10) !== challenge.sum) {
       setError(true);
       setAnswer('');
       newChallenge();
@@ -68,7 +90,7 @@ export function MarketContact({ listingId, contact, title, isAr }: Props) {
     try {
       const res = await fetch(`${API_BASE}/api/v1/market/${listingId}/phone`);
       const data = await res.json();
-      setPhone(data?.phone ?? null);
+      setPhone(data?.number ? data : null);
       setPhase('revealed');
     } catch {
       setError(true);
@@ -77,7 +99,7 @@ export function MarketContact({ listingId, contact, title, isAr }: Props) {
     }
   };
 
-  if (!wa && !tg && !contact.has_phone) {
+  if (!wa && !tgUser && !contact.has_phone) {
     return <p className="text-sm text-neutral-500">{isAr ? 'لا توجد معلومات تواصل' : 'No contact info'}</p>;
   }
 
@@ -92,11 +114,11 @@ export function MarketContact({ listingId, contact, title, isAr }: Props) {
         </a>
       )}
 
-      {tg && (
-        <a href={tg} target="_blank" rel="noopener noreferrer"
+      {tgUser && (
+        <button onClick={openTelegram}
           className="flex items-center justify-center gap-2 w-full py-3 rounded-xl font-semibold bg-sky-600 hover:bg-sky-500 text-white transition-colors">
           <span>✈️</span> {isAr ? 'تلجرام' : 'Telegram'}
-        </a>
+        </button>
       )}
 
       {contact.has_phone && phase === 'hidden' && (
@@ -109,7 +131,7 @@ export function MarketContact({ listingId, contact, title, isAr }: Props) {
       {contact.has_phone && phase === 'asking' && challenge && (
         <div className="rounded-xl bg-white/[0.04] border border-white/10 p-4 space-y-3">
           <p className="text-sm text-neutral-300 text-center">
-            {isAr ? 'تأكيد بشري: كم يساوي' : 'Human check: what is'} <span className="font-bold text-white">{challenge.a} + {challenge.b}</span> ؟
+            {isAr ? 'تأكيد بشري: كم يساوي' : 'Human check: what is'} <span className="font-bold text-white">{challenge.text}</span> {isAr ? '؟' : '?'}
           </p>
           <div className="flex gap-2">
             <input
@@ -130,9 +152,9 @@ export function MarketContact({ listingId, contact, title, isAr }: Props) {
       )}
 
       {phase === 'revealed' && phone && (
-        <a href={`tel:${phone.replace(/\s/g, '')}`}
+        <a href={`tel:${phone.tel}`}
           className="flex items-center justify-center gap-2 w-full py-3 rounded-xl font-semibold bg-white/10 hover:bg-white/15 text-white transition-colors" dir="ltr">
-          <span>📞</span> {phone}
+          <span>📞</span> <span className="font-mono tracking-wide">{phone.dial_code} - {phone.number}</span>
         </a>
       )}
       {phase === 'revealed' && !phone && (
