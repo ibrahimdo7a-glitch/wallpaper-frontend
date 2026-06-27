@@ -1,6 +1,6 @@
 import { setRequestLocale } from 'next-intl/server';
 import type { Metadata } from 'next';
-import { fetchAppCategories, fetchApps, fetchSiteContent } from '@/lib/server-api';
+import { fetchAppCategories, fetchApps } from '@/lib/server-api';
 import { AppsBrowser } from '@/components/apps/AppsBrowser';
 import { type Locale } from '@/lib/i18n';
 
@@ -17,17 +17,15 @@ export default async function AppsPage({ params: { locale }, searchParams }: Pro
   setRequestLocale(locale);
   const isAr = locale === 'ar';
 
-  const [categories, { data: apps }, site] = await Promise.all([
+  const [categories, { data: apps }] = await Promise.all([
     fetchAppCategories(),
     fetchApps({ category: searchParams.category, sort: searchParams.sort, per_page: 24 }),
-    fetchSiteContent().catch(() => null),
   ]);
 
   return (
     <AppsBrowser
       apps={apps}
       categories={categories}
-      ilinkBoxes={site?.ilink_boxes ?? []}
       basePath={`/${locale}/apps`}
       locale={locale}
       isAr={isAr}

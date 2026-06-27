@@ -11,18 +11,9 @@ export interface AppsBrowserCategory {
   apps_count: number;
 }
 
-export interface IlinkBox {
-  label_ar: string;
-  label_en: string;
-  tooltip_ar: string;
-  tooltip_en: string;
-  file_url: string;
-}
-
 interface Props {
   apps: ApiApp[];
   categories: AppsBrowserCategory[];
-  ilinkBoxes: IlinkBox[];
   basePath: string; // e.g. /ar/apps or /ar/brands/leopard/apps
   locale: string;
   isAr: boolean;
@@ -40,8 +31,12 @@ function appBadge(app: ApiApp, isAr: boolean): string | null {
   return null;
 }
 
-export function AppsBrowser({ apps, categories, ilinkBoxes, basePath, locale, isAr, activeCategory, activeSort, title, subtitle }: Props) {
+export function AppsBrowser({ apps, categories, basePath, locale, isAr, activeCategory, activeSort, title, subtitle }: Props) {
   const sort = activeSort ?? 'newest';
+  // Featured apps surface as orange boxes at the top; the rest fall into the normal grid.
+  const featured = apps.filter((a) => a.is_featured);
+  const regular = apps.filter((a) => !a.is_featured);
+
   const chip = (active: boolean) =>
     `px-4 py-1.5 rounded-full text-sm font-medium transition-colors ${active ? 'bg-white text-black' : 'bg-white/5 text-neutral-300 hover:bg-white/10'}`;
 
@@ -54,27 +49,10 @@ export function AppsBrowser({ apps, categories, ilinkBoxes, basePath, locale, is
           <p className="text-neutral-400 mt-2">{subtitle}</p>
         </header>
 
-        {/* Featured download boxes (iLink + up to 3 more) in one row */}
-        {ilinkBoxes.length > 0 && (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 mb-8">
-            {ilinkBoxes.map((box, i) => {
-              const label = (isAr ? box.label_ar : box.label_en) || box.label_ar;
-              const tip = isAr ? box.tooltip_ar : box.tooltip_en;
-              return (
-                <a key={i} href={box.file_url} download
-                  className="group flex items-center gap-3 p-4 rounded-2xl border border-orange-500/30 bg-orange-500/[0.08] hover:bg-orange-500/[0.14] transition-colors">
-                  <div className="flex-shrink-0 w-11 h-11 rounded-xl bg-orange-500 flex items-center justify-center text-white">
-                    <svg className="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                      <path d="M12 3v12m0 0l-4-4m4 4l4-4M5 21h14" />
-                    </svg>
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <p className="font-bold text-white truncate">{label || (isAr ? 'تحميل' : 'Download')}</p>
-                    {tip && <p className="text-xs text-neutral-400 truncate">{tip}</p>}
-                  </div>
-                </a>
-              );
-            })}
+        {/* Featured apps — prominent orange boxes that open the normal app page */}
+        {featured.length > 0 && (
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-8">
+            {featured.map((app) => <FeaturedAppBox key={app.id} app={app} locale={locale} isAr={isAr} />)}
           </div>
         )}
 
@@ -109,17 +87,44 @@ export function AppsBrowser({ apps, categories, ilinkBoxes, basePath, locale, is
         </div>
 
         {/* Apps grid */}
-        {apps.length === 0 ? (
-          <p className="text-neutral-500 text-center py-24 border border-dashed border-white/10 rounded-2xl">
-            {isAr ? 'لا توجد تطبيقات بعد' : 'No apps yet'}
-          </p>
+        {regular.length === 0 ? (
+          featured.length === 0 && (
+            <p className="text-neutral-500 text-center py-24 border border-dashed border-white/10 rounded-2xl">
+              {isAr ? 'لا توجد تطبيقات بعد' : 'No apps yet'}
+            </p>
+          )
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-            {apps.map((app) => <AppCard key={app.id} app={app} locale={locale} isAr={isAr} />)}
+            {regular.map((app) => <AppCard key={app.id} app={app} locale={locale} isAr={isAr} />)}
           </div>
         )}
       </div>
     </main>
+  );
+}
+
+/** Featured app rendered as an orange highlight box; clicking opens the standard app detail page. */
+function FeaturedAppBox({ app, locale, isAr }: { app: ApiApp; locale: string; isAr: boolean }) {
+  const title = isAr ? app.title_ar : (app.title_en || app.title_ar);
+  const desc = isAr ? app.short_description_ar : (app.short_description_en || app.short_description_ar);
+
+  return (
+    <Link href={`/${locale}/apps/${app.slug}`}
+      className="group flex items-center gap-3 p-4 rounded-2xl border border-orange-500/30 bg-orange-500/[0.08] hover:bg-orange-500/[0.14] transition-colors">
+      <div className="flex-1 min-w-0">
+        <p className="font-bold text-white truncate">{title}</p>
+        {desc && <p className="text-xs text-neutral-400 truncate mt-0.5">{desc}</p>}
+      </div>
+      <div className="shrink-0 w-11 h-11 rounded-xl overflow-hidden bg-orange-500 flex items-center justify-center text-white">
+        {app.icon_url ? (
+          <Image src={app.icon_url} alt={title} width={44} height={44} className="object-cover w-full h-full" />
+        ) : (
+          <svg className="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M12 3v12m0 0l-4-4m4 4l4-4M5 21h14" />
+          </svg>
+        )}
+      </div>
+    </Link>
   );
 }
 

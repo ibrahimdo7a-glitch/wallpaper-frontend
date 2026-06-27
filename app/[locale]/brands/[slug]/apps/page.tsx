@@ -1,6 +1,6 @@
 import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
-import { fetchBrand, fetchBrandApps, fetchSiteContent } from '@/lib/server-api';
+import { fetchBrand, fetchBrandApps } from '@/lib/server-api';
 import { AppsBrowser, type AppsBrowserCategory } from '@/components/apps/AppsBrowser';
 import { type Locale } from '@/lib/i18n';
 
@@ -16,10 +16,9 @@ export async function generateMetadata({ params: { locale, slug } }: Props): Pro
 
 export default async function BrandAppsPage({ params: { locale, slug }, searchParams }: Props) {
   const isAr = locale === 'ar';
-  const [brand, allApps, site] = await Promise.all([
+  const [brand, allApps] = await Promise.all([
     fetchBrand(slug),
     fetchBrandApps(slug),
-    fetchSiteContent().catch(() => null),
   ]);
   if (!brand) notFound();
   const brandName = isAr ? brand.name_ar : (brand.name_en ?? brand.name_ar);
@@ -49,7 +48,6 @@ export default async function BrandAppsPage({ params: { locale, slug }, searchPa
     <AppsBrowser
       apps={apps}
       categories={categories}
-      ilinkBoxes={site?.ilink_boxes ?? []}
       basePath={`/${locale}/brands/${slug}/apps`}
       locale={locale}
       isAr={isAr}

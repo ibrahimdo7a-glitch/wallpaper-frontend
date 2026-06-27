@@ -68,7 +68,6 @@ export interface SiteContent {
   ilink_tooltip_ar: string;
   ilink_tooltip_en: string;
   ilink_file_url: string;
-  ilink_boxes?: { label_ar: string; label_en: string; tooltip_ar: string; tooltip_en: string; file_url: string }[];
 }
 
 export async function fetchCategories(): Promise<ApiCategory[]> {
