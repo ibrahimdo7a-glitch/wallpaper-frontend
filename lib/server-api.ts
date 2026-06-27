@@ -487,6 +487,28 @@ export async function fetchBrandModels(brandSlug: string): Promise<ApiCarModel[]
   return res?.data ?? [];
 }
 
+export interface ApiBrandApp {
+  id: number;
+  title_ar: string;
+  title_en: string | null;
+  slug: string;
+  short_description_ar: string | null;
+  short_description_en: string | null;
+  badge_text_ar: string | null;
+  badge_text_en: string | null;
+  works_on_car_screen: boolean;
+  icon_url: string | null;
+  is_free: boolean;
+  is_featured: boolean;
+  downloads_count: number;
+  category: { name_ar: string; name_en: string | null; icon: string | null } | null;
+}
+
+export async function fetchBrandApps(brandSlug: string): Promise<ApiBrandApp[]> {
+  const res = await get<{ data: ApiBrandApp[] }>(`/brands/${brandSlug}/apps`, 60, ['apps', `brand-${brandSlug}`]);
+  return res?.data ?? [];
+}
+
 export async function fetchCarModel(brandSlug: string, modelSlug: string): Promise<ApiCarModel | null> {
   const res = await get<{ data: ApiCarModel }>(`/brands/${brandSlug}/models/${modelSlug}`, 60, ['car-models', `model-${modelSlug}`]);
   return res?.data ?? null;

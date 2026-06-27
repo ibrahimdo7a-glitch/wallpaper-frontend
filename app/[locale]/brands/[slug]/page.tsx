@@ -3,7 +3,7 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { notFound } from 'next/navigation';
 import { setRequestLocale } from 'next-intl/server';
-import { fetchBrand, fetchBrandSections, fetchBrandModels, fetchBrands } from '@/lib/server-api';
+import { fetchBrand, fetchBrandSections, fetchBrandModels, fetchBrands, fetchBrandApps } from '@/lib/server-api';
 import { locales, type Locale } from '@/lib/i18n';
 import type { ApiBrandSection } from '@/lib/server-api';
 
@@ -35,10 +35,11 @@ export default async function BrandPage({ params }: Props) {
   setRequestLocale(params.locale);
   const isAr = params.locale === 'ar';
 
-  const [brand, sections, models] = await Promise.all([
+  const [brand, sections, models, apps] = await Promise.all([
     fetchBrand(params.slug),
     fetchBrandSections(params.slug),
     fetchBrandModels(params.slug),
+    fetchBrandApps(params.slug),
   ]);
 
   if (!brand) notFound();
@@ -188,6 +189,28 @@ export default async function BrandPage({ params }: Props) {
             )}
           </section>
         ))}
+
+        {/* ─── Apps for this brand ─── */}
+        {apps.length > 0 && (
+          <section className="mb-10">
+            <h2 className="font-bold text-lg mb-4">📱 {isAr ? `تطبيقات ${brandName}` : `${brandName} apps`}</h2>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+              {apps.map(app => (
+                <Link key={app.id} href={`/${params.locale}/apps/${app.slug}`}
+                  className="flex items-center gap-3 p-3 rounded-xl bg-white/[0.03] border border-white/5 hover:border-white/10 transition-colors">
+                  <div className="w-12 h-12 rounded-xl overflow-hidden bg-white/5 shrink-0 flex items-center justify-center">
+                    {app.icon_url ? <Image src={app.icon_url} alt="" width={48} height={48} className="object-cover w-full h-full" /> : <span className="text-2xl">📱</span>}
+                  </div>
+                  <div className="min-w-0">
+                    <p className="font-bold text-sm truncate">{isAr ? app.title_ar : (app.title_en ?? app.title_ar)}</p>
+                    {app.category && <p className="text-[11px] text-gray-400 truncate">{app.category.icon} {isAr ? app.category.name_ar : (app.category.name_en ?? app.category.name_ar)}</p>}
+                    {app.works_on_car_screen && <span className="text-[11px] text-emerald-400">🚗 {isAr ? 'يعمل على شاشة السيارة' : 'Car screen'}</span>}
+                  </div>
+                </Link>
+              ))}
+            </div>
+          </section>
+        )}
 
         <div className="h-16" />
       </div>
