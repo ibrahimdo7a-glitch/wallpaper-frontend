@@ -1,13 +1,12 @@
 import type { Metadata } from 'next';
-import Link from 'next/link';
-import Image from 'next/image';
 import { notFound } from 'next/navigation';
-import { fetchBrand, fetchBrandApps } from '@/lib/server-api';
+import { fetchBrand, fetchBrandApps, fetchSiteContent } from '@/lib/server-api';
+import { AppsBrowser, type AppsBrowserCategory } from '@/components/apps/AppsBrowser';
 import { type Locale } from '@/lib/i18n';
 
 export const revalidate = 60;
 
-type Props = { params: { locale: Locale; slug: string } };
+type Props = { params: { locale: Locale; slug: string }; searchParams: { category?: string; sort?: string } };
 
 export async function generateMetadata({ params: { locale, slug } }: Props): Promise<Metadata> {
   const brand = await fetchBrand(slug);
@@ -15,48 +14,56 @@ export async function generateMetadata({ params: { locale, slug } }: Props): Pro
   return { title: `${locale === 'ar' ? 'تطبيقات' : 'Apps'} ${name} | QEV` };
 }
 
-export default async function BrandAppsPage({ params: { locale, slug } }: Props) {
+export default async function BrandAppsPage({ params: { locale, slug }, searchParams }: Props) {
   const isAr = locale === 'ar';
-  const [brand, apps] = await Promise.all([fetchBrand(slug), fetchBrandApps(slug)]);
+  const [brand, allApps, site] = await Promise.all([
+    fetchBrand(slug),
+    fetchBrandApps(slug),
+    fetchSiteContent().catch(() => null),
+  ]);
   if (!brand) notFound();
   const brandName = isAr ? brand.name_ar : (brand.name_en ?? brand.name_ar);
 
+  // Category facets derived from this brand's apps only.
+  const catMap = new Map<string, AppsBrowserCategory>();
+  for (const a of allApps) {
+    if (!a.category) continue;
+    const existing = catMap.get(a.category.slug);
+    if (existing) existing.apps_count++;
+    else catMap.set(a.category.slug, {
+      id: a.category.id, slug: a.category.slug, name_ar: a.category.name_ar,
+      name_en: a.category.name_en, icon: a.category.icon, apps_count: 1,
+    });
+  }
+  const categories = Array.from(catMap.values());
+
+  // Filter + sort in-memory (a brand has few apps).
+  let apps = searchParams.category ? allApps.filter(a => a.category?.slug === searchParams.category) : allApps;
+  const sort = searchParams.sort ?? 'newest';
+  apps = [...apps].sort((a, b) =>
+    sort === 'most_downloaded'
+      ? b.downloads_count - a.downloads_count
+      : new Date(b.published_at ?? 0).getTime() - new Date(a.published_at ?? 0).getTime());
+
+  const ilink = {
+    enabled: site?.ilink_enabled === true || site?.ilink_enabled === '1',
+    url: site?.ilink_file_url ?? '',
+    label: (isAr ? site?.ilink_label_ar : site?.ilink_label_en) ?? null,
+    tooltip: (isAr ? site?.ilink_tooltip_ar : site?.ilink_tooltip_en) ?? null,
+  };
+
   return (
-    <main className="min-h-screen bg-black text-white" dir={isAr ? 'rtl' : 'ltr'}>
-      <div className="max-w-5xl mx-auto px-4 py-10">
-        <nav className="text-xs text-gray-500 mb-6 flex gap-2">
-          <Link href={`/${locale}/brands/${slug}`} className="hover:text-white transition-colors">{brandName}</Link>
-          <span>/</span>
-          <span className="text-gray-300">{isAr ? 'التطبيقات' : 'Apps'}</span>
-        </nav>
-
-        <h1 className="text-2xl font-extrabold mb-6">📱 {isAr ? `تطبيقات ${brandName}` : `${brandName} apps`}</h1>
-
-        {apps.length === 0 ? (
-          <p className="text-gray-500 text-center py-20 border border-dashed border-white/10 rounded-2xl">
-            {isAr ? 'لا توجد تطبيقات بعد' : 'No apps yet'}
-          </p>
-        ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-            {apps.map(app => (
-              <Link key={app.id} href={`/${locale}/apps/${app.slug}`}
-                className="flex items-center gap-3 p-4 rounded-2xl bg-white/[0.03] border border-white/5 hover:border-white/10 transition-colors">
-                <div className="w-14 h-14 rounded-2xl overflow-hidden bg-white/5 shrink-0 flex items-center justify-center">
-                  {app.icon_url ? <Image src={app.icon_url} alt="" width={56} height={56} className="object-cover w-full h-full" /> : <span className="text-2xl">📱</span>}
-                </div>
-                <div className="min-w-0 flex-1">
-                  <p className="font-bold text-sm truncate">{isAr ? app.title_ar : (app.title_en ?? app.title_ar)}</p>
-                  {app.category && <p className="text-[11px] text-gray-400 truncate">{app.category.icon} {isAr ? app.category.name_ar : (app.category.name_en ?? app.category.name_ar)}</p>}
-                  <div className="flex gap-2 mt-0.5">
-                    {app.works_on_car_screen && <span className="text-[11px] text-emerald-400">🚗 {isAr ? 'شاشة السيارة' : 'Car screen'}</span>}
-                    {app.is_free && <span className="text-[11px] text-sky-400">{isAr ? 'مجاني' : 'Free'}</span>}
-                  </div>
-                </div>
-              </Link>
-            ))}
-          </div>
-        )}
-      </div>
-    </main>
+    <AppsBrowser
+      apps={apps}
+      categories={categories}
+      ilink={ilink}
+      basePath={`/${locale}/brands/${slug}/apps`}
+      locale={locale}
+      isAr={isAr}
+      activeCategory={searchParams.category}
+      activeSort={searchParams.sort}
+      title={isAr ? `تطبيقات ${brandName}` : `${brandName} apps`}
+      subtitle={isAr ? `التطبيقات الخاصة بسيارات ${brandName} مع خطوات التنصيب.` : `Apps for ${brandName} cars with installation guides.`}
+    />
   );
 }
