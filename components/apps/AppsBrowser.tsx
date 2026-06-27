@@ -33,8 +33,9 @@ function appBadge(app: ApiApp, isAr: boolean): string | null {
 
 export function AppsBrowser({ apps, categories, basePath, locale, isAr, activeCategory, activeSort, title, subtitle }: Props) {
   const sort = activeSort ?? 'newest';
-  // Featured apps surface as orange boxes at the top; the rest fall into the normal grid.
-  const featured = apps.filter((a) => a.is_featured);
+  // Featured apps surface as orange boxes at the top, in the admin's manual order (sort_order);
+  // the rest fall into the normal grid.
+  const featured = apps.filter((a) => a.is_featured).sort((a, b) => a.sort_order - b.sort_order);
   const regular = apps.filter((a) => !a.is_featured);
 
   const chip = (active: boolean) =>

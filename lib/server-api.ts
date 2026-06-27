@@ -123,6 +123,7 @@ export interface ApiApp {
   file_size_label: string;
   is_free: boolean;
   is_featured: boolean;
+  sort_order: number;
   safety_status: string | null;
   downloads_count: number;
   published_at: string | null;
