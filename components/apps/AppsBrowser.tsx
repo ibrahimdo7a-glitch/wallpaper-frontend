@@ -42,9 +42,9 @@ const PILL: Record<string, string> = {
 };
 
 /** Admin-toggled quality badges shown under the app name (each appears only when its flag is set). */
-function qualityBadges(app: ApiApp, isAr: boolean): { label: string; cls: string }[] {
-  const out: { label: string; cls: string }[] = [];
-  if (app.is_featured) out.push({ label: isAr ? '⭐ مميز' : '⭐ Featured', cls: PILL.amber });
+function qualityBadges(app: ApiApp, isAr: boolean): { key: string; label: string; cls: string }[] {
+  const out: { key: string; label: string; cls: string }[] = [];
+  if (app.is_featured) out.push({ key: 'featured', label: isAr ? '⭐ مميز' : '⭐ Featured', cls: PILL.amber });
   if (app.safety_status) {
     const map: Record<string, { label: string; cls: string }> = {
       verified:        { label: isAr ? '✅ موثّق وآمن'  : '✅ Verified & safe', cls: PILL.emerald },
@@ -52,23 +52,29 @@ function qualityBadges(app: ApiApp, isAr: boolean): { label: string; cls: string
       external_source: { label: isAr ? '⚠️ مصدر خارجي' : '⚠️ External source', cls: PILL.amber },
       not_tested:      { label: isAr ? '❓ غير مختبر'   : '❓ Not tested',      cls: PILL.gray },
     };
-    if (map[app.safety_status]) out.push(map[app.safety_status]);
+    if (map[app.safety_status]) out.push({ key: 'safety', ...map[app.safety_status] });
   }
-  if (app.is_important) out.push({ label: isAr ? '🔥 مهم' : '🔥 Important', cls: PILL.rose });
-  if (app.is_verified)  out.push({ label: isAr ? '🛡️ موثّق' : '🛡️ Verified', cls: PILL.sky });
+  if (app.is_important) out.push({ key: 'important', label: isAr ? '🔥 مهم' : '🔥 Important', cls: PILL.rose });
+  if (app.is_verified)  out.push({ key: 'verified', label: isAr ? '🛡️ موثّق' : '🛡️ Verified', cls: PILL.sky });
   return out;
 }
 
-function QualityBadges({ app, isAr }: { app: ApiApp; isAr: boolean }) {
-  const badges = qualityBadges(app, isAr);
+function QualityBadges({ app, isAr, exclude = [] }: { app: ApiApp; isAr: boolean; exclude?: string[] }) {
+  const badges = qualityBadges(app, isAr).filter((b) => !exclude.includes(b.key));
   if (badges.length === 0) return null;
   return (
     <div className="flex flex-wrap gap-1.5">
-      {badges.map((b, i) => (
-        <span key={i} className={`inline-flex items-center text-[11px] font-medium px-2 py-0.5 rounded-full border ${b.cls}`}>{b.label}</span>
+      {badges.map((b) => (
+        <span key={b.key} className={`inline-flex items-center text-[11px] font-medium px-2 py-0.5 rounded-full border ${b.cls}`}>{b.label}</span>
       ))}
     </div>
   );
+}
+
+/** "المطور: الاسم" / "Developer: name" */
+function developerLine(app: ApiApp, isAr: boolean): string | null {
+  if (!app.developer) return null;
+  return `${isAr ? 'المطور' : 'Developer'}: ${app.developer}`;
 }
 
 export function AppsBrowser({ apps, categories, basePath, locale, isAr, activeCategory, activeSort, title, subtitle }: Props) {
@@ -152,20 +158,28 @@ function FeaturedAppBox({ app, locale, isAr }: { app: ApiApp; locale: string; is
   return (
     <Link href={`/${locale}/apps/${app.slug}`}
       className="group flex flex-col gap-3 p-4 rounded-2xl border border-orange-400/50 bg-orange-500/[0.16] hover:bg-orange-500/[0.24] transition-colors">
-      <div className="shrink-0 w-12 h-12 rounded-xl overflow-hidden bg-orange-500 flex items-center justify-center text-white">
-        {app.icon_url ? (
-          <Image src={app.icon_url} alt={title} width={48} height={48} className="object-cover w-full h-full" />
-        ) : (
-          <svg className="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-            <path d="M12 3v12m0 0l-4-4m4 4l4-4M5 21h14" />
-          </svg>
+      {/* Top bar: icon at the start, the "مميز" badge pinned to the opposite corner */}
+      <div className="flex items-start justify-between gap-2">
+        <div className="shrink-0 w-12 h-12 rounded-xl overflow-hidden bg-orange-500 flex items-center justify-center text-white">
+          {app.icon_url ? (
+            <Image src={app.icon_url} alt={title} width={48} height={48} className="object-cover w-full h-full" />
+          ) : (
+            <svg className="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M12 3v12m0 0l-4-4m4 4l4-4M5 21h14" />
+            </svg>
+          )}
+        </div>
+        {app.is_featured && (
+          <span className={`inline-flex items-center text-[11px] font-medium px-2 py-0.5 rounded-full border ${PILL.amber}`}>
+            ⭐ {isAr ? 'مميز' : 'Featured'}
+          </span>
         )}
       </div>
       <div className="min-w-0 space-y-1.5">
         <p className="font-bold text-white truncate">{title}</p>
         {desc && <p className="text-xs text-orange-200/70 line-clamp-2">{desc}</p>}
-        <QualityBadges app={app} isAr={isAr} />
-        {app.developer && <p className="text-xs text-orange-100/60 truncate">{app.developer}</p>}
+        <QualityBadges app={app} isAr={isAr} exclude={['featured']} />
+        {developerLine(app, isAr) && <p className="text-xs text-orange-100/60 truncate">{developerLine(app, isAr)}</p>}
       </div>
     </Link>
   );
@@ -190,7 +204,7 @@ function AppCard({ app, locale, isAr }: { app: ApiApp; locale: string; isAr: boo
         <div className="flex-1 min-w-0 space-y-1.5">
           <h3 className="font-bold text-[15px] leading-tight text-white line-clamp-2">{title}</h3>
           <QualityBadges app={app} isAr={isAr} />
-          {app.developer && <p className="text-xs text-neutral-500 truncate">{app.developer}</p>}
+          {developerLine(app, isAr) && <p className="text-xs text-neutral-500 truncate">{developerLine(app, isAr)}</p>}
         </div>
       </div>
 
