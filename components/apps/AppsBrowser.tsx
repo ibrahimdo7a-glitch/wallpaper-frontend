@@ -31,6 +31,46 @@ function appBadge(app: ApiApp, isAr: boolean): string | null {
   return null;
 }
 
+// Static pill styles (kept as full class strings so Tailwind doesn't purge them).
+const PILL: Record<string, string> = {
+  amber:   'bg-amber-500/15 text-amber-200 border-amber-500/25',
+  emerald: 'bg-emerald-500/15 text-emerald-200 border-emerald-500/25',
+  blue:    'bg-blue-500/15 text-blue-200 border-blue-500/25',
+  rose:    'bg-rose-500/15 text-rose-200 border-rose-500/25',
+  sky:     'bg-sky-500/15 text-sky-200 border-sky-500/25',
+  gray:    'bg-white/5 text-neutral-300 border-white/10',
+};
+
+/** Admin-toggled quality badges shown under the app name (each appears only when its flag is set). */
+function qualityBadges(app: ApiApp, isAr: boolean): { label: string; cls: string }[] {
+  const out: { label: string; cls: string }[] = [];
+  if (app.is_featured) out.push({ label: isAr ? '⭐ مميز' : '⭐ Featured', cls: PILL.amber });
+  if (app.safety_status) {
+    const map: Record<string, { label: string; cls: string }> = {
+      verified:        { label: isAr ? '✅ موثّق وآمن'  : '✅ Verified & safe', cls: PILL.emerald },
+      tested:          { label: isAr ? '🔵 مجرّب'       : '🔵 Tested',         cls: PILL.blue },
+      external_source: { label: isAr ? '⚠️ مصدر خارجي' : '⚠️ External source', cls: PILL.amber },
+      not_tested:      { label: isAr ? '❓ غير مختبر'   : '❓ Not tested',      cls: PILL.gray },
+    };
+    if (map[app.safety_status]) out.push(map[app.safety_status]);
+  }
+  if (app.is_important) out.push({ label: isAr ? '🔥 مهم' : '🔥 Important', cls: PILL.rose });
+  if (app.is_verified)  out.push({ label: isAr ? '🛡️ موثّق' : '🛡️ Verified', cls: PILL.sky });
+  return out;
+}
+
+function QualityBadges({ app, isAr }: { app: ApiApp; isAr: boolean }) {
+  const badges = qualityBadges(app, isAr);
+  if (badges.length === 0) return null;
+  return (
+    <div className="flex flex-wrap gap-1.5">
+      {badges.map((b, i) => (
+        <span key={i} className={`inline-flex items-center text-[11px] font-medium px-2 py-0.5 rounded-full border ${b.cls}`}>{b.label}</span>
+      ))}
+    </div>
+  );
+}
+
 export function AppsBrowser({ apps, categories, basePath, locale, isAr, activeCategory, activeSort, title, subtitle }: Props) {
   const sort = activeSort ?? 'newest';
   // Featured apps surface as orange boxes at the top, in the admin's manual order (sort_order);
@@ -121,9 +161,11 @@ function FeaturedAppBox({ app, locale, isAr }: { app: ApiApp; locale: string; is
           </svg>
         )}
       </div>
-      <div className="min-w-0">
+      <div className="min-w-0 space-y-1.5">
         <p className="font-bold text-white truncate">{title}</p>
-        {desc && <p className="text-xs text-orange-200/70 line-clamp-2 mt-1">{desc}</p>}
+        {desc && <p className="text-xs text-orange-200/70 line-clamp-2">{desc}</p>}
+        <QualityBadges app={app} isAr={isAr} />
+        {app.developer && <p className="text-xs text-orange-100/60 truncate">{app.developer}</p>}
       </div>
     </Link>
   );
@@ -145,9 +187,10 @@ function AppCard({ app, locale, isAr }: { app: ApiApp; locale: string; isAr: boo
             <span className="text-2xl text-white/20">📱</span>
           )}
         </div>
-        <div className="flex-1 min-w-0">
+        <div className="flex-1 min-w-0 space-y-1.5">
           <h3 className="font-bold text-[15px] leading-tight text-white line-clamp-2">{title}</h3>
-          {app.developer && <p className="text-xs text-neutral-500 mt-1 truncate">{app.developer}</p>}
+          <QualityBadges app={app} isAr={isAr} />
+          {app.developer && <p className="text-xs text-neutral-500 truncate">{app.developer}</p>}
         </div>
       </div>
 
