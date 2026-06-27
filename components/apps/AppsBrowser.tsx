@@ -11,17 +11,18 @@ export interface AppsBrowserCategory {
   apps_count: number;
 }
 
-export interface AppsBrowserILink {
-  enabled: boolean;
-  url: string;
-  label: string | null;
-  tooltip: string | null;
+export interface IlinkBox {
+  label_ar: string;
+  label_en: string;
+  tooltip_ar: string;
+  tooltip_en: string;
+  file_url: string;
 }
 
 interface Props {
   apps: ApiApp[];
   categories: AppsBrowserCategory[];
-  ilink: AppsBrowserILink;
+  ilinkBoxes: IlinkBox[];
   basePath: string; // e.g. /ar/apps or /ar/brands/leopard/apps
   locale: string;
   isAr: boolean;
@@ -39,7 +40,7 @@ function appBadge(app: ApiApp, isAr: boolean): string | null {
   return null;
 }
 
-export function AppsBrowser({ apps, categories, ilink, basePath, locale, isAr, activeCategory, activeSort, title, subtitle }: Props) {
+export function AppsBrowser({ apps, categories, ilinkBoxes, basePath, locale, isAr, activeCategory, activeSort, title, subtitle }: Props) {
   const sort = activeSort ?? 'newest';
   const chip = (active: boolean) =>
     `px-4 py-1.5 rounded-full text-sm font-medium transition-colors ${active ? 'bg-white text-black' : 'bg-white/5 text-neutral-300 hover:bg-white/10'}`;
@@ -53,24 +54,28 @@ export function AppsBrowser({ apps, categories, ilink, basePath, locale, isAr, a
           <p className="text-neutral-400 mt-2">{subtitle}</p>
         </header>
 
-        {/* iLink — prominent download banner */}
-        {ilink.enabled && ilink.url && (
-          <a href={ilink.url} download
-            className="group flex items-center gap-4 mb-8 p-5 rounded-2xl border border-orange-500/30 bg-orange-500/[0.08] hover:bg-orange-500/[0.14] transition-colors">
-            <div className="flex-shrink-0 w-14 h-14 rounded-2xl bg-orange-500 flex items-center justify-center text-white">
-              <svg className="w-7 h-7" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M12 3v12m0 0l-4-4m4 4l4-4M5 21h14" />
-              </svg>
-            </div>
-            <div className="flex-1 min-w-0">
-              <p className="text-lg font-bold text-white">{ilink.label || (isAr ? 'حمّل تطبيق iLink' : 'Download iLink app')}</p>
-              {ilink.tooltip && <p className="text-sm text-neutral-400 mt-0.5 line-clamp-2">{ilink.tooltip}</p>}
-            </div>
-            <span className="flex-shrink-0 inline-flex items-center gap-2 px-4 py-2 rounded-full bg-orange-500 group-hover:bg-orange-600 text-white text-sm font-semibold transition-colors">
-              {isAr ? 'تحميل' : 'Download'}
-              <span className="transition-transform group-hover:translate-x-0.5 rtl:group-hover:-translate-x-0.5">↓</span>
-            </span>
-          </a>
+        {/* Featured download boxes (iLink + up to 3 more) in one row */}
+        {ilinkBoxes.length > 0 && (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 mb-8">
+            {ilinkBoxes.map((box, i) => {
+              const label = (isAr ? box.label_ar : box.label_en) || box.label_ar;
+              const tip = isAr ? box.tooltip_ar : box.tooltip_en;
+              return (
+                <a key={i} href={box.file_url} download
+                  className="group flex items-center gap-3 p-4 rounded-2xl border border-orange-500/30 bg-orange-500/[0.08] hover:bg-orange-500/[0.14] transition-colors">
+                  <div className="flex-shrink-0 w-11 h-11 rounded-xl bg-orange-500 flex items-center justify-center text-white">
+                    <svg className="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <path d="M12 3v12m0 0l-4-4m4 4l4-4M5 21h14" />
+                    </svg>
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="font-bold text-white truncate">{label || (isAr ? 'تحميل' : 'Download')}</p>
+                    {tip && <p className="text-xs text-neutral-400 truncate">{tip}</p>}
+                  </div>
+                </a>
+              );
+            })}
+          </div>
         )}
 
         {/* Category tabs */}

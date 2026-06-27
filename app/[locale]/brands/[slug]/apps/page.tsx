@@ -45,18 +45,11 @@ export default async function BrandAppsPage({ params: { locale, slug }, searchPa
       ? b.downloads_count - a.downloads_count
       : new Date(b.published_at ?? 0).getTime() - new Date(a.published_at ?? 0).getTime());
 
-  const ilink = {
-    enabled: site?.ilink_enabled === true || site?.ilink_enabled === '1',
-    url: site?.ilink_file_url ?? '',
-    label: (isAr ? site?.ilink_label_ar : site?.ilink_label_en) ?? null,
-    tooltip: (isAr ? site?.ilink_tooltip_ar : site?.ilink_tooltip_en) ?? null,
-  };
-
   return (
     <AppsBrowser
       apps={apps}
       categories={categories}
-      ilink={ilink}
+      ilinkBoxes={site?.ilink_boxes ?? []}
       basePath={`/${locale}/brands/${slug}/apps`}
       locale={locale}
       isAr={isAr}

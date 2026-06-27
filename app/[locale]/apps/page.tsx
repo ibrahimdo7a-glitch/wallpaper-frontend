@@ -23,18 +23,11 @@ export default async function AppsPage({ params: { locale }, searchParams }: Pro
     fetchSiteContent().catch(() => null),
   ]);
 
-  const ilink = {
-    enabled: site?.ilink_enabled === true || site?.ilink_enabled === '1',
-    url: site?.ilink_file_url ?? '',
-    label: (isAr ? site?.ilink_label_ar : site?.ilink_label_en) ?? null,
-    tooltip: (isAr ? site?.ilink_tooltip_ar : site?.ilink_tooltip_en) ?? null,
-  };
-
   return (
     <AppsBrowser
       apps={apps}
       categories={categories}
-      ilink={ilink}
+      ilinkBoxes={site?.ilink_boxes ?? []}
       basePath={`/${locale}/apps`}
       locale={locale}
       isAr={isAr}
