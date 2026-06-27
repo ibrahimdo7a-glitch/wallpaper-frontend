@@ -111,10 +111,10 @@ function FeaturedAppBox({ app, locale, isAr }: { app: ApiApp; locale: string; is
 
   return (
     <Link href={`/${locale}/apps/${app.slug}`}
-      className="group flex items-center gap-3 p-4 rounded-2xl border border-orange-500/30 bg-orange-500/[0.08] hover:bg-orange-500/[0.14] transition-colors">
+      className="group flex items-center gap-3 p-4 rounded-2xl border border-orange-400/50 bg-orange-500/[0.16] hover:bg-orange-500/[0.24] transition-colors">
       <div className="flex-1 min-w-0">
         <p className="font-bold text-white truncate">{title}</p>
-        {desc && <p className="text-xs text-neutral-400 truncate mt-0.5">{desc}</p>}
+        {desc && <p className="text-xs text-orange-200/70 truncate mt-0.5">{desc}</p>}
       </div>
       <div className="shrink-0 w-11 h-11 rounded-xl overflow-hidden bg-orange-500 flex items-center justify-center text-white">
         {app.icon_url ? (
