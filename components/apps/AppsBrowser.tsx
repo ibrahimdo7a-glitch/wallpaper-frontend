@@ -35,7 +35,7 @@ export function AppsBrowser({ apps, categories, basePath, locale, isAr, activeCa
   const sort = activeSort ?? 'newest';
   // Featured apps surface as orange boxes at the top, in the admin's manual order (sort_order);
   // the rest fall into the normal grid.
-  const featured = apps.filter((a) => a.is_featured).sort((a, b) => a.sort_order - b.sort_order);
+  const featured = apps.filter((a) => a.is_featured).sort((a, b) => (a.sort_order ?? 0) - (b.sort_order ?? 0));
   const regular = apps.filter((a) => !a.is_featured);
 
   const chip = (active: boolean) =>
