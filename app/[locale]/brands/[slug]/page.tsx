@@ -116,8 +116,8 @@ export default async function BrandPage({ params }: Props) {
           </p>
         )}
 
-        {/* ─── Dynamic Sections Navigation ─── */}
-        {navSections.length > 0 && (
+        {/* ─── Dynamic Sections Navigation (+ Apps card) ─── */}
+        {(navSections.length > 0 || apps.length > 0) && (
           <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-8 gap-2 mb-10">
             {navSections.map(section => (
               <Link
@@ -132,6 +132,15 @@ export default async function BrandPage({ params }: Props) {
                 </div>
               </Link>
             ))}
+            {apps.length > 0 && (
+              <Link
+                href={`/${params.locale}/brands/${params.slug}/apps`}
+                className="group bg-gray-900 hover:bg-gray-800 border border-gray-800 hover:border-gray-600 rounded-xl p-3 text-center transition-all"
+              >
+                <div className="text-xl mb-1">📱</div>
+                <div className="text-xs font-medium leading-tight">{isAr ? 'التطبيقات' : 'Apps'}</div>
+              </Link>
+            )}
           </div>
         )}
 
@@ -189,28 +198,6 @@ export default async function BrandPage({ params }: Props) {
             )}
           </section>
         ))}
-
-        {/* ─── Apps for this brand ─── */}
-        {apps.length > 0 && (
-          <section className="mb-10">
-            <h2 className="font-bold text-lg mb-4">📱 {isAr ? `تطبيقات ${brandName}` : `${brandName} apps`}</h2>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-              {apps.map(app => (
-                <Link key={app.id} href={`/${params.locale}/apps/${app.slug}`}
-                  className="flex items-center gap-3 p-3 rounded-xl bg-white/[0.03] border border-white/5 hover:border-white/10 transition-colors">
-                  <div className="w-12 h-12 rounded-xl overflow-hidden bg-white/5 shrink-0 flex items-center justify-center">
-                    {app.icon_url ? <Image src={app.icon_url} alt="" width={48} height={48} className="object-cover w-full h-full" /> : <span className="text-2xl">📱</span>}
-                  </div>
-                  <div className="min-w-0">
-                    <p className="font-bold text-sm truncate">{isAr ? app.title_ar : (app.title_en ?? app.title_ar)}</p>
-                    {app.category && <p className="text-[11px] text-gray-400 truncate">{app.category.icon} {isAr ? app.category.name_ar : (app.category.name_en ?? app.category.name_ar)}</p>}
-                    {app.works_on_car_screen && <span className="text-[11px] text-emerald-400">🚗 {isAr ? 'يعمل على شاشة السيارة' : 'Car screen'}</span>}
-                  </div>
-                </Link>
-              ))}
-            </div>
-          </section>
-        )}
 
         <div className="h-16" />
       </div>
