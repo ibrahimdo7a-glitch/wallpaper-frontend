@@ -50,9 +50,9 @@ export function AppsBrowser({ apps, categories, basePath, locale, isAr, activeCa
           <p className="text-neutral-400 mt-2">{subtitle}</p>
         </header>
 
-        {/* Featured apps — prominent orange boxes that open the normal app page */}
+        {/* Featured apps — prominent orange boxes (up to 4 in a row) that open the normal app page */}
         {featured.length > 0 && (
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-8">
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-8">
             {featured.map((app) => <FeaturedAppBox key={app.id} app={app} locale={locale} isAr={isAr} />)}
           </div>
         )}
@@ -111,19 +111,19 @@ function FeaturedAppBox({ app, locale, isAr }: { app: ApiApp; locale: string; is
 
   return (
     <Link href={`/${locale}/apps/${app.slug}`}
-      className="group flex items-center gap-3 p-4 rounded-2xl border border-orange-400/50 bg-orange-500/[0.16] hover:bg-orange-500/[0.24] transition-colors">
-      <div className="flex-1 min-w-0">
-        <p className="font-bold text-white truncate">{title}</p>
-        {desc && <p className="text-xs text-orange-200/70 truncate mt-0.5">{desc}</p>}
-      </div>
-      <div className="shrink-0 w-11 h-11 rounded-xl overflow-hidden bg-orange-500 flex items-center justify-center text-white">
+      className="group flex flex-col gap-3 p-4 rounded-2xl border border-orange-400/50 bg-orange-500/[0.16] hover:bg-orange-500/[0.24] transition-colors">
+      <div className="shrink-0 w-12 h-12 rounded-xl overflow-hidden bg-orange-500 flex items-center justify-center text-white">
         {app.icon_url ? (
-          <Image src={app.icon_url} alt={title} width={44} height={44} className="object-cover w-full h-full" />
+          <Image src={app.icon_url} alt={title} width={48} height={48} className="object-cover w-full h-full" />
         ) : (
           <svg className="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
             <path d="M12 3v12m0 0l-4-4m4 4l4-4M5 21h14" />
           </svg>
         )}
+      </div>
+      <div className="min-w-0">
+        <p className="font-bold text-white truncate">{title}</p>
+        {desc && <p className="text-xs text-orange-200/70 line-clamp-2 mt-1">{desc}</p>}
       </div>
     </Link>
   );
