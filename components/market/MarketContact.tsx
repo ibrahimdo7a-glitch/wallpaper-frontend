@@ -99,13 +99,15 @@ export function MarketContact({ listingId, contact, title, isAr }: Props) {
     }
   };
 
-  if (!wa && !tgUser && !contact.has_phone) {
-    return <p className="text-sm text-neutral-500">{isAr ? 'لا توجد معلومات تواصل' : 'No contact info'}</p>;
-  }
+  const hasContactMethod = !!wa || !!tgUser || contact.has_phone;
 
   return (
     <div className="space-y-2">
       {contact.name && <p className="text-sm text-neutral-400 mb-3">{isAr ? 'المُعلِن:' : 'Seller:'} <span className="text-white font-medium">{contact.name}</span></p>}
+
+      {!hasContactMethod && (
+        <p className="text-sm text-neutral-500">{isAr ? 'لا توجد وسيلة تواصل مضافة لهذا الإعلان.' : 'No contact method added for this listing.'}</p>
+      )}
 
       {wa && (
         <a href={wa} target="_blank" rel="noopener noreferrer"

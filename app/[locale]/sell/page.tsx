@@ -192,6 +192,13 @@ export default function SellPage() {
               </div>
             </div>
 
+            <div>
+              <label className={lbl}>{isAr ? 'الاسم 🔒 (من حسابك)' : 'Name 🔒 (your account)'}</label>
+              <input value={member?.name || '—'} readOnly title={isAr ? 'يظهر هذا الاسم في إعلانك ولا يمكن تغييره' : 'Shown on your listing'}
+                className={`${input} opacity-70 cursor-not-allowed`} />
+              <p className="text-xs text-neutral-500 mt-1">{isAr ? 'أضف هاتفًا أو واتساب ليتمكّن المشترون من التواصل معك.' : 'Add a phone or WhatsApp so buyers can reach you.'}</p>
+            </div>
+
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
               <div>
                 <label className={lbl}>{isAr ? 'هاتف' : 'Phone'}</label>
