@@ -59,7 +59,7 @@ export function AppDownloadButton({ appId, locale, hasApk, hasExternal }: Props)
       className={`inline-flex items-center gap-2.5 px-6 py-2.5 rounded-xl font-semibold text-sm transition-all shadow-lg ${
         done
           ? 'bg-green-600 text-white'
-          : 'bg-primary-600 hover:bg-primary-700 active:scale-95 text-white'
+          : 'bg-blue-600 hover:bg-blue-500 active:scale-95 text-white'
       } disabled:opacity-60 disabled:cursor-not-allowed`}
     >
       {loading ? (
