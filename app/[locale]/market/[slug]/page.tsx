@@ -1,9 +1,9 @@
 import type { Metadata } from 'next';
-import Image from 'next/image';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { fetchMarketListing } from '@/lib/server-api';
 import { MarketContact } from '@/components/market/MarketContact';
+import { MarketGallery } from '@/components/market/MarketGallery';
 import { SaveButton } from '@/components/market/SaveButton';
 import { type Locale } from '@/lib/i18n';
 
@@ -52,24 +52,7 @@ export default async function MarketDetailPage({ params: { locale, slug } }: Pro
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           <div className="lg:col-span-2 space-y-6">
-            {l.images.length > 0 ? (
-              <div className="space-y-2">
-                <div className="relative aspect-[4/3] rounded-2xl overflow-hidden bg-white/5">
-                  <Image src={l.images[0]} alt={title} fill className="object-contain" />
-                </div>
-                {l.images.length > 1 && (
-                  <div className="grid grid-cols-5 gap-2">
-                    {l.images.slice(1, 6).map((img, i) => (
-                      <div key={i} className="relative aspect-square rounded-lg overflow-hidden bg-white/5">
-                        <Image src={img} alt="" fill className="object-cover" />
-                      </div>
-                    ))}
-                  </div>
-                )}
-              </div>
-            ) : (
-              <div className="aspect-[4/3] rounded-2xl bg-white/5 flex items-center justify-center text-5xl text-white/10">🛒</div>
-            )}
+            <MarketGallery images={l.images} title={title} isAr={isAr} />
 
             {desc && (
               <section>

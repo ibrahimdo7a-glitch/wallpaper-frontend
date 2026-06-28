@@ -9,14 +9,15 @@ import { memberFetch } from '@/lib/member-api';
 
 interface MyListing {
   id: number; title_ar: string; slug: string; price: number | null; currency: string;
-  cover_url: string | null; status: string; created_at: string;
+  cover_url: string | null; status: string; rejection_reason?: string | null; created_at: string;
 }
 
 const STATUS_AR: Record<string, { t: string; c: string }> = {
   published: { t: 'منشور', c: 'text-emerald-400' },
   pending: { t: 'بانتظار المراجعة', c: 'text-amber-400' },
+  rejected: { t: 'مرفوض', c: 'text-rose-400' },
   sold: { t: 'مُباع', c: 'text-neutral-400' },
-  hidden: { t: 'مخفي', c: 'text-rose-400' },
+  hidden: { t: 'مخفي', c: 'text-neutral-400' },
 };
 
 export default function AccountPage() {
@@ -115,9 +116,22 @@ export default function AccountPage() {
                         <span className={`text-xs font-semibold ${st.c}`}>{isAr ? st.t : l.status}</span>
                       </div>
                     );
-                    return l.status === 'published'
-                      ? <Link key={l.id} href={`/${locale}/market/${l.slug}`}>{inner}</Link>
-                      : <div key={l.id}>{inner}</div>;
+                    if (l.status === 'published') {
+                      return <Link key={l.id} href={`/${locale}/market/${l.slug}`}>{inner}</Link>;
+                    }
+                    return (
+                      <div key={l.id} className="space-y-1">
+                        {inner}
+                        {l.status === 'rejected' && l.rejection_reason && (
+                          <p className="text-xs text-rose-300/90 px-2">❌ {isAr ? 'سبب الرفض:' : 'Reason:'} {l.rejection_reason}</p>
+                        )}
+                        {(l.status === 'rejected' || l.status === 'pending') && (
+                          <Link href={`/${locale}/sell?edit=${l.id}`} className="inline-block text-xs font-semibold text-sky-400 hover:underline px-2">
+                            ✏️ {isAr ? 'تعديل وإعادة الإرسال' : 'Edit & resubmit'}
+                          </Link>
+                        )}
+                      </div>
+                    );
                   })}
                 </div>
               )}

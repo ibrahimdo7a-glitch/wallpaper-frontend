@@ -1,8 +1,8 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { Suspense, useEffect, useState } from 'react';
 import Link from 'next/link';
-import { useParams } from 'next/navigation';
+import { useParams, useSearchParams } from 'next/navigation';
 import { useMember } from '@/lib/member-auth';
 import { getMemberToken } from '@/lib/member-api';
 
@@ -13,10 +13,23 @@ const CURRENCIES = ['QAR', 'SAR', 'AED', 'KWD', 'BHD', 'OMR', 'USD'];
 type Section = { id: number; slug: string; name_ar: string; name_en: string | null; icon: string | null };
 
 export default function SellPage() {
+  return (
+    <Suspense fallback={<div className="min-h-screen bg-[#0a0c11]" />}>
+      <SellForm />
+    </Suspense>
+  );
+}
+
+function SellForm() {
   const params = useParams();
   const locale = (params?.locale as string) || 'ar';
   const isAr = locale === 'ar';
   const { member, loading } = useMember();
+  const searchParams = useSearchParams();
+  const editId = searchParams.get('edit');
+
+  const [existingImages, setExistingImages] = useState<string[]>([]);
+  const [rejectionReason, setRejectionReason] = useState<string | null>(null);
 
   const [section, setSection] = useState<'cars' | 'parts'>('cars');
   const [listingType, setListingType] = useState('car_sale');
@@ -42,6 +55,35 @@ export default function SellPage() {
   useEffect(() => {
     if (member?.username) setTelegram((t) => t || member.username || '');
   }, [member]);
+
+  // Edit mode: load the member's own listing into the form.
+  useEffect(() => {
+    if (!editId || !member) return;
+    fetch(`${API_BASE}/api/v1/member/listings/${editId}`, {
+      headers: { Accept: 'application/json', Authorization: `Bearer ${getMemberToken()}` },
+    })
+      .then((r) => (r.ok ? r.json() : null))
+      .then((d) => {
+        const x = d?.data;
+        if (!x) return;
+        setSection(x.section);
+        setListingType(x.listing_type || 'car_sale');
+        setCategoryId(x.market_category_id ? String(x.market_category_id) : '');
+        setTitle(x.title_ar || '');
+        setDesc(x.description_ar || '');
+        setPrice(x.price != null ? String(x.price) : '');
+        setCurrency(x.currency || 'QAR');
+        setNegotiable(!!x.is_negotiable);
+        setCondition(x.condition || '');
+        setCountry(x.country || 'قطر');
+        setCity(x.city || '');
+        setPhone(x.contact_phone || '');
+        setWhatsapp(x.contact_whatsapp || '');
+        setExistingImages(x.images || []);
+        setRejectionReason(x.status === 'rejected' ? x.rejection_reason : null);
+      })
+      .catch(() => {});
+  }, [editId, member]);
 
   useEffect(() => {
     fetch(`${API_BASE}/api/v1/market/config`, { headers: { Accept: 'application/json' } })
@@ -72,7 +114,8 @@ export default function SellPage() {
       if (telegram) fd.append('contact_telegram', telegram);
       images.slice(0, 10).forEach((f) => fd.append('images[]', f));
 
-      const res = await fetch(`${API_BASE}/api/v1/member/listings`, {
+      const path = editId ? `/api/v1/member/listings/${editId}` : '/api/v1/member/listings';
+      const res = await fetch(`${API_BASE}${path}`, {
         method: 'POST',
         headers: { Accept: 'application/json', Authorization: `Bearer ${getMemberToken()}` },
         body: fd,
@@ -96,7 +139,15 @@ export default function SellPage() {
   return (
     <main className="min-h-screen bg-[#0a0c11] text-neutral-100" dir={isAr ? 'rtl' : 'ltr'}>
       <div className="max-w-2xl mx-auto px-4 py-10">
-        <h1 className="text-2xl font-extrabold mb-6">{isAr ? 'أضف إعلان' : 'Post a listing'}</h1>
+        <h1 className="text-2xl font-extrabold mb-6">{editId ? (isAr ? '✏️ تعديل الإعلان' : 'Edit listing') : (isAr ? 'أضف إعلان' : 'Post a listing')}</h1>
+
+        {rejectionReason && (
+          <div className="mb-6 rounded-2xl border border-rose-500/30 bg-rose-500/10 p-4">
+            <p className="font-bold text-rose-300">{isAr ? '❌ تم رفض إعلانك' : '❌ Listing rejected'}</p>
+            <p className="text-sm text-rose-200/90 mt-1">{isAr ? 'السبب: ' : 'Reason: '}{rejectionReason}</p>
+            <p className="text-xs text-neutral-400 mt-2">{isAr ? 'عدّل الإعلان أدناه وأعد إرساله للمراجعة.' : 'Fix the listing below and resubmit.'}</p>
+          </div>
+        )}
 
         {loading ? (
           <p className="text-neutral-500">{isAr ? 'جارٍ التحميل…' : 'Loading…'}</p>
@@ -217,6 +268,17 @@ export default function SellPage() {
 
             <div>
               <label className={lbl}>{isAr ? 'الصور (حتى ١٠)' : 'Images (up to 10)'}</label>
+              {editId && existingImages.length > 0 && images.length === 0 && (
+                <div className="mb-2">
+                  <div className="grid grid-cols-5 gap-2">
+                    {existingImages.slice(0, 10).map((img, i) => (
+                      // eslint-disable-next-line @next/next/no-img-element
+                      <img key={i} src={img} alt="" className="aspect-square w-full rounded-lg object-cover bg-white/5" />
+                    ))}
+                  </div>
+                  <p className="text-xs text-neutral-500 mt-1">{isAr ? 'الصور الحالية — ارفع صورًا جديدة لاستبدالها.' : 'Current images — upload new ones to replace.'}</p>
+                </div>
+              )}
               <input type="file" multiple accept="image/*" onChange={(e) => setImages(Array.from(e.target.files || []))}
                 className="block w-full text-sm text-neutral-400 file:me-3 file:py-2 file:px-4 file:rounded-lg file:border-0 file:bg-white/10 file:text-white" />
               {images.length > 0 && <p className="text-xs text-neutral-500 mt-1">{images.length} {isAr ? 'صورة مختارة' : 'selected'}</p>}
@@ -226,7 +288,7 @@ export default function SellPage() {
 
             <button onClick={submit} disabled={submitting}
               className="w-full py-3 rounded-xl bg-emerald-600 hover:bg-emerald-500 disabled:opacity-50 text-white font-bold transition-colors">
-              {submitting ? (isAr ? 'جارٍ الإرسال…' : 'Submitting…') : (isAr ? 'إرسال الإعلان' : 'Submit')}
+              {submitting ? (isAr ? 'جارٍ الإرسال…' : 'Submitting…') : editId ? (isAr ? 'إرسال التعديل للمراجعة' : 'Resubmit for review') : (isAr ? 'إرسال الإعلان' : 'Submit')}
             </button>
             <p className="text-xs text-neutral-500 text-center">{isAr ? 'يُراجَع إعلانك قبل النشر.' : 'Reviewed before publishing.'}</p>
           </div>
