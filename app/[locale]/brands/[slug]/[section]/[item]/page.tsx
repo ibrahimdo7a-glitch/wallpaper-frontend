@@ -6,6 +6,7 @@ import { setRequestLocale } from 'next-intl/server';
 import { fetchContentItem } from '@/lib/server-api';
 import { type Locale } from '@/lib/i18n';
 import { ContentActions } from '@/components/brand/ContentActions';
+import { NoImageSave } from '@/components/brand/NoImageSave';
 
 type Props = {
   params: { locale: Locale; slug: string; section: string; item: string };
@@ -59,6 +60,8 @@ export default async function ContentDetailPage({ params }: Props) {
 
   return (
     <main className="min-h-screen bg-black text-white" dir={isAr ? 'rtl' : 'ltr'}>
+      {/* Disables right-click + drag on THIS page only (wallpaper display) */}
+      <NoImageSave />
       <div className="max-w-7xl mx-auto px-4 py-8">
         {/* Breadcrumb */}
         <div className="flex items-center gap-2 text-sm text-gray-400 mb-6 flex-wrap">
