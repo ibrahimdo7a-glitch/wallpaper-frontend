@@ -12,6 +12,14 @@
     box-sizing: border-box;
   }
 
+  /* Native <select> dropdown options: the browser renders the option list with a
+     white background by default, which hides our light text on the dark theme. */
+  select option,
+  select optgroup {
+    background-color: #0f1216;
+    color: #f5f5f5;
+  }
+
   html {
     scroll-behavior: smooth;
     -webkit-tap-highlight-color: transparent;
