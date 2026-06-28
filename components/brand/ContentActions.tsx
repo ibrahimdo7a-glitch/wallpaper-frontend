@@ -1,6 +1,8 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { useMember } from '@/lib/member-auth';
+import { memberFetch } from '@/lib/member-api';
 
 const API_BASE = (process.env.NEXT_PUBLIC_API_URL || 'https://api.qev.app').replace(/\/$/, '');
 
@@ -16,6 +18,7 @@ interface Props {
 }
 
 export function ContentActions({ contentId, fileUrl, imageUrl, slug, initialLikes, initialDownloads, primaryColor, isAr }: Props) {
+  const { member, openLogin } = useMember();
   const [likes, setLikes] = useState(initialLikes);
   const [liked, setLiked] = useState(false);
   const [downloads, setDownloads] = useState(initialDownloads);
@@ -46,25 +49,34 @@ export function ContentActions({ contentId, fileUrl, imageUrl, slug, initialLike
 
   async function handleDownload() {
     if (downloading) return;
+    // Downloads are members-only — open the login modal for guests.
+    if (!member) {
+      openLogin();
+      return;
+    }
     setDownloading(true);
-    let url = fileUrl ?? imageUrl ?? '#';
     try {
-      const res = await fetch(`${API_BASE}/api/v1/content/${contentId}/download`, { method: 'POST', headers: { Accept: 'application/json' } });
-      if (res.ok) {
-        const data = await res.json();
-        if (data.download_url) url = data.download_url;
-        if (typeof data.downloads_count === 'number') setDownloads(data.downloads_count);
+      const res = await memberFetch(`/content/${contentId}/download`, { method: 'POST' });
+      if (res.status === 401) {
+        openLogin();
+        return;
       }
-    } catch { /* fall back to direct url */ }
+      if (!res.ok) return;
+      const data = await res.json();
+      if (typeof data.downloads_count === 'number') setDownloads(data.downloads_count);
+      const url = data.download_url ?? fileUrl ?? imageUrl;
+      if (url) {
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = `wallpaper-${slug ?? contentId}`;
+        link.target = '_blank';
+        link.rel = 'noopener noreferrer';
+        document.body.appendChild(link);
+        link.click();
+        link.remove();
+      }
+    } catch { /* ignore */ }
     finally {
-      const link = document.createElement('a');
-      link.href = url;
-      link.download = `wallpaper-${slug ?? contentId}`;
-      link.target = '_blank';
-      link.rel = 'noopener noreferrer';
-      document.body.appendChild(link);
-      link.click();
-      link.remove();
       setDownloading(false);
     }
   }

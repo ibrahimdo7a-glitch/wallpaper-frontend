@@ -29,8 +29,7 @@ export function Header({ locale, siteName, marketLinks = [] }: HeaderProps) {
   const otherPath = pathname.replace(`/${locale}`, `/${otherLocale}`);
   const [dark, setDark] = useState(false);
   const [scrolled, setScrolled] = useState(false);
-  const [loginOpen, setLoginOpen] = useState(false);
-  const { member, loading: memberLoading, logout } = useMember();
+  const { member, loading: memberLoading, logout, loginOpen, openLogin, closeLogin } = useMember();
 
   useEffect(() => {
     const stored = localStorage.getItem('theme');
@@ -141,7 +140,7 @@ export function Header({ locale, siteName, marketLinks = [] }: HeaderProps) {
                 <button onClick={logout} title={isRTL ? 'خروج' : 'Logout'} className="w-7 h-7 rounded-full text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 flex items-center justify-center">⎋</button>
               </div>
             ) : (
-              <button onClick={() => setLoginOpen(true)} className="px-3 py-1.5 rounded-full text-xs font-semibold bg-sky-600 hover:bg-sky-500 text-white transition-colors whitespace-nowrap">
+              <button onClick={openLogin} className="px-3 py-1.5 rounded-full text-xs font-semibold bg-sky-600 hover:bg-sky-500 text-white transition-colors whitespace-nowrap">
                 {isRTL ? 'دخول' : 'Sign in'}
               </button>
             ))}
@@ -166,7 +165,7 @@ export function Header({ locale, siteName, marketLinks = [] }: HeaderProps) {
         </nav>
       </div>
 
-      <LoginModal open={loginOpen} onOpenChange={setLoginOpen} isAr={isRTL} />
+      <LoginModal open={loginOpen} onOpenChange={(o) => (o ? openLogin() : closeLogin())} isAr={isRTL} />
     </header>
   );
 }

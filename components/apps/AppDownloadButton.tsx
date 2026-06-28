@@ -1,8 +1,8 @@
 'use client';
 
 import { useState } from 'react';
-
-const API_BASE = (process.env.NEXT_PUBLIC_API_URL || 'https://api.qev.app').replace(/\/$/, '');
+import { useMember } from '@/lib/member-auth';
+import { memberFetch } from '@/lib/member-api';
 
 interface Props {
   appId: number;
@@ -15,12 +15,22 @@ export function AppDownloadButton({ appId, locale, hasApk, hasExternal }: Props)
   const [loading, setLoading] = useState(false);
   const [done, setDone] = useState(false);
   const isAr = locale === 'ar';
+  const { member, openLogin } = useMember();
 
   const handleDownload = async () => {
     if (loading || (!hasApk && !hasExternal)) return;
+    // Downloads are members-only — open the login modal for guests.
+    if (!member) {
+      openLogin();
+      return;
+    }
     setLoading(true);
     try {
-      const res = await fetch(`${API_BASE}/api/v1/apps/${appId}/download`, { method: 'POST' });
+      const res = await memberFetch(`/apps/${appId}/download`, { method: 'POST' });
+      if (res.status === 401) {
+        openLogin();
+        return;
+      }
       const data = await res.json();
       if (data.download_url) {
         window.open(data.download_url, '_blank', 'noopener');

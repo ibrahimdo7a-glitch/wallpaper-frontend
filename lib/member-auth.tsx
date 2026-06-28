@@ -18,6 +18,9 @@ interface MemberContextValue {
   loading: boolean;
   login: (token: string, member: Member) => void;
   logout: () => void;
+  loginOpen: boolean;
+  openLogin: () => void;
+  closeLogin: () => void;
 }
 
 const MemberContext = createContext<MemberContextValue>({
@@ -25,11 +28,18 @@ const MemberContext = createContext<MemberContextValue>({
   loading: true,
   login: () => {},
   logout: () => {},
+  loginOpen: false,
+  openLogin: () => {},
+  closeLogin: () => {},
 });
 
 export function MemberProvider({ children }: { children: React.ReactNode }) {
   const [member, setMember] = useState<Member | null>(null);
   const [loading, setLoading] = useState(true);
+  const [loginOpen, setLoginOpen] = useState(false);
+
+  const openLogin = useCallback(() => setLoginOpen(true), []);
+  const closeLogin = useCallback(() => setLoginOpen(false), []);
 
   useEffect(() => {
     const token = getMemberToken();
@@ -53,6 +63,7 @@ export function MemberProvider({ children }: { children: React.ReactNode }) {
   const login = useCallback((token: string, m: Member) => {
     setMemberToken(token);
     setMember(m);
+    setLoginOpen(false);
   }, []);
 
   const logout = useCallback(() => {
@@ -61,7 +72,11 @@ export function MemberProvider({ children }: { children: React.ReactNode }) {
     setMember(null);
   }, []);
 
-  return <MemberContext.Provider value={{ member, loading, login, logout }}>{children}</MemberContext.Provider>;
+  return (
+    <MemberContext.Provider value={{ member, loading, login, logout, loginOpen, openLogin, closeLogin }}>
+      {children}
+    </MemberContext.Provider>
+  );
 }
 
 export const useMember = () => useContext(MemberContext);
