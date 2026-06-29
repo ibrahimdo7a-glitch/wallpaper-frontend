@@ -39,8 +39,8 @@ export function BrandsStatsRow({ brandsSection, isAr, locale }: Props) {
               <span className="text-xs sm:text-sm font-semibold text-gray-800 dark:text-gray-100 text-center leading-tight line-clamp-1 w-full group-hover:text-gray-900 dark:group-hover:text-white">
                 {isAr ? brand.name_ar : (brand.name_en ?? brand.name_ar)}
               </span>
-              {brand.sections_count > 0 && (
-                <span className="text-[10px] text-gray-400 dark:text-gray-500">{brand.sections_count} {isAr ? 'قسم' : 'sec'}</span>
+              {brand.models_count > 0 && (
+                <span className="text-[10px] text-gray-400 dark:text-gray-500">{brand.models_count} {isAr ? 'موديلات' : 'models'}</span>
               )}
             </Link>
           ))}
