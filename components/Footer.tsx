@@ -38,6 +38,9 @@ export async function Footer({ locale }: FooterProps) {
 
           {/* Links */}
           <div className={`flex items-center gap-4 ${isRTL ? 'flex-row-reverse' : ''}`}>
+            <Link href={`/${locale}/about`} className="text-gray-500 dark:text-gray-400 text-xs hover:text-gray-900 dark:hover:text-white transition-colors">
+              {isRTL ? 'من نحن' : 'About'}
+            </Link>
             <Link href={`/${locale}/privacy`} className="text-gray-500 dark:text-gray-400 text-xs hover:text-gray-900 dark:hover:text-white transition-colors">
               {t.footer.privacy}
             </Link>

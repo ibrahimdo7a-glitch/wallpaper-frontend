@@ -64,6 +64,10 @@ export interface SiteContent {
   footer_copyright_en: string;
   terms_ar: string;
   terms_en: string;
+  privacy_ar: string;
+  privacy_en: string;
+  about_ar: string;
+  about_en: string;
   ilink_enabled: boolean | string;
   ilink_label_ar: string;
   ilink_label_en: string;
