@@ -27,6 +27,8 @@ export async function generateMetadata({ params: { locale, slug } }: Props): Pro
       title,
       description: desc,
       type: 'website',
+      url: `https://qev.app/${locale}/market/${slug}`,
+      siteName: locale === 'ar' ? 'قناة قطر للسيارات الكهربائية' : 'QEV',
       images: image ? [{ url: image }] : [],
     },
     twitter: { card: image ? 'summary_large_image' : 'summary', title, description: desc, images: image ? [image] : [] },
