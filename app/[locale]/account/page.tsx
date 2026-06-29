@@ -10,7 +10,7 @@ import { memberFetch } from '@/lib/member-api';
 interface MyListing {
   id: number; title_ar: string; slug: string; price: number | null; currency: string;
   cover_url: string | null; status: string; rejection_reason?: string | null;
-  can_renew?: boolean; renew_in_days?: number; created_at: string;
+  can_renew?: boolean; is_expired?: boolean; created_at: string;
 }
 
 const STATUS_AR: Record<string, { t: string; c: string }> = {
@@ -31,6 +31,9 @@ export default function AccountPage() {
   const [listingsLoading, setListingsLoading] = useState(true);
   const [saved, setSaved] = useState<MyListing[]>([]);
   const [newsTg, setNewsTg] = useState(false);
+  const [toast, setToast] = useState('');
+
+  const showToast = (msg: string) => { setToast(msg); setTimeout(() => setToast(''), 4000); };
 
   useEffect(() => {
     if (!member) return;
@@ -51,8 +54,9 @@ export default function AccountPage() {
     try {
       const res = await memberFetch(`/member/listings/${id}/action`, { method: 'POST', body: JSON.stringify({ action }) });
       const d = await res.json().catch(() => ({}));
-      if (!res.ok) { if (d?.error) window.alert(d.error); return; }
-      setListings((prev) => prev.map((l) => (l.id === id ? { ...l, status: d.status, can_renew: d.can_renew } : l)));
+      if (!res.ok) { if (d?.error) showToast(d.error); return; }
+      if (action === 'renew') showToast(isAr ? 'تم تجديد الإعلان ✓' : 'Listing renewed ✓');
+      setListings((prev) => prev.map((l) => (l.id === id ? { ...l, status: d.status, can_renew: d.can_renew, is_expired: false } : l)));
     } catch { /* ignore */ }
   };
 
@@ -114,7 +118,10 @@ export default function AccountPage() {
               ) : (
                 <div className="space-y-2">
                   {listings.map((l) => {
-                    const st = STATUS_AR[l.status] ?? { t: l.status, c: 'text-neutral-400' };
+                    const expired = l.status === 'published' && l.is_expired;
+                    const st = expired
+                      ? { t: 'منتهي الصلاحية', c: 'text-rose-400' }
+                      : (STATUS_AR[l.status] ?? { t: l.status, c: 'text-neutral-400' });
                     const topRow = (
                       <div className="flex items-center gap-3 p-3">
                         <div className="relative w-14 h-14 rounded-lg overflow-hidden bg-white/5 shrink-0">
@@ -124,7 +131,7 @@ export default function AccountPage() {
                           <p className="font-bold text-sm truncate">{l.title_ar}</p>
                           <p className="text-xs text-emerald-400">{l.price != null ? `${l.price.toLocaleString()} ${l.currency}` : (isAr ? 'حسب الطلب' : 'On request')}</p>
                         </div>
-                        <span className={`text-xs font-semibold ${st.c}`}>{isAr ? st.t : l.status}</span>
+                        <span className={`text-xs font-semibold ${st.c}`}>{isAr ? st.t : (expired ? 'Expired' : l.status)}</span>
                       </div>
                     );
 
@@ -133,11 +140,8 @@ export default function AccountPage() {
                       actions.push(<Link key="edit" href={`/${locale}/sell?edit=${l.id}`} className="text-xs font-semibold text-sky-400 hover:underline">✏️ {isAr ? 'تعديل وإعادة الإرسال' : 'Edit & resubmit'}</Link>);
                     }
                     if (l.status === 'published') {
-                      if (l.can_renew) {
-                        actions.push(<button key="renew" onClick={() => doAction(l.id, 'renew')} className="text-xs font-semibold text-sky-400 hover:underline">🔄 {isAr ? 'تجديد' : 'Renew'}</button>);
-                      } else if (l.renew_in_days) {
-                        actions.push(<span key="renew-soon" className="text-xs text-neutral-500">🔄 {isAr ? `تجديد بعد ${l.renew_in_days} يوم` : `Renew in ${l.renew_in_days}d`}</span>);
-                      }
+                      // Renew is always clickable; the API replies with a light message if it's too soon (before 7 days).
+                      actions.push(<button key="renew" onClick={() => doAction(l.id, 'renew')} className="text-xs font-semibold text-sky-400 hover:underline">🔄 {isAr ? 'تجديد' : 'Renew'}</button>);
                       actions.push(<button key="pause" onClick={() => doAction(l.id, 'pause')} className="text-xs font-semibold text-amber-400 hover:underline">⏸ {isAr ? 'إيقاف' : 'Pause'}</button>);
                       actions.push(<button key="sold" onClick={() => doAction(l.id, 'sold')} className="text-xs font-semibold text-neutral-300 hover:underline">✅ {isAr ? 'تم البيع' : 'Sold'}</button>);
                     }
@@ -198,6 +202,12 @@ export default function AccountPage() {
           </div>
         )}
       </div>
+
+      {toast && (
+        <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-[120] max-w-[90vw] rounded-xl bg-[#171a21] border border-white/15 px-4 py-2.5 text-sm text-neutral-100 shadow-xl text-center" dir={isAr ? 'rtl' : 'ltr'}>
+          {toast}
+        </div>
+      )}
     </main>
   );
 }
