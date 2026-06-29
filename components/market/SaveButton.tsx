@@ -36,9 +36,9 @@ export function SaveButton({ type, id, isAr }: { type: 'listing' | 'content' | '
 
   return (
     <button onClick={toggle} disabled={busy}
-      className={`flex items-center justify-center gap-2 w-full py-2.5 rounded-xl font-semibold transition-colors ${saved ? 'bg-rose-500/15 text-rose-300 border border-rose-500/30' : 'bg-white/5 hover:bg-white/10 text-neutral-200 border border-white/10'}`}>
-      <span>{saved ? '❤️' : '🤍'}</span>
-      {isAr ? (saved ? 'محفوظ في المفضّلة' : 'حفظ في المفضّلة') : (saved ? 'Saved' : 'Save')}
+      className={`flex items-center justify-center gap-1.5 w-full py-2 rounded-xl font-medium text-sm transition-colors ${saved ? 'bg-rose-500/15 text-rose-300 border border-rose-500/30' : 'bg-white/5 hover:bg-white/10 text-neutral-200 border border-white/10'}`}>
+      <span className="text-base leading-none">{saved ? '❤️' : '🤍'}</span>
+      {isAr ? (saved ? 'محفوظ' : 'حفظ') : (saved ? 'Saved' : 'Save')}
     </button>
   );
 }
