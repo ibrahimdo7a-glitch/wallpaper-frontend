@@ -45,28 +45,28 @@ export function MarketSectionView({ basePath, label, locale, isAr, listings, met
           <AddListingButton locale={locale} isAr={isAr} />
         </header>
 
-        {(tabs.length > 0 || countries.length > 0) && (
-          <nav className="flex items-center gap-2 flex-wrap mb-6">
-            {tabs.length > 0 && (
-              <>
-                <Link href={href({ [tabParam]: undefined, page: undefined })} className={tabCls(!activeTab)}>{isAr ? 'الكل' : 'All'}</Link>
-                {tabs.map((t) => (
-                  <Link key={t.value} href={href({ [tabParam]: t.value, page: undefined })} className={tabCls(activeTab === t.value)}>
-                    {t.label}
-                  </Link>
-                ))}
-              </>
-            )}
+        {tabs.length > 0 && (
+          <nav className="flex gap-2 flex-wrap mb-6">
+            <Link href={href({ [tabParam]: undefined, page: undefined })} className={tabCls(!activeTab)}>{isAr ? 'الكل' : 'All'}</Link>
+            {tabs.map((t) => (
+              <Link key={t.value} href={href({ [tabParam]: t.value, page: undefined })} className={tabCls(activeTab === t.value)}>
+                {t.label}
+              </Link>
+            ))}
+          </nav>
+        )}
 
-            {/* Country filter — sits right beside the type filters, styled to match them. */}
+        <div className="flex justify-end mb-6">
+          <div className="flex items-center gap-2 flex-wrap justify-end">
+            {/* Country filter — grouped right beside the sort filters, matching their style. */}
             {countries.length > 0 && (
               <details className="relative">
-                <summary className={`${tabCls(!!activeCountry)} list-none [&::-webkit-details-marker]:hidden cursor-pointer inline-flex items-center gap-1.5`}>
+                <summary className={`list-none [&::-webkit-details-marker]:hidden cursor-pointer inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-colors ${activeCountry ? 'bg-white/10 text-white' : 'bg-white/[0.03] text-neutral-400 hover:bg-white/10'}`}>
                   <span>🌍</span>
                   <span>{activeCountry || (isAr ? 'كل الدول' : 'All countries')}</span>
-                  <span className="text-[10px] opacity-60">▾</span>
+                  <span className="text-[9px] opacity-60">▾</span>
                 </summary>
-                <div className="absolute z-30 mt-2 start-0 min-w-[180px] max-h-72 overflow-auto rounded-2xl border border-white/10 bg-[#11151b] p-1.5 shadow-2xl">
+                <div className="absolute z-30 mt-2 end-0 min-w-[170px] max-h-72 overflow-auto rounded-xl border border-white/10 bg-[#11151b] p-1.5 shadow-2xl">
                   <Link href={href({ country: undefined, page: undefined })} className={countryItemCls(!activeCountry)}>
                     {isAr ? 'كل الدول' : 'All countries'}
                   </Link>
@@ -78,11 +78,7 @@ export function MarketSectionView({ basePath, label, locale, isAr, listings, met
                 </div>
               </details>
             )}
-          </nav>
-        )}
 
-        <div className="flex justify-end mb-6">
-          <div className="flex gap-2">
             {[
               { value: '', label: isAr ? 'الأحدث' : 'Newest' },
               { value: 'price_low', label: isAr ? 'الأرخص' : 'Cheapest' },
