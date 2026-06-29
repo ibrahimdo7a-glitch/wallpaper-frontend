@@ -299,6 +299,7 @@ export interface ApiContentItem {
   views_count: number;
   downloads_count: number;
   published_at: string | null;
+  section_slug?: string | null;
 }
 
 export interface ApiContentDetail extends ApiContentItem {
@@ -360,9 +361,27 @@ export async function fetchModelSections(brandSlug: string, modelSlug: string): 
   return res?.sections ?? [];
 }
 
-export async function fetchModelWithSections(brandSlug: string, modelSlug: string): Promise<{ model: ApiCarModel | null; sections: ApiBrandSection[] }> {
-  const res = await get<{ data: ApiCarModel; sections: ApiBrandSection[] }>(`/brands/${brandSlug}/models/${modelSlug}`, 300, [`model-${modelSlug}`, `brand-${brandSlug}`]);
-  return { model: res?.data ?? null, sections: res?.sections ?? [] };
+export interface ApiModelListing {
+  id: number;
+  title_ar: string;
+  title_en: string | null;
+  slug: string;
+  price: number | null;
+  currency: string;
+  city: string | null;
+  cover_url: string | null;
+  is_featured: boolean;
+  listing_type: string;
+}
+
+export async function fetchModelWithSections(brandSlug: string, modelSlug: string): Promise<{ model: ApiCarModel | null; sections: ApiBrandSection[]; listings: ApiModelListing[]; wallpapers: ApiContentItem[] }> {
+  const res = await get<{ data: ApiCarModel; sections: ApiBrandSection[]; listings: ApiModelListing[]; wallpapers: ApiContentItem[] }>(`/brands/${brandSlug}/models/${modelSlug}`, 300, [`model-${modelSlug}`, `brand-${brandSlug}`]);
+  return {
+    model: res?.data ?? null,
+    sections: res?.sections ?? [],
+    listings: res?.listings ?? [],
+    wallpapers: res?.wallpapers ?? [],
+  };
 }
 
 export async function fetchModelSectionContent(

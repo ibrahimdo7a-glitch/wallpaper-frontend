@@ -41,7 +41,7 @@ export default async function ModelPage({ params }: Props) {
   setRequestLocale(params.locale);
   const isAr = params.locale === 'ar';
 
-  const [brand, { model, sections }] = await Promise.all([
+  const [brand, { model, sections, listings, wallpapers }] = await Promise.all([
     fetchBrand(params.slug),
     fetchModelWithSections(params.slug, params.model),
   ]);
@@ -114,6 +114,59 @@ export default async function ModelPage({ params }: Props) {
               </Link>
             ))}
           </div>
+        )}
+
+        {/* Marketplace listings that picked this model — featured first */}
+        {listings.length > 0 && (
+          <section className="mb-10">
+            <div className="flex items-center justify-between mb-3">
+              <h2 className="font-bold text-lg">🛒 {isAr ? `إعلانات ${modelName}` : `${modelName} listings`}</h2>
+              <Link href={`/${params.locale}/cars`} className="text-xs text-gray-400 border border-gray-700 rounded-full px-3 py-1 hover:bg-gray-800 transition-colors">
+                {isAr ? 'عرض الكل' : 'View all'}
+              </Link>
+            </div>
+            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
+              {listings.map(l => (
+                <Link key={l.id} href={`/${params.locale}/market/${l.slug}`}
+                  className={`group rounded-2xl overflow-hidden bg-gray-900 border transition-all ${l.is_featured ? 'border-amber-500/60 ring-1 ring-amber-500/30' : 'border-gray-800 hover:border-gray-600'}`}>
+                  <div className="relative aspect-square bg-gray-800">
+                    {l.cover_url
+                      ? <Image src={l.cover_url} alt={l.title_ar} fill className="object-cover group-hover:scale-105 transition-transform duration-300" />
+                      : <div className="w-full h-full flex items-center justify-center text-2xl text-white/10">🛒</div>}
+                    {l.is_featured && <span className="absolute top-1.5 start-1.5 text-[10px] font-bold bg-amber-500 text-black px-1.5 py-0.5 rounded-full">⭐</span>}
+                  </div>
+                  <div className="p-2">
+                    <p className="text-xs font-semibold truncate">{isAr ? l.title_ar : (l.title_en ?? l.title_ar)}</p>
+                    <p className="text-xs text-emerald-400 truncate">{l.price != null ? `${l.price.toLocaleString()} ${l.currency}` : (isAr ? 'حسب الطلب' : 'On request')}</p>
+                    {l.city && <p className="text-[10px] text-gray-500 truncate">{l.city}</p>}
+                  </div>
+                </Link>
+              ))}
+            </div>
+          </section>
+        )}
+
+        {/* Latest wallpapers for this model (homepage-style strip) */}
+        {wallpapers.length > 0 && (
+          <section className="mb-10">
+            <h2 className="font-bold text-lg mb-3">🖼️ {isAr ? `خلفيات ${modelName}` : `${modelName} wallpapers`}</h2>
+            <div className="flex gap-3 overflow-x-auto pb-2" style={{ scrollbarWidth: 'none' }}>
+              {wallpapers.map(w => {
+                const thumb = w.thumbnail_url ?? w.image_url;
+                const href = w.section_slug ? `/${params.locale}/brands/${params.slug}/${w.section_slug}/${w.id}` : '#';
+                return (
+                  <Link key={w.id} href={href}
+                    className="flex-shrink-0 group relative w-36 rounded-2xl overflow-hidden bg-gray-900 border border-gray-800 hover:border-gray-600 block transition-colors">
+                    <div className="relative h-52 bg-gray-800">
+                      {thumb
+                        ? <Image src={thumb} alt={w.title_ar} fill className="object-cover group-hover:scale-105 transition-transform duration-300" />
+                        : <div className="w-full h-full flex items-center justify-center text-3xl text-white/10">🖼️</div>}
+                    </div>
+                  </Link>
+                );
+              })}
+            </div>
+          </section>
         )}
 
         {/* If no sections configured, show a friendly empty state */}
