@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, type ReactNode } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { useParams } from 'next/navigation';
@@ -9,7 +9,8 @@ import { memberFetch } from '@/lib/member-api';
 
 interface MyListing {
   id: number; title_ar: string; slug: string; price: number | null; currency: string;
-  cover_url: string | null; status: string; rejection_reason?: string | null; created_at: string;
+  cover_url: string | null; status: string; rejection_reason?: string | null;
+  can_renew?: boolean; renew_in_days?: number; created_at: string;
 }
 
 const STATUS_AR: Record<string, { t: string; c: string }> = {
@@ -45,12 +46,13 @@ export default function AccountPage() {
       .catch(() => {});
   }, [member]);
 
-  const toggleActive = async (id: number) => {
+  const doAction = async (id: number, action: 'pause' | 'resume' | 'sold' | 'renew') => {
+    if (action === 'sold' && !window.confirm(isAr ? 'تعليم هذا الإعلان كمباع؟' : 'Mark this listing as sold?')) return;
     try {
-      const res = await memberFetch(`/member/listings/${id}/toggle-active`, { method: 'POST' });
-      if (!res.ok) return;
-      const d = await res.json();
-      setListings((prev) => prev.map((l) => (l.id === id ? { ...l, status: d.status } : l)));
+      const res = await memberFetch(`/member/listings/${id}/action`, { method: 'POST', body: JSON.stringify({ action }) });
+      const d = await res.json().catch(() => ({}));
+      if (!res.ok) { if (d?.error) window.alert(d.error); return; }
+      setListings((prev) => prev.map((l) => (l.id === id ? { ...l, status: d.status, can_renew: d.can_renew } : l)));
     } catch { /* ignore */ }
   };
 
@@ -113,8 +115,8 @@ export default function AccountPage() {
                 <div className="space-y-2">
                   {listings.map((l) => {
                     const st = STATUS_AR[l.status] ?? { t: l.status, c: 'text-neutral-400' };
-                    const inner = (
-                      <div className="flex items-center gap-3 p-2 rounded-xl bg-white/[0.03] border border-white/5">
+                    const topRow = (
+                      <div className="flex items-center gap-3 p-3">
                         <div className="relative w-14 h-14 rounded-lg overflow-hidden bg-white/5 shrink-0">
                           {l.cover_url ? <Image src={l.cover_url} alt="" fill className="object-cover" /> : <div className="w-full h-full flex items-center justify-center text-xl text-white/10">🛒</div>}
                         </div>
@@ -125,34 +127,41 @@ export default function AccountPage() {
                         <span className={`text-xs font-semibold ${st.c}`}>{isAr ? st.t : l.status}</span>
                       </div>
                     );
-                    const hasActions = ['published', 'hidden', 'rejected', 'pending'].includes(l.status);
+
+                    const actions: ReactNode[] = [];
+                    if (l.status === 'rejected' || l.status === 'pending') {
+                      actions.push(<Link key="edit" href={`/${locale}/sell?edit=${l.id}`} className="text-xs font-semibold text-sky-400 hover:underline">✏️ {isAr ? 'تعديل وإعادة الإرسال' : 'Edit & resubmit'}</Link>);
+                    }
+                    if (l.status === 'published') {
+                      if (l.can_renew) {
+                        actions.push(<button key="renew" onClick={() => doAction(l.id, 'renew')} className="text-xs font-semibold text-sky-400 hover:underline">🔄 {isAr ? 'تجديد' : 'Renew'}</button>);
+                      } else if (l.renew_in_days) {
+                        actions.push(<span key="renew-soon" className="text-xs text-neutral-500">🔄 {isAr ? `تجديد بعد ${l.renew_in_days} يوم` : `Renew in ${l.renew_in_days}d`}</span>);
+                      }
+                      actions.push(<button key="pause" onClick={() => doAction(l.id, 'pause')} className="text-xs font-semibold text-amber-400 hover:underline">⏸ {isAr ? 'إيقاف' : 'Pause'}</button>);
+                      actions.push(<button key="sold" onClick={() => doAction(l.id, 'sold')} className="text-xs font-semibold text-neutral-300 hover:underline">✅ {isAr ? 'تم البيع' : 'Sold'}</button>);
+                    }
+                    if (l.status === 'hidden') {
+                      actions.push(<button key="resume" onClick={() => doAction(l.id, 'resume')} className="text-xs font-semibold text-emerald-400 hover:underline">▶ {isAr ? 'إعادة النشر' : 'Resume'}</button>);
+                      actions.push(<button key="sold" onClick={() => doAction(l.id, 'sold')} className="text-xs font-semibold text-neutral-300 hover:underline">✅ {isAr ? 'تم البيع' : 'Sold'}</button>);
+                    }
+                    if (l.status === 'sold') {
+                      actions.push(<button key="resume" onClick={() => doAction(l.id, 'resume')} className="text-xs font-semibold text-emerald-400 hover:underline">▶ {isAr ? 'إعادة النشر' : 'Re-list'}</button>);
+                    }
+
                     return (
-                      <div key={l.id} className="space-y-1">
+                      <div key={l.id} className="rounded-xl bg-white/[0.03] border border-white/5 overflow-hidden">
                         {l.status === 'published'
-                          ? <Link href={`/${locale}/market/${l.slug}`}>{inner}</Link>
-                          : inner}
+                          ? <Link href={`/${locale}/market/${l.slug}`} className="block hover:bg-white/[0.02]">{topRow}</Link>
+                          : topRow}
 
                         {l.status === 'rejected' && l.rejection_reason && (
-                          <p className="text-xs text-rose-300/90 px-2">❌ {isAr ? 'سبب الرفض:' : 'Reason:'} {l.rejection_reason}</p>
+                          <p className="text-xs text-rose-300/90 px-3 pb-1">❌ {isAr ? 'سبب الرفض:' : 'Reason:'} {l.rejection_reason}</p>
                         )}
 
-                        {hasActions && (
-                          <div className="flex flex-wrap items-center gap-4 px-2">
-                            {(l.status === 'rejected' || l.status === 'pending') && (
-                              <Link href={`/${locale}/sell?edit=${l.id}`} className="text-xs font-semibold text-sky-400 hover:underline">
-                                ✏️ {isAr ? 'تعديل وإعادة الإرسال' : 'Edit & resubmit'}
-                              </Link>
-                            )}
-                            {l.status === 'published' && (
-                              <button onClick={() => toggleActive(l.id)} className="text-xs font-semibold text-amber-400 hover:underline">
-                                ⏸ {isAr ? 'إيقاف الإعلان' : 'Pause'}
-                              </button>
-                            )}
-                            {l.status === 'hidden' && (
-                              <button onClick={() => toggleActive(l.id)} className="text-xs font-semibold text-emerald-400 hover:underline">
-                                ▶ {isAr ? 'إعادة النشر' : 'Resume'}
-                              </button>
-                            )}
+                        {actions.length > 0 && (
+                          <div className="flex flex-wrap items-center gap-x-4 gap-y-1.5 px-3 py-2 border-t border-white/5 bg-white/[0.02]">
+                            {actions}
                           </div>
                         )}
                       </div>
