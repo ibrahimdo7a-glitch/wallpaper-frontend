@@ -5,6 +5,7 @@ import { fetchMarketListing } from '@/lib/server-api';
 import { MarketContact } from '@/components/market/MarketContact';
 import { MarketGallery } from '@/components/market/MarketGallery';
 import { SaveButton } from '@/components/market/SaveButton';
+import { ShareButton } from '@/components/market/ShareButton';
 import { type Locale } from '@/lib/i18n';
 
 export const revalidate = 60;
@@ -69,8 +70,9 @@ export default async function MarketDetailPage({ params: { locale, slug } }: Pro
                 {l.price != null ? `${l.price.toLocaleString()} ${l.currency}` : (isAr ? 'حسب الطلب' : 'On request')}
                 {l.is_negotiable && <span className="text-xs text-neutral-400 font-normal ms-2">{isAr ? '(قابل للتفاوض)' : '(negotiable)'}</span>}
               </p>
-              <div className="mt-3">
+              <div className="mt-3 flex gap-2">
                 <SaveButton type="listing" id={l.id} isAr={isAr} />
+                <ShareButton title={title} isAr={isAr} />
               </div>
             </div>
 
