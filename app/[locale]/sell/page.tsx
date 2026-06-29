@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { useParams, useSearchParams } from 'next/navigation';
 import { useMember } from '@/lib/member-auth';
 import { getMemberToken } from '@/lib/member-api';
+import { ImageUploader } from '@/components/market/ImageUploader';
 
 const API_BASE = (process.env.NEXT_PUBLIC_API_URL || 'https://api.qev.app').replace(/\/$/, '');
 const GULF = ['قطر', 'السعودية', 'الإمارات', 'الكويت', 'البحرين', 'عُمان'];
@@ -129,7 +130,7 @@ function SellForm() {
       if (phone) fd.append('contact_phone', phone);
       if (whatsapp) fd.append('contact_whatsapp', whatsapp);
       if (telegram) fd.append('contact_telegram', telegram);
-      images.slice(0, 10).forEach((f) => fd.append('images[]', f));
+      images.slice(0, 3).forEach((f) => fd.append('images[]', f));
 
       const path = editId ? `/api/v1/member/listings/${editId}` : '/api/v1/member/listings';
       const res = await fetch(`${API_BASE}${path}`, {
@@ -152,6 +153,8 @@ function SellForm() {
 
   const input = 'w-full px-3 py-2.5 rounded-xl bg-white/5 border border-white/10 text-white outline-none focus:border-sky-500';
   const lbl = 'block text-sm text-neutral-400 mb-1';
+  const card = 'rounded-2xl border border-white/10 bg-white/[0.03] p-4 space-y-4';
+  const gt = 'text-sm font-bold text-neutral-200';
 
   return (
     <main className="min-h-screen bg-[#0a0c11] text-neutral-100" dir={isAr ? 'rtl' : 'ltr'}>
@@ -183,162 +186,155 @@ function SellForm() {
             </div>
           </div>
         ) : (
-          <div className="space-y-5">
-            {/* Section */}
+          <div className="space-y-4">
+            {/* Section toggle */}
             <div className="grid grid-cols-2 gap-2">
               {(['cars', 'parts'] as const).map((s) => (
                 <button key={s} onClick={() => setSection(s)} type="button"
-                  className={`py-2.5 rounded-xl font-semibold transition-colors ${section === s ? 'bg-white text-black' : 'bg-white/5 text-neutral-300'}`}>
+                  className={`py-3 rounded-2xl font-semibold transition-colors ${section === s ? 'bg-white text-black' : 'bg-white/5 text-neutral-300 hover:bg-white/10'}`}>
                   {s === 'cars' ? (isAr ? '🚗 سيارة' : '🚗 Car') : (isAr ? '🔧 قطعة / اكسسوار' : '🔧 Part')}
                 </button>
               ))}
             </div>
 
-            {section === 'cars' ? (
-              <div>
-                <label className={lbl}>{isAr ? 'النوع' : 'Type'}</label>
-                <select value={listingType} onChange={(e) => setListingType(e.target.value)} className={input}>
-                  <option value="car_sale">{isAr ? 'للبيع' : 'For sale'}</option>
-                  <option value="car_request">{isAr ? 'طلب شراء' : 'Wanted'}</option>
-                </select>
-              </div>
-            ) : (
-              <div>
-                <label className={lbl}>{isAr ? 'القسم' : 'Section'}</label>
-                <select value={categoryId} onChange={(e) => setCategoryId(e.target.value)} className={input}>
-                  <option value="">{isAr ? 'اختر القسم' : 'Select'}</option>
-                  {sections.map((s) => <option key={s.slug} value={String(s.id)}>{s.icon} {isAr ? s.name_ar : (s.name_en ?? s.name_ar)}</option>)}
-                </select>
-              </div>
-            )}
-
-            {/* Brand + Model (cars = the car; parts = compatible car). "Other" lets the member type a custom value. */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-              <div>
-                <label className={lbl}>{section === 'parts' ? (isAr ? 'الماركة المتوافقة' : 'Compatible brand') : (isAr ? 'الماركة' : 'Brand')}</label>
-                <select value={brandId} onChange={(e) => { setBrandId(e.target.value); setModelId(''); setCustomModel(''); }} className={input}>
-                  <option value="">{isAr ? 'اختر الماركة' : 'Select brand'}</option>
-                  {brands.map((b) => <option key={b.id} value={String(b.id)}>{isAr ? b.name_ar : (b.name_en ?? b.name_ar)}</option>)}
-                  <option value="other">{isAr ? 'أخرى (اكتبها)' : 'Other (type it)'}</option>
-                </select>
-                {brandId === 'other' && (
-                  <input value={customBrand} onChange={(e) => setCustomBrand(e.target.value)} maxLength={60} className={`${input} mt-2`} placeholder={isAr ? 'اكتب اسم الماركة' : 'Type the brand'} />
-                )}
-              </div>
-              <div>
-                <label className={lbl}>{isAr ? 'الموديل' : 'Model'}</label>
-                {brandId && brandId !== 'other' ? (
-                  <>
-                    <select value={modelId} onChange={(e) => { setModelId(e.target.value); if (e.target.value !== 'other') setCustomModel(''); }} className={input}>
-                      <option value="">{isAr ? 'اختر الموديل' : 'Select model'}</option>
-                      {(brands.find((b) => String(b.id) === brandId)?.models ?? []).map((m) => (
-                        <option key={m.id} value={String(m.id)}>{isAr ? m.name_ar : (m.name_en ?? m.name_ar)}</option>
-                      ))}
-                      <option value="other">{isAr ? 'أخرى (اكتبه)' : 'Other (type it)'}</option>
-                    </select>
-                    {modelId === 'other' && (
-                      <input value={customModel} onChange={(e) => setCustomModel(e.target.value)} maxLength={60} className={`${input} mt-2`} placeholder={isAr ? 'اكتب اسم الموديل' : 'Type the model'} />
-                    )}
-                  </>
-                ) : (
-                  <input value={customModel} onChange={(e) => setCustomModel(e.target.value)} maxLength={60} disabled={!brandId} className={`${input} disabled:opacity-50`} placeholder={brandId ? (isAr ? 'اكتب الموديل' : 'Type the model') : (isAr ? 'اختر الماركة أولًا' : 'Select brand first')} />
-                )}
-              </div>
-            </div>
-
-            <div>
-              <label className={lbl}>{isAr ? 'العنوان *' : 'Title *'}</label>
-              <input value={title} onChange={(e) => setTitle(e.target.value)} className={input} placeholder={isAr ? 'مثال: بي واي دي سيل 2024' : ''} />
-            </div>
-
-            <div>
-              <label className={lbl}>{isAr ? 'الوصف' : 'Description'}</label>
-              <textarea value={desc} onChange={(e) => setDesc(e.target.value)} rows={4} className={input} />
-            </div>
-
-            <div className="grid grid-cols-3 gap-2">
-              <div className="col-span-1">
-                <label className={lbl}>{isAr ? 'السعر' : 'Price'}</label>
-                <input value={price} onChange={(e) => setPrice(e.target.value)} type="number" inputMode="numeric" className={input} />
-              </div>
-              <div className="col-span-1">
-                <label className={lbl}>{isAr ? 'العملة' : 'Currency'}</label>
-                <select value={currency} onChange={(e) => setCurrency(e.target.value)} className={input}>
-                  {CURRENCIES.map((c) => <option key={c} value={c}>{c}</option>)}
-                </select>
-              </div>
-              <div className="col-span-1">
-                <label className={lbl}>{isAr ? 'الحالة' : 'Condition'}</label>
-                <select value={condition} onChange={(e) => setCondition(e.target.value)} className={input}>
-                  <option value="">—</option>
-                  <option value="new">{isAr ? 'جديد' : 'New'}</option>
-                  <option value="used">{isAr ? 'مستعمل' : 'Used'}</option>
-                </select>
-              </div>
-            </div>
-
-            <label className="flex items-center gap-2 text-sm text-neutral-300">
-              <input type="checkbox" checked={negotiable} onChange={(e) => setNegotiable(e.target.checked)} /> {isAr ? 'السعر قابل للتفاوض' : 'Negotiable'}
-            </label>
-
-            <div className="grid grid-cols-2 gap-2">
-              <div>
-                <label className={lbl}>{isAr ? 'الدولة' : 'Country'}</label>
-                <select value={country} onChange={(e) => setCountry(e.target.value)} className={input}>
-                  {GULF.map((c) => <option key={c} value={c}>{c}</option>)}
-                </select>
-              </div>
-              <div>
-                <label className={lbl}>{isAr ? 'المدينة' : 'City'}</label>
-                <input value={city} onChange={(e) => setCity(e.target.value)} className={input} />
-              </div>
-            </div>
-
-            <div>
-              <label className={lbl}>{isAr ? 'الاسم 🔒 (من حسابك)' : 'Name 🔒 (your account)'}</label>
-              <input value={member?.name || '—'} readOnly title={isAr ? 'يظهر هذا الاسم في إعلانك ولا يمكن تغييره' : 'Shown on your listing'}
-                className={`${input} opacity-70 cursor-not-allowed`} />
-              <p className="text-xs text-neutral-500 mt-1">{isAr ? 'أضف هاتفًا أو واتساب ليتمكّن المشترون من التواصل معك.' : 'Add a phone or WhatsApp so buyers can reach you.'}</p>
-            </div>
-
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
-              <div>
-                <label className={lbl}>{isAr ? 'هاتف' : 'Phone'}</label>
-                <input value={phone} onChange={(e) => setPhone(e.target.value)} className={input} placeholder="974XXXXXXXX" />
-              </div>
-              <div>
-                <label className={lbl}>{isAr ? 'واتساب' : 'WhatsApp'}</label>
-                <input value={whatsapp} onChange={(e) => setWhatsapp(e.target.value)} className={input} placeholder="974XXXXXXXX" />
-              </div>
-              <div>
-                <label className={lbl}>{isAr ? 'تلجرام 🔒 (من حسابك)' : 'Telegram 🔒 (your account)'}</label>
-                <input value={telegram ? `@${telegram}` : '—'} readOnly title={isAr ? 'مرتبط بحسابك ولا يمكن تغييره' : 'Linked to your account'}
-                  className={`${input} opacity-70 cursor-not-allowed`} />
-              </div>
-            </div>
-
-            <div>
-              <label className={lbl}>{isAr ? 'الصور (حتى ١٠)' : 'Images (up to 10)'}</label>
-              {editId && existingImages.length > 0 && images.length === 0 && (
-                <div className="mb-2">
-                  <div className="grid grid-cols-5 gap-2">
-                    {existingImages.slice(0, 10).map((img, i) => (
-                      // eslint-disable-next-line @next/next/no-img-element
-                      <img key={i} src={img} alt="" className="aspect-square w-full rounded-lg object-cover bg-white/5" />
-                    ))}
-                  </div>
-                  <p className="text-xs text-neutral-500 mt-1">{isAr ? 'الصور الحالية — ارفع صورًا جديدة لاستبدالها.' : 'Current images — upload new ones to replace.'}</p>
+            {/* التفاصيل */}
+            <div className={card}>
+              <p className={gt}>📝 {isAr ? 'تفاصيل الإعلان' : 'Listing details'}</p>
+              {section === 'cars' ? (
+                <div>
+                  <label className={lbl}>{isAr ? 'النوع' : 'Type'}</label>
+                  <select value={listingType} onChange={(e) => setListingType(e.target.value)} className={input}>
+                    <option value="car_sale">{isAr ? 'للبيع' : 'For sale'}</option>
+                    <option value="car_request">{isAr ? 'طلب شراء' : 'Wanted'}</option>
+                  </select>
+                </div>
+              ) : (
+                <div>
+                  <label className={lbl}>{isAr ? 'القسم' : 'Section'}</label>
+                  <select value={categoryId} onChange={(e) => setCategoryId(e.target.value)} className={input}>
+                    <option value="">{isAr ? 'اختر القسم' : 'Select'}</option>
+                    {sections.map((s) => <option key={s.slug} value={String(s.id)}>{s.icon} {isAr ? s.name_ar : (s.name_en ?? s.name_ar)}</option>)}
+                  </select>
                 </div>
               )}
-              <input type="file" multiple accept="image/*" onChange={(e) => setImages(Array.from(e.target.files || []))}
-                className="block w-full text-sm text-neutral-400 file:me-3 file:py-2 file:px-4 file:rounded-lg file:border-0 file:bg-white/10 file:text-white" />
-              {images.length > 0 && <p className="text-xs text-neutral-500 mt-1">{images.length} {isAr ? 'صورة مختارة' : 'selected'}</p>}
+              <div>
+                <label className={lbl}>{isAr ? 'العنوان *' : 'Title *'}</label>
+                <input value={title} onChange={(e) => setTitle(e.target.value)} className={input} placeholder={isAr ? 'مثال: بي واي دي سيل 2024' : 'e.g. BYD Seal 2024'} />
+              </div>
+              <div>
+                <label className={lbl}>{isAr ? 'الوصف' : 'Description'}</label>
+                <textarea value={desc} onChange={(e) => setDesc(e.target.value)} rows={4} className={`${input} resize-none`} placeholder={isAr ? 'حالة السيارة/القطعة، المميزات، أي تفاصيل مهمة…' : 'Condition, features, key details…'} />
+              </div>
             </div>
 
-            {error && <p className="text-rose-400 text-sm">{error}</p>}
+            {/* الماركة والموديل */}
+            <div className={card}>
+              <p className={gt}>🚘 {section === 'parts' ? (isAr ? 'التوافق' : 'Compatibility') : (isAr ? 'الماركة والموديل' : 'Brand & model')}</p>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div>
+                  <label className={lbl}>{section === 'parts' ? (isAr ? 'الماركة المتوافقة' : 'Compatible brand') : (isAr ? 'الماركة' : 'Brand')}</label>
+                  <select value={brandId} onChange={(e) => { setBrandId(e.target.value); setModelId(''); setCustomModel(''); }} className={input}>
+                    <option value="">{isAr ? 'اختر الماركة' : 'Select brand'}</option>
+                    {brands.map((b) => <option key={b.id} value={String(b.id)}>{isAr ? b.name_ar : (b.name_en ?? b.name_ar)}</option>)}
+                    <option value="other">{isAr ? 'أخرى (اكتبها)' : 'Other (type it)'}</option>
+                  </select>
+                  {brandId === 'other' && (
+                    <input value={customBrand} onChange={(e) => setCustomBrand(e.target.value)} maxLength={60} className={`${input} mt-2`} placeholder={isAr ? 'اكتب اسم الماركة' : 'Type the brand'} />
+                  )}
+                </div>
+                <div>
+                  <label className={lbl}>{isAr ? 'الموديل' : 'Model'}</label>
+                  {brandId && brandId !== 'other' ? (
+                    <>
+                      <select value={modelId} onChange={(e) => { setModelId(e.target.value); if (e.target.value !== 'other') setCustomModel(''); }} className={input}>
+                        <option value="">{isAr ? 'اختر الموديل' : 'Select model'}</option>
+                        {(brands.find((b) => String(b.id) === brandId)?.models ?? []).map((m) => (
+                          <option key={m.id} value={String(m.id)}>{isAr ? m.name_ar : (m.name_en ?? m.name_ar)}</option>
+                        ))}
+                        <option value="other">{isAr ? 'أخرى (اكتبه)' : 'Other (type it)'}</option>
+                      </select>
+                      {modelId === 'other' && (
+                        <input value={customModel} onChange={(e) => setCustomModel(e.target.value)} maxLength={60} className={`${input} mt-2`} placeholder={isAr ? 'اكتب اسم الموديل' : 'Type the model'} />
+                      )}
+                    </>
+                  ) : (
+                    <input value={customModel} onChange={(e) => setCustomModel(e.target.value)} maxLength={60} disabled={!brandId} className={`${input} disabled:opacity-50`} placeholder={brandId ? (isAr ? 'اكتب الموديل' : 'Type the model') : (isAr ? 'اختر الماركة أولًا' : 'Select brand first')} />
+                  )}
+                </div>
+              </div>
+            </div>
+
+            {/* السعر والموقع */}
+            <div className={card}>
+              <p className={gt}>💰 {isAr ? 'السعر والموقع' : 'Price & location'}</p>
+              <div className="grid grid-cols-3 gap-3">
+                <div><label className={lbl}>{isAr ? 'السعر' : 'Price'}</label>
+                  <input value={price} onChange={(e) => setPrice(e.target.value)} type="number" inputMode="numeric" className={input} /></div>
+                <div><label className={lbl}>{isAr ? 'العملة' : 'Currency'}</label>
+                  <select value={currency} onChange={(e) => setCurrency(e.target.value)} className={input}>
+                    {CURRENCIES.map((c) => <option key={c} value={c}>{c}</option>)}
+                  </select></div>
+                <div><label className={lbl}>{isAr ? 'الحالة' : 'Condition'}</label>
+                  <select value={condition} onChange={(e) => setCondition(e.target.value)} className={input}>
+                    <option value="">—</option>
+                    <option value="new">{isAr ? 'جديد' : 'New'}</option>
+                    <option value="used">{isAr ? 'مستعمل' : 'Used'}</option>
+                  </select></div>
+              </div>
+              <label className="flex items-center gap-2 text-sm text-neutral-300">
+                <input type="checkbox" checked={negotiable} onChange={(e) => setNegotiable(e.target.checked)} /> {isAr ? 'السعر قابل للتفاوض' : 'Negotiable'}
+              </label>
+              <div className="grid grid-cols-2 gap-3">
+                <div><label className={lbl}>{isAr ? 'الدولة' : 'Country'}</label>
+                  <select value={country} onChange={(e) => setCountry(e.target.value)} className={input}>
+                    {GULF.map((c) => <option key={c} value={c}>{c}</option>)}
+                  </select></div>
+                <div><label className={lbl}>{isAr ? 'المدينة' : 'City'}</label>
+                  <input value={city} onChange={(e) => setCity(e.target.value)} className={input} /></div>
+              </div>
+            </div>
+
+            {/* الصور */}
+            <div className={card}>
+              <p className={gt}>📷 {isAr ? 'الصور (حتى ٣)' : 'Images (up to 3)'}</p>
+              {editId && existingImages.length > 0 && images.length === 0 && (
+                <div>
+                  <div className="grid grid-cols-3 gap-2">
+                    {existingImages.slice(0, 3).map((img, i) => (
+                      // eslint-disable-next-line @next/next/no-img-element
+                      <img key={i} src={img} alt="" className="aspect-square w-full rounded-xl object-cover bg-white/5" />
+                    ))}
+                  </div>
+                  <p className="text-xs text-neutral-500 mt-1.5">{isAr ? 'الصور الحالية — أضف صورًا جديدة لاستبدالها.' : 'Current images — add new ones to replace.'}</p>
+                </div>
+              )}
+              <ImageUploader files={images} onChange={setImages} max={3} isAr={isAr} />
+            </div>
+
+            {/* التواصل */}
+            <div className={card}>
+              <p className={gt}>📞 {isAr ? 'التواصل' : 'Contact'}</p>
+              <div>
+                <label className={lbl}>{isAr ? 'الاسم 🔒 (من حسابك)' : 'Name 🔒 (your account)'}</label>
+                <input value={member?.name || '—'} readOnly title={isAr ? 'يظهر هذا الاسم في إعلانك ولا يمكن تغييره' : 'Shown on your listing'}
+                  className={`${input} opacity-70 cursor-not-allowed`} />
+              </div>
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                <div><label className={lbl}>{isAr ? 'هاتف' : 'Phone'}</label>
+                  <input value={phone} onChange={(e) => setPhone(e.target.value)} className={input} placeholder="974XXXXXXXX" /></div>
+                <div><label className={lbl}>{isAr ? 'واتساب' : 'WhatsApp'}</label>
+                  <input value={whatsapp} onChange={(e) => setWhatsapp(e.target.value)} className={input} placeholder="974XXXXXXXX" /></div>
+                <div><label className={lbl}>{isAr ? 'تلجرام 🔒' : 'Telegram 🔒'}</label>
+                  <input value={telegram ? `@${telegram}` : '—'} readOnly title={isAr ? 'مرتبط بحسابك' : 'Linked to your account'}
+                    className={`${input} opacity-70 cursor-not-allowed`} /></div>
+              </div>
+              <p className="text-xs text-neutral-500">{isAr ? 'أضف هاتفًا أو واتساب ليتمكّن المشترون من التواصل معك.' : 'Add a phone or WhatsApp so buyers can reach you.'}</p>
+            </div>
+
+            {error && <p className="text-rose-400 text-sm text-center">{error}</p>}
 
             <button onClick={submit} disabled={submitting}
-              className="w-full py-3 rounded-xl bg-emerald-600 hover:bg-emerald-500 disabled:opacity-50 text-white font-bold transition-colors">
+              className="w-full py-3.5 rounded-2xl bg-emerald-600 hover:bg-emerald-500 disabled:opacity-50 text-white font-bold transition-colors">
               {submitting ? (isAr ? 'جارٍ الإرسال…' : 'Submitting…') : editId ? (isAr ? 'إرسال التعديل للمراجعة' : 'Resubmit for review') : (isAr ? 'إرسال الإعلان' : 'Submit')}
             </button>
             <p className="text-xs text-neutral-500 text-center">{isAr ? 'يُراجَع إعلانك قبل النشر.' : 'Reviewed before publishing.'}</p>
