@@ -2,6 +2,7 @@ import Link from 'next/link';
 import { type Locale } from '@/types';
 import { translations } from '@/data/translations';
 import { fetchSiteContent } from '@/lib/server-api';
+import { ContactWidget } from '@/components/ContactWidget';
 
 interface FooterProps {
   locale: Locale;
@@ -38,6 +39,7 @@ export async function Footer({ locale }: FooterProps) {
 
           {/* Links */}
           <div className={`flex items-center gap-4 ${isRTL ? 'flex-row-reverse' : ''}`}>
+            {siteContent?.contact_enabled !== false && <ContactWidget isAr={isRTL} />}
             <Link href={`/${locale}/about`} className="text-gray-500 dark:text-gray-400 text-xs hover:text-gray-900 dark:hover:text-white transition-colors">
               {isRTL ? 'من نحن' : 'About'}
             </Link>

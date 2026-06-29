@@ -68,6 +68,7 @@ export interface SiteContent {
   privacy_en: string;
   about_ar: string;
   about_en: string;
+  contact_enabled: boolean | string;
   ilink_enabled: boolean | string;
   ilink_label_ar: string;
   ilink_label_en: string;
