@@ -62,6 +62,8 @@ export interface SiteContent {
   feature_fast_en: string;
   footer_copyright_ar: string;
   footer_copyright_en: string;
+  terms_ar: string;
+  terms_en: string;
   ilink_enabled: boolean | string;
   ilink_label_ar: string;
   ilink_label_en: string;
