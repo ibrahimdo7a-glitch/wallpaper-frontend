@@ -3,13 +3,15 @@
 import { useState } from 'react';
 
 /** "Share" button → a lightweight modal with Telegram / WhatsApp / copy-link options. */
-export function ShareButton({ title, isAr }: { title: string; isAr: boolean }) {
+export function ShareButton({ title, text, isAr }: { title: string; text: string; isAr: boolean }) {
   const [open, setOpen] = useState(false);
   const [copied, setCopied] = useState(false);
 
   const url = typeof window !== 'undefined' ? window.location.href : '';
-  const tg = `https://t.me/share/url?url=${encodeURIComponent(url)}&text=${encodeURIComponent(title)}`;
-  const wa = `https://wa.me/?text=${encodeURIComponent(`${title}\n${url}`)}`;
+  // Telegram pulls the cover from the page's OpenGraph; text is the caption.
+  const tg = `https://t.me/share/url?url=${encodeURIComponent(url)}&text=${encodeURIComponent(text)}`;
+  // WhatsApp builds its preview from the link in the text.
+  const wa = `https://wa.me/?text=${encodeURIComponent(`${text}\n\n${url}`)}`;
 
   const copy = async () => {
     try {

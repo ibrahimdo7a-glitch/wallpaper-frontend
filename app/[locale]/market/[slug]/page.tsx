@@ -16,7 +16,21 @@ type Props = { params: { locale: Locale; slug: string } };
 export async function generateMetadata({ params: { locale, slug } }: Props): Promise<Metadata> {
   const l = await fetchMarketListing(slug);
   if (!l) return { title: 'Not found' };
-  return { title: `${locale === 'ar' ? l.title_ar : (l.title_en ?? l.title_ar)} | السوق` };
+  const title = locale === 'ar' ? l.title_ar : (l.title_en ?? l.title_ar);
+  const price = l.price != null ? `${l.price.toLocaleString()} ${l.currency}` : (locale === 'ar' ? 'حسب الطلب' : 'On request');
+  const desc = (locale === 'ar' ? l.description_ar : l.description_en) || price;
+  const image = l.images?.[0];
+  return {
+    title: `${title} | السوق`,
+    description: desc,
+    openGraph: {
+      title,
+      description: desc,
+      type: 'website',
+      images: image ? [{ url: image }] : [],
+    },
+    twitter: { card: image ? 'summary_large_image' : 'summary', title, description: desc, images: image ? [image] : [] },
+  };
 }
 
 export default async function MarketDetailPage({ params: { locale, slug } }: Props) {
@@ -26,6 +40,16 @@ export default async function MarketDetailPage({ params: { locale, slug } }: Pro
 
   const title = isAr ? l.title_ar : (l.title_en ?? l.title_ar);
   const desc = isAr ? l.description_ar : (l.description_en ?? l.description_ar);
+
+  // Descriptive text shared on Telegram/WhatsApp (the cover shows via OpenGraph).
+  const shareLines = [
+    isAr ? '📢 إعلان من قناة قطر للسيارات الكهربائية:' : '📢 A listing from QEV Cars:',
+    `🚗 ${title}`,
+  ];
+  if (l.price != null) shareLines.push(`💰 ${l.price.toLocaleString()} ${l.currency}${l.is_negotiable ? (isAr ? ' (قابل للتفاوض)' : ' (negotiable)') : ''}`);
+  if (l.country || l.city) shareLines.push(`📍 ${[l.country, l.city].filter(Boolean).join(' · ')}`);
+  if (l.contact?.name) shareLines.push(`👤 ${l.contact.name}`);
+  const shareText = shareLines.join('\n');
 
   const isCar = l.listing_type === 'car_sale' || l.listing_type === 'car_request';
   const section = { base: isCar ? '/cars' : '/parts', label: isCar ? (isAr ? 'سوق السيارات' : 'Cars') : (isAr ? 'قطع وأكسسوارات' : 'Parts & Accessories') };
@@ -72,7 +96,7 @@ export default async function MarketDetailPage({ params: { locale, slug } }: Pro
               </p>
               <div className="mt-3 flex gap-2">
                 <SaveButton type="listing" id={l.id} isAr={isAr} />
-                <ShareButton title={title} isAr={isAr} />
+                <ShareButton title={title} text={shareText} isAr={isAr} />
               </div>
             </div>
 
