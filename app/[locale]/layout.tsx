@@ -25,12 +25,15 @@ export async function generateMetadata({
   const siteName = locale === 'ar'
     ? (siteContent?.site_name_ar || t.siteName)
     : (siteContent?.site_name_en || t.siteName);
+  const faviconUrl = siteContent?.favicon_url || undefined;
   return {
     title: { default: siteName, template: `%s | ${siteName}` },
     description: locale === 'ar'
       ? (siteContent?.hero_subtitle_ar || t.hero.subtitle)
       : (siteContent?.hero_subtitle_en || t.hero.subtitle),
     metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || 'https://qev.app'),
+    // Favicon is admin-managed via Site Settings — applied to every browser tab + mobile.
+    ...(faviconUrl ? { icons: { icon: faviconUrl, shortcut: faviconUrl, apple: faviconUrl } } : {}),
   };
 }
 
