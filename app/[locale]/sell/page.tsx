@@ -11,6 +11,8 @@ const GULF = ['قطر', 'السعودية', 'الإمارات', 'الكويت', 
 const CURRENCIES = ['QAR', 'SAR', 'AED', 'KWD', 'BHD', 'OMR', 'USD'];
 
 type Section = { id: number; slug: string; name_ar: string; name_en: string | null; icon: string | null };
+type Model = { id: number; name_ar: string; name_en: string | null };
+type Brand = { id: number; name_ar: string; name_en: string | null; models: Model[] };
 
 export default function SellPage() {
   return (
@@ -35,6 +37,11 @@ function SellForm() {
   const [listingType, setListingType] = useState('car_sale');
   const [categoryId, setCategoryId] = useState('');
   const [sections, setSections] = useState<Section[]>([]);
+  const [brands, setBrands] = useState<Brand[]>([]);
+  const [brandId, setBrandId] = useState('');       // '' | "<id>" | 'other'
+  const [customBrand, setCustomBrand] = useState('');
+  const [modelId, setModelId] = useState('');        // '' | "<id>" | 'other'
+  const [customModel, setCustomModel] = useState('');
   const [title, setTitle] = useState('');
   const [desc, setDesc] = useState('');
   const [price, setPrice] = useState('');
@@ -77,6 +84,10 @@ function SellForm() {
         setCondition(x.condition || '');
         setCountry(x.country || 'قطر');
         setCity(x.city || '');
+        if (x.brand_id) setBrandId(String(x.brand_id));
+        else if (x.custom_brand) { setBrandId('other'); setCustomBrand(x.custom_brand); }
+        if (x.car_model_id) setModelId(String(x.car_model_id));
+        else if (x.custom_model) { setModelId('other'); setCustomModel(x.custom_model); }
         setPhone(x.contact_phone || '');
         setWhatsapp(x.contact_whatsapp || '');
         setExistingImages(x.images || []);
@@ -88,7 +99,7 @@ function SellForm() {
   useEffect(() => {
     fetch(`${API_BASE}/api/v1/market/config`, { headers: { Accept: 'application/json' } })
       .then((r) => r.json())
-      .then((d) => setSections(d?.parts?.sections ?? []))
+      .then((d) => { setSections(d?.parts?.sections ?? []); setBrands(d?.brands ?? []); })
       .catch(() => {});
   }, []);
 
@@ -101,6 +112,12 @@ function SellForm() {
       fd.append('section', section);
       if (section === 'cars') fd.append('listing_type', listingType);
       if (section === 'parts' && categoryId) fd.append('market_category_id', categoryId);
+      // Brand: a real brand id, or a typed "other" value.
+      if (/^\d+$/.test(brandId)) fd.append('brand_id', brandId);
+      else if (brandId === 'other' && customBrand.trim()) fd.append('custom_brand', customBrand.trim());
+      // Model: a real model id, or a typed value (when brand or model is "other").
+      if (/^\d+$/.test(modelId)) fd.append('car_model_id', modelId);
+      else if (customModel.trim() && (brandId === 'other' || modelId === 'other')) fd.append('custom_model', customModel.trim());
       fd.append('title_ar', title);
       if (desc) fd.append('description_ar', desc);
       if (price) fd.append('price', price);
@@ -194,6 +211,40 @@ function SellForm() {
                 </select>
               </div>
             )}
+
+            {/* Brand + Model (cars = the car; parts = compatible car). "Other" lets the member type a custom value. */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+              <div>
+                <label className={lbl}>{section === 'parts' ? (isAr ? 'الماركة المتوافقة' : 'Compatible brand') : (isAr ? 'الماركة' : 'Brand')}</label>
+                <select value={brandId} onChange={(e) => { setBrandId(e.target.value); setModelId(''); setCustomModel(''); }} className={input}>
+                  <option value="">{isAr ? 'اختر الماركة' : 'Select brand'}</option>
+                  {brands.map((b) => <option key={b.id} value={String(b.id)}>{isAr ? b.name_ar : (b.name_en ?? b.name_ar)}</option>)}
+                  <option value="other">{isAr ? 'أخرى (اكتبها)' : 'Other (type it)'}</option>
+                </select>
+                {brandId === 'other' && (
+                  <input value={customBrand} onChange={(e) => setCustomBrand(e.target.value)} maxLength={60} className={`${input} mt-2`} placeholder={isAr ? 'اكتب اسم الماركة' : 'Type the brand'} />
+                )}
+              </div>
+              <div>
+                <label className={lbl}>{isAr ? 'الموديل' : 'Model'}</label>
+                {brandId && brandId !== 'other' ? (
+                  <>
+                    <select value={modelId} onChange={(e) => { setModelId(e.target.value); if (e.target.value !== 'other') setCustomModel(''); }} className={input}>
+                      <option value="">{isAr ? 'اختر الموديل' : 'Select model'}</option>
+                      {(brands.find((b) => String(b.id) === brandId)?.models ?? []).map((m) => (
+                        <option key={m.id} value={String(m.id)}>{isAr ? m.name_ar : (m.name_en ?? m.name_ar)}</option>
+                      ))}
+                      <option value="other">{isAr ? 'أخرى (اكتبه)' : 'Other (type it)'}</option>
+                    </select>
+                    {modelId === 'other' && (
+                      <input value={customModel} onChange={(e) => setCustomModel(e.target.value)} maxLength={60} className={`${input} mt-2`} placeholder={isAr ? 'اكتب اسم الموديل' : 'Type the model'} />
+                    )}
+                  </>
+                ) : (
+                  <input value={customModel} onChange={(e) => setCustomModel(e.target.value)} maxLength={60} disabled={!brandId} className={`${input} disabled:opacity-50`} placeholder={brandId ? (isAr ? 'اكتب الموديل' : 'Type the model') : (isAr ? 'اختر الماركة أولًا' : 'Select brand first')} />
+                )}
+              </div>
+            </div>
 
             <div>
               <label className={lbl}>{isAr ? 'العنوان *' : 'Title *'}</label>
