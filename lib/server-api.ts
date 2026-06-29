@@ -76,6 +76,10 @@ export interface SiteContent {
   ilink_tooltip_en: string;
   ilink_file_url: string;
   favicon_url: string;
+  seo_google_verification: string;
+  seo_bing_verification: string;
+  seo_keywords_ar: string;
+  seo_keywords_en: string;
 }
 
 export async function fetchCategories(): Promise<ApiCategory[]> {

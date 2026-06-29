@@ -18,10 +18,22 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const article = await fetchNewsArticle(params.slug);
   if (!article) return { title: 'Not Found' };
   const isAr = params.locale === 'ar';
+  const title = isAr ? article.title_ar : (article.title_en ?? article.title_ar);
+  const description = isAr ? article.summary_ar ?? '' : article.summary_en ?? '';
   return {
-    title: `${isAr ? article.title_ar : (article.title_en ?? article.title_ar)} | QEV`,
-    description: isAr ? article.summary_ar ?? '' : article.summary_en ?? '',
-    openGraph: { images: article.cover_image_url ? [article.cover_image_url] : [] },
+    title: `${title} | QEV`,
+    description,
+    alternates: {
+      canonical: `/${params.locale}/news/${params.slug}`,
+      languages: { ar: `/ar/news/${params.slug}`, en: `/en/news/${params.slug}` },
+    },
+    openGraph: {
+      type: 'article',
+      title,
+      description,
+      ...(article.published_at ? { publishedTime: article.published_at } : {}),
+      images: article.cover_image_url ? [article.cover_image_url] : [],
+    },
   };
 }
 
@@ -43,12 +55,26 @@ export default async function NewsArticlePage({ params }: Props) {
   const front = (process.env.NEXT_PUBLIC_SITE_URL || 'https://qev.app').replace(/\/$/, '');
   const shareUrl = `${front}/${params.locale}/news/${article.slug}`;
 
+  const articleJsonLd = {
+    '@context': 'https://schema.org',
+    '@type': 'NewsArticle',
+    headline: title,
+    ...(summary ? { description: summary } : {}),
+    ...(article.cover_image_url ? { image: [article.cover_image_url] } : {}),
+    ...(article.published_at ? { datePublished: article.published_at, dateModified: article.published_at } : {}),
+    ...(article.author_name ? { author: { '@type': 'Person', name: article.author_name } } : {}),
+    publisher: { '@type': 'Organization', name: isAr ? 'قناة قطر للسيارات الكهربائية' : 'QEV' },
+    mainEntityOfPage: { '@type': 'WebPage', '@id': shareUrl },
+    inLanguage: isAr ? 'ar' : 'en',
+  };
+
   const related = (await fetchNews({ category: article.category?.slug, perPage: 4 })).data
     .filter(a => a.slug !== article.slug)
     .slice(0, 3);
 
   return (
     <main className="min-h-screen bg-[#0a0c11] text-neutral-100" dir={isAr ? 'rtl' : 'ltr'}>
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(articleJsonLd) }} />
       <article className="max-w-3xl mx-auto px-4 py-10">
         {/* Breadcrumb */}
         <div className="flex items-center gap-2 text-sm text-neutral-400 mb-6">

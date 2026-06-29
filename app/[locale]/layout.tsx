@@ -7,6 +7,7 @@ import { Footer } from '@/components/Footer';
 import { MemberProvider } from '@/lib/member-auth';
 import { translations } from '@/data/translations';
 import { fetchSiteContent, fetchMarketConfig } from '@/lib/server-api';
+import { SITE_URL, resolveKeywords, siteJsonLd } from '@/lib/seo';
 import './globals.css';
 
 export function generateStaticParams() {
@@ -22,16 +23,53 @@ export async function generateMetadata({
     Promise.resolve(translations[locale as Locale] ?? translations.en),
     fetchSiteContent(),
   ]);
-  const siteName = locale === 'ar'
+  const isAr = locale === 'ar';
+  const siteName = isAr
     ? (siteContent?.site_name_ar || t.siteName)
     : (siteContent?.site_name_en || t.siteName);
+  const description = isAr
+    ? (siteContent?.hero_subtitle_ar || t.hero.subtitle)
+    : (siteContent?.hero_subtitle_en || t.hero.subtitle);
   const faviconUrl = siteContent?.favicon_url || undefined;
+  const keywords = resolveKeywords(isAr ? siteContent?.seo_keywords_ar : siteContent?.seo_keywords_en, locale);
+  const google = siteContent?.seo_google_verification || undefined;
+  const bing = siteContent?.seo_bing_verification || undefined;
+
   return {
     title: { default: siteName, template: `%s | ${siteName}` },
-    description: locale === 'ar'
-      ? (siteContent?.hero_subtitle_ar || t.hero.subtitle)
-      : (siteContent?.hero_subtitle_en || t.hero.subtitle),
-    metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || 'https://qev.app'),
+    description,
+    metadataBase: new URL(SITE_URL),
+    keywords,
+    applicationName: siteName,
+    alternates: {
+      // hreflang pair for the locale home; deep pages also ship alternates via the sitemap.
+      languages: { ar: '/ar', en: '/en', 'x-default': '/ar' },
+    },
+    openGraph: {
+      type: 'website',
+      siteName,
+      title: siteName,
+      description,
+      locale: isAr ? 'ar_AR' : 'en_US',
+      ...(faviconUrl ? { images: [faviconUrl] } : {}),
+    },
+    twitter: {
+      card: 'summary_large_image',
+      title: siteName,
+      description,
+      ...(faviconUrl ? { images: [faviconUrl] } : {}),
+    },
+    robots: {
+      index: true,
+      follow: true,
+      googleBot: { index: true, follow: true, 'max-image-preview': 'large', 'max-snippet': -1, 'max-video-preview': -1 },
+    },
+    ...((google || bing) ? {
+      verification: {
+        ...(google ? { google } : {}),
+        ...(bing ? { other: { 'msvalidate.01': bing } } : {}),
+      },
+    } : {}),
     // Favicon is admin-managed via Site Settings — applied to every browser tab + mobile.
     ...(faviconUrl ? { icons: { icon: faviconUrl, shortcut: faviconUrl, apple: faviconUrl } } : {}),
   };
@@ -81,6 +119,13 @@ export default async function LocaleLayout({
         <link
           href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Noto+Kufi+Arabic:wght@400;500;600;700;800;900&display=swap"
           rel="stylesheet"
+        />
+        {/* Organization + WebSite (sitelinks search box) structured data */}
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify(siteJsonLd(siteName, locale, siteContent?.favicon_url || undefined)),
+          }}
         />
       </head>
       <body

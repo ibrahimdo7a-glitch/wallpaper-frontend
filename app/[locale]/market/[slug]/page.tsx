@@ -7,6 +7,7 @@ import { MarketGallery } from '@/components/market/MarketGallery';
 import { SaveButton } from '@/components/market/SaveButton';
 import { ShareButton } from '@/components/market/ShareButton';
 import { type Locale } from '@/lib/i18n';
+import { SITE_URL } from '@/lib/seo';
 
 export const revalidate = 60;
 export async function generateStaticParams() { return []; }
@@ -23,11 +24,15 @@ export async function generateMetadata({ params: { locale, slug } }: Props): Pro
   return {
     title: `${title} | السوق`,
     description: desc,
+    alternates: {
+      canonical: `/${locale}/market/${slug}`,
+      languages: { ar: `/ar/market/${slug}`, en: `/en/market/${slug}` },
+    },
     openGraph: {
       title,
       description: desc,
       type: 'website',
-      url: `https://qev.app/${locale}/market/${slug}`,
+      url: `${SITE_URL}/${locale}/market/${slug}`,
       siteName: locale === 'ar' ? 'قناة قطر للسيارات الكهربائية' : 'QEV',
       images: image ? [{ url: image }] : [],
     },
@@ -68,8 +73,27 @@ export default async function MarketDetailPage({ params: { locale, slug } }: Pro
   if (l.category) specs.push({ label: isAr ? 'القسم' : 'Section', value: l.category });
   if (l.city) specs.push({ label: isAr ? 'الموقع' : 'Location', value: `${l.country ? l.country + ' · ' : ''}${l.city}` });
 
+  const productJsonLd = {
+    '@context': 'https://schema.org',
+    '@type': 'Product',
+    name: title,
+    description: desc || title,
+    ...(l.images?.length ? { image: l.images } : {}),
+    ...(l.brand ? { brand: { '@type': 'Brand', name: l.brand.name_ar } } : {}),
+    ...(l.price != null ? {
+      offers: {
+        '@type': 'Offer',
+        price: l.price,
+        priceCurrency: l.currency,
+        availability: 'https://schema.org/InStock',
+        url: `${SITE_URL}/${locale}/market/${slug}`,
+      },
+    } : {}),
+  };
+
   return (
     <main className="min-h-screen bg-[#0a0c11] text-neutral-100" dir={isAr ? 'rtl' : 'ltr'}>
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(productJsonLd) }} />
       <div className="max-w-6xl mx-auto px-4 py-8">
         <nav className="text-xs text-neutral-500 mb-6 flex gap-2">
           <Link href={`/${locale}${section.base}`} className="hover:text-white transition-colors">{section.label}</Link>
