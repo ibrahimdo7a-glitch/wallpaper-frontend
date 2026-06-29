@@ -622,6 +622,7 @@ export interface ApiMarketSection {
 export interface ApiMarketConfig {
   cars: ApiMarketSection;
   parts: ApiMarketSection;
+  countries: string[];
 }
 
 export interface ApiMarketListing {
@@ -661,6 +662,7 @@ export async function fetchMarketConfig(): Promise<ApiMarketConfig> {
   return res ?? {
     cars: { enabled: false, label_ar: 'سوق السيارات', label_en: 'Cars' },
     parts: { enabled: false, label_ar: 'قطع وأكسسوارات', label_en: 'Parts & Accessories' },
+    countries: [],
   };
 }
 

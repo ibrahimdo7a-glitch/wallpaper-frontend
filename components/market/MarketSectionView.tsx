@@ -14,14 +14,16 @@ interface Props {
   tabParam: 'type' | 'category';
   activeTab?: string;
   sort?: string;
+  countries?: string[];
+  activeCountry?: string;
 }
 
-export function MarketSectionView({ basePath, label, locale, isAr, listings, meta, tabs, tabParam, activeTab, sort }: Props) {
+export function MarketSectionView({ basePath, label, locale, isAr, listings, meta, tabs, tabParam, activeTab, sort, countries = [], activeCountry }: Props) {
   const page = Math.max(1, Number(meta?.current_page ?? 1));
 
   // Build a query string for this section, overriding selected keys.
   const href = (over: Record<string, string | undefined>) => {
-    const params: Record<string, string | undefined> = { [tabParam]: activeTab, sort, ...over };
+    const params: Record<string, string | undefined> = { [tabParam]: activeTab, sort, country: activeCountry, ...over };
     const qs = Object.entries(params)
       .filter(([, v]) => v !== undefined && v !== '')
       .map(([k, v]) => `${k}=${encodeURIComponent(v as string)}`)
@@ -31,6 +33,9 @@ export function MarketSectionView({ basePath, label, locale, isAr, listings, met
 
   const tabCls = (active: boolean) =>
     `px-4 py-1.5 rounded-full text-sm font-medium transition-colors ${active ? 'bg-white text-black' : 'bg-white/5 text-neutral-300 hover:bg-white/10'}`;
+
+  const countryItemCls = (active: boolean) =>
+    `block px-3 py-1.5 rounded-lg text-sm whitespace-nowrap transition-colors ${active ? 'bg-white/10 text-white font-semibold' : 'text-neutral-300 hover:bg-white/10'}`;
 
   return (
     <main className="min-h-screen bg-[#0a0c11] text-neutral-100" dir={isAr ? 'rtl' : 'ltr'}>
@@ -51,7 +56,28 @@ export function MarketSectionView({ basePath, label, locale, isAr, listings, met
           </nav>
         )}
 
-        <div className="flex justify-end mb-6">
+        <div className="flex items-center justify-between gap-3 flex-wrap mb-6">
+          {/* Country filter — a JS-free dropdown of the configured countries. */}
+          {countries.length > 0 ? (
+            <details className="relative">
+              <summary className="list-none [&::-webkit-details-marker]:hidden cursor-pointer flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium bg-white/[0.03] text-neutral-200 hover:bg-white/10 transition-colors">
+                <span>🌍</span>
+                <span>{activeCountry || (isAr ? 'كل الدول' : 'All countries')}</span>
+                <span className="text-[10px] opacity-60">▾</span>
+              </summary>
+              <div className="absolute z-30 mt-2 start-0 min-w-[170px] max-h-72 overflow-auto rounded-xl border border-white/10 bg-[#11151b] p-1 shadow-2xl">
+                <Link href={href({ country: undefined, page: undefined })} className={countryItemCls(!activeCountry)}>
+                  {isAr ? 'كل الدول' : 'All countries'}
+                </Link>
+                {countries.map((c) => (
+                  <Link key={c} href={href({ country: c, page: undefined })} className={countryItemCls(activeCountry === c)}>
+                    {c}
+                  </Link>
+                ))}
+              </div>
+            </details>
+          ) : <span />}
+
           <div className="flex gap-2">
             {[
               { value: '', label: isAr ? 'الأحدث' : 'Newest' },
