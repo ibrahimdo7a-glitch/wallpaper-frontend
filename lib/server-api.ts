@@ -521,6 +521,23 @@ export async function fetchBrandApps(brandSlug: string): Promise<ApiApp[]> {
   return res?.data ?? [];
 }
 
+export interface BrandShowcaseListing {
+  id: number; title_ar: string; title_en: string | null; slug: string;
+  price: number | null; currency: string; is_negotiable: boolean;
+  city: string | null; cover_url: string | null; is_featured: boolean;
+}
+export interface BrandShowcaseWallpaper {
+  id: number; title_ar: string; title_en: string | null; slug: string;
+  image_url: string | null; thumbnail_url: string | null;
+  section_slug: string | null; downloads_count: number;
+}
+export async function fetchBrandShowcase(brandSlug: string): Promise<{ listings: BrandShowcaseListing[]; wallpapers: BrandShowcaseWallpaper[] }> {
+  const res = await get<{ data: { listings: BrandShowcaseListing[]; wallpapers: BrandShowcaseWallpaper[] } }>(
+    `/brands/${brandSlug}/showcase`, 60, [`brand-${brandSlug}`, 'market', 'wallpapers'],
+  );
+  return res?.data ?? { listings: [], wallpapers: [] };
+}
+
 export async function fetchCarModel(brandSlug: string, modelSlug: string): Promise<ApiCarModel | null> {
   const res = await get<{ data: ApiCarModel }>(`/brands/${brandSlug}/models/${modelSlug}`, 60, ['car-models', `model-${modelSlug}`]);
   return res?.data ?? null;

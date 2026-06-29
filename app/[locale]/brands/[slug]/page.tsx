@@ -3,7 +3,7 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { notFound } from 'next/navigation';
 import { setRequestLocale } from 'next-intl/server';
-import { fetchBrand, fetchBrandSections, fetchBrandModels, fetchBrands, fetchBrandApps } from '@/lib/server-api';
+import { fetchBrand, fetchBrandSections, fetchBrandModels, fetchBrands, fetchBrandApps, fetchBrandShowcase } from '@/lib/server-api';
 import { locales, type Locale } from '@/lib/i18n';
 import type { ApiBrandSection } from '@/lib/server-api';
 
@@ -35,17 +35,20 @@ export default async function BrandPage({ params }: Props) {
   setRequestLocale(params.locale);
   const isAr = params.locale === 'ar';
 
-  const [brand, sections, models, apps] = await Promise.all([
+  const [brand, sections, models, apps, showcase] = await Promise.all([
     fetchBrand(params.slug),
     fetchBrandSections(params.slug),
     fetchBrandModels(params.slug),
     fetchBrandApps(params.slug),
+    fetchBrandShowcase(params.slug),
   ]);
 
   if (!brand) notFound();
 
   const brandName = isAr ? brand.name_ar : (brand.name_en ?? brand.name_ar);
   const navSections = sections.filter(s => s.show_in_navigation);
+  const featuredListings = showcase.listings.filter(l => l.is_featured);
+  const regularListings = showcase.listings.filter(l => !l.is_featured);
   const homeSections = sections.filter(s => s.show_in_brand_home);
 
   const primaryColor = brand.primary_color ?? '#3b82f6';
@@ -177,6 +180,74 @@ export default async function BrandPage({ params }: Props) {
                   </div>
                 </Link>
               ))}
+            </div>
+          </section>
+        )}
+
+        {/* ─── Brand listings (last 12, featured on top) ─── */}
+        {showcase.listings.length > 0 && (
+          <section className="mb-12">
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-lg font-bold">🛒 {isAr ? `إعلانات ${brandName}` : `${brandName} listings`}</h2>
+              <Link href={`/${params.locale}/cars`} className="text-sm hover:underline" style={{ color: primaryColor }}>
+                {isAr ? 'عرض الكل ←' : 'View all →'}
+              </Link>
+            </div>
+
+            {featuredListings.length > 0 && (
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-3">
+                {featuredListings.map(l => (
+                  <Link key={l.id} href={`/${params.locale}/market/${l.slug}`}
+                    className="group flex items-center gap-3 p-3 rounded-2xl border border-amber-500/30 bg-amber-500/[0.07] hover:bg-amber-500/[0.13] transition-colors">
+                    <div className="relative w-20 h-16 rounded-xl overflow-hidden bg-white/5 shrink-0">
+                      {l.cover_url ? <Image src={l.cover_url} alt={l.title_ar} fill className="object-cover" /> : <div className="w-full h-full flex items-center justify-center text-2xl">🚗</div>}
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <span className="text-[10px] font-bold text-amber-300">⭐ {isAr ? 'مميّز' : 'Featured'}</span>
+                      <p className="font-bold text-sm text-white truncate">{isAr ? l.title_ar : (l.title_en ?? l.title_ar)}</p>
+                      <p className="text-xs text-emerald-400">{l.price != null ? `${l.price.toLocaleString()} ${l.currency}` : (isAr ? 'حسب الطلب' : 'On request')}</p>
+                    </div>
+                  </Link>
+                ))}
+              </div>
+            )}
+
+            {regularListings.length > 0 && (
+              <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
+                {regularListings.map(l => (
+                  <Link key={l.id} href={`/${params.locale}/market/${l.slug}`}
+                    className="group bg-gray-900 hover:bg-gray-800 border border-gray-800 hover:border-gray-600 rounded-2xl overflow-hidden transition-all">
+                    <div className="relative h-24 bg-gray-800">
+                      {l.cover_url ? <Image src={l.cover_url} alt={l.title_ar} fill className="object-cover group-hover:scale-105 transition-transform duration-300" /> : <div className="h-full flex items-center justify-center text-2xl">🚗</div>}
+                    </div>
+                    <div className="p-2">
+                      <p className="font-semibold text-xs truncate">{isAr ? l.title_ar : (l.title_en ?? l.title_ar)}</p>
+                      <p className="text-[11px] text-emerald-400">{l.price != null ? `${l.price.toLocaleString()} ${l.currency}` : (isAr ? 'حسب الطلب' : 'On request')}</p>
+                    </div>
+                  </Link>
+                ))}
+              </div>
+            )}
+          </section>
+        )}
+
+        {/* ─── Latest brand wallpapers ─── */}
+        {showcase.wallpapers.length > 0 && (
+          <section className="mb-12">
+            <h2 className="text-lg font-bold mb-4">🖼️ {isAr ? `أحدث خلفيات ${brandName}` : `Latest ${brandName} wallpapers`}</h2>
+            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
+              {showcase.wallpapers.map(w => {
+                const href = w.section_slug ? `/${params.locale}/brands/${params.slug}/${w.section_slug}/${w.slug}` : '#';
+                const img = w.thumbnail_url ?? w.image_url;
+                return (
+                  <Link key={w.id} href={href}
+                    className="group bg-gray-900 border border-gray-800 hover:border-gray-600 rounded-2xl overflow-hidden transition-all">
+                    <div className="relative aspect-[3/4] bg-gray-800">
+                      {img ? <Image src={img} alt={w.title_ar} fill className="object-cover group-hover:scale-105 transition-transform duration-300" /> : <div className="h-full flex items-center justify-center text-2xl">🖼️</div>}
+                    </div>
+                  </Link>
+                );
+              })}
             </div>
           </section>
         )}
