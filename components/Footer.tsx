@@ -24,21 +24,6 @@ export async function Footer({ locale }: FooterProps) {
   return (
     <footer className="border-t border-gray-100 dark:border-gray-800 bg-white dark:bg-gray-950 py-5">
       <div className="max-w-7xl mx-auto px-4 sm:px-6">
-        {/* Geo links — internal links to the country landing pages (SEO + discovery) */}
-        <div className="border-b border-gray-100 dark:border-gray-800 pb-4 mb-4">
-          <p className="text-gray-500 dark:text-gray-400 text-xs font-semibold mb-2">
-            {isRTL ? 'السيارات الكهربائية حسب الدولة' : 'Electric cars by country'}
-          </p>
-          <div className={`flex flex-wrap gap-x-4 gap-y-1.5 ${isRTL ? 'flex-row-reverse justify-end' : ''}`}>
-            {COUNTRIES.map((c) => (
-              <Link key={c.slug} href={`/${locale}/electric-cars/${c.slug}`}
-                className="text-gray-500 dark:text-gray-400 text-xs hover:text-gray-900 dark:hover:text-white transition-colors">
-                {isRTL ? `سيارات كهربائية ${c.name_ar}` : `EV ${c.name_en}`}
-              </Link>
-            ))}
-          </div>
-        </div>
-
         <div className={`flex flex-col sm:flex-row items-center gap-3 justify-between ${isRTL ? 'sm:flex-row-reverse' : ''}`}>
           {/* Logo */}
           <div className={`flex items-center gap-2 ${isRTL ? 'flex-row-reverse' : ''}`}>
@@ -65,6 +50,19 @@ export async function Footer({ locale }: FooterProps) {
             <Link href={`/${locale}/terms`} className="text-gray-500 dark:text-gray-400 text-xs hover:text-gray-900 dark:hover:text-white transition-colors">
               {t.footer.terms}
             </Link>
+          </div>
+        </div>
+
+        {/* By-country links — small, desktop-only, low-prominence (SEO internal links) */}
+        <div className="hidden sm:block border-t border-gray-100 dark:border-gray-800 pt-3 mt-4">
+          <div className={`flex flex-wrap items-center gap-x-3 gap-y-1 ${isRTL ? 'flex-row-reverse justify-end' : ''}`}>
+            <span className="text-[10px] text-gray-400 dark:text-gray-600">{isRTL ? 'حسب الدولة:' : 'By country:'}</span>
+            {COUNTRIES.map((c) => (
+              <Link key={c.slug} href={`/${locale}/electric-cars/${c.slug}`}
+                className="text-[10px] text-gray-400 dark:text-gray-600 hover:text-gray-700 dark:hover:text-gray-300 transition-colors">
+                {isRTL ? `سيارات كهربائية ${c.name_ar}` : `EV ${c.name_en}`}
+              </Link>
+            ))}
           </div>
         </div>
       </div>
