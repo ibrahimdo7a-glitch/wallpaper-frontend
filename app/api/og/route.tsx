@@ -2,13 +2,23 @@ import { ImageResponse } from 'next/og';
 
 export const runtime = 'edge';
 
+const API = (process.env.NEXT_PUBLIC_API_URL || 'https://api.qev.app').replace(/\/$/, '');
+
 /**
- * Default Open Graph / Twitter share image (1200×630), QEV-branded.
- * Used as the fallback preview for pages without their own image (home, cars,
- * brands, country pages). Detail pages (listings/news) override with their real
- * photo. Latin-only text so it renders without bundling an Arabic font.
+ * Default Open Graph / Twitter share image (1200×630). If the admin uploaded a
+ * custom share image (Site Settings → صورة المشاركة) we redirect to it; otherwise
+ * we render the QEV-branded fallback. Used site-wide for pages without their own
+ * image. Latin-only text so it renders without bundling an Arabic font.
  */
-export function GET() {
+export async function GET() {
+  try {
+    const r = await fetch(`${API}/api/v1/settings/site-content`, { next: { revalidate: 300 } });
+    const j = await r.json();
+    if (j?.data?.og_image_url) {
+      return Response.redirect(j.data.og_image_url, 302);
+    }
+  } catch { /* fall back to the generated image */ }
+
   return new ImageResponse(
     (
       <div
