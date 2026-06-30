@@ -33,11 +33,14 @@ const MemberContext = createContext<MemberContextValue>({
   closeLogin: () => {},
 });
 
-export function MemberProvider({ children }: { children: React.ReactNode }) {
+interface Broadcast { id: string; message: string; audience: string }
+
+export function MemberProvider({ children, broadcast = null }: { children: React.ReactNode; broadcast?: Broadcast | null }) {
   const [member, setMember] = useState<Member | null>(null);
   const [loading, setLoading] = useState(true);
   const [loginOpen, setLoginOpen] = useState(false);
   const [notice, setNotice] = useState<string | null>(null);
+  const [showBroadcast, setShowBroadcast] = useState(false);
 
   const openLogin = useCallback(() => setLoginOpen(true), []);
   const closeLogin = useCallback(() => setLoginOpen(false), []);
@@ -46,6 +49,19 @@ export function MemberProvider({ children }: { children: React.ReactNode }) {
     setNotice(null);
     memberFetch('/member/notice/ack', { method: 'POST' }).catch(() => {});
   }, []);
+
+  const dismissBroadcast = useCallback(() => {
+    setShowBroadcast(false);
+    try { if (broadcast) localStorage.setItem('qev_ann_' + broadcast.id, '1'); } catch { /* ignore */ }
+  }, [broadcast]);
+
+  // Show the general broadcast once per visitor, respecting audience (members-only).
+  useEffect(() => {
+    if (loading || !broadcast?.message) return;
+    if (broadcast.audience === 'members' && !member) return;
+    try { if (localStorage.getItem('qev_ann_' + broadcast.id)) return; } catch { /* ignore */ }
+    setShowBroadcast(true);
+  }, [loading, member, broadcast]);
 
   useEffect(() => {
     const token = getMemberToken();
@@ -93,6 +109,22 @@ export function MemberProvider({ children }: { children: React.ReactNode }) {
               className="w-full py-2.5 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-semibold transition-colors"
             >
               حسنًا، فهمت
+            </button>
+            <p className="text-[11px] text-neutral-500 mt-3">هذه الرسالة تظهر مرة واحدة فقط</p>
+          </div>
+        </div>
+      )}
+      {!notice && showBroadcast && broadcast && (
+        <div className="fixed inset-0 z-[200] bg-black/60 flex items-center justify-center p-4" dir="rtl">
+          <div className="bg-[#0f1216] border border-white/10 rounded-2xl p-6 w-full max-w-sm shadow-2xl text-center">
+            <div className="text-3xl mb-3">📢</div>
+            <h3 className="font-bold text-white text-lg mb-2">إعلان</h3>
+            <p className="text-neutral-200 text-sm leading-relaxed whitespace-pre-line mb-5">{broadcast.message}</p>
+            <button
+              onClick={dismissBroadcast}
+              className="w-full py-2.5 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-semibold transition-colors"
+            >
+              حسنًا
             </button>
             <p className="text-[11px] text-neutral-500 mt-3">هذه الرسالة تظهر مرة واحدة فقط</p>
           </div>

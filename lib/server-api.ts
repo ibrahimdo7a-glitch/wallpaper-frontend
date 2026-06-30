@@ -80,6 +80,7 @@ export interface SiteContent {
   seo_bing_verification: string;
   seo_keywords_ar: string;
   seo_keywords_en: string;
+  broadcast: { id: string; message: string; audience: string } | null;
 }
 
 export async function fetchCategories(): Promise<ApiCategory[]> {

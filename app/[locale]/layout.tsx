@@ -147,7 +147,7 @@ export default async function LocaleLayout({
           isRTL ? 'font-arabic' : 'font-sans'
         }`}
       >
-        <MemberProvider>
+        <MemberProvider broadcast={siteContent?.broadcast ?? null}>
           <AnalyticsTracker />
           <Header
             locale={locale as Locale}
