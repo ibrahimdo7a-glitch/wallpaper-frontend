@@ -82,6 +82,7 @@ export interface SiteContent {
   seo_keywords_en: string;
   broadcast: { id: string; message: string; audience: string } | null;
   wp_enabled: boolean;
+  og_image_url: string;
 }
 
 export async function fetchCategories(): Promise<ApiCategory[]> {

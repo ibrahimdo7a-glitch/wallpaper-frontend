@@ -35,6 +35,8 @@ export async function generateMetadata({
   const keywords = resolveKeywords(isAr ? siteContent?.seo_keywords_ar : siteContent?.seo_keywords_en, locale);
   const google = siteContent?.seo_google_verification || undefined;
   const bing = siteContent?.seo_bing_verification || undefined;
+  // Admin's custom share image (direct URL, no redirect) → falls back to the generated /api/og.
+  const shareImage = siteContent?.og_image_url || OG_IMAGE;
 
   return {
     title: { default: siteName, template: `%s | ${siteName}` },
@@ -52,13 +54,13 @@ export async function generateMetadata({
       title: siteName,
       description,
       locale: isAr ? 'ar_AR' : 'en_US',
-      images: [{ url: OG_IMAGE, width: 1200, height: 630 }],
+      images: [{ url: shareImage, width: 1200, height: 630 }],
     },
     twitter: {
       card: 'summary_large_image',
       title: siteName,
       description,
-      images: [OG_IMAGE],
+      images: [shareImage],
     },
     robots: {
       index: true,
