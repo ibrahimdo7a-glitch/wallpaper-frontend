@@ -19,9 +19,10 @@ interface HeaderProps {
   siteName?: string;
   ilink?: ILink;
   marketLinks?: { href: string; label: string }[];
+  showWallpapers?: boolean;
 }
 
-export function Header({ locale, siteName, marketLinks = [] }: HeaderProps) {
+export function Header({ locale, siteName, marketLinks = [], showWallpapers = true }: HeaderProps) {
   const t = translations[locale];
   const pathname = usePathname();
   const isRTL = locale === 'ar';
@@ -57,6 +58,7 @@ export function Header({ locale, siteName, marketLinks = [] }: HeaderProps) {
     ...marketLinks,
     { href: `/${locale}/news`, label: isRTL ? 'الأخبار' : 'News' },
     { href: `/${locale}/apps`, label: isRTL ? 'التطبيقات' : 'Apps' },
+    ...(showWallpapers ? [{ href: `/${locale}/wallpapers`, label: isRTL ? 'الخلفيات' : 'Wallpapers' }] : []),
   ];
 
   const isActive = (href: string) => pathname === href;

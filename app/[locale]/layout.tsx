@@ -153,6 +153,7 @@ export default async function LocaleLayout({
             locale={locale as Locale}
             siteName={siteName}
             marketLinks={marketLinks}
+            showWallpapers={siteContent?.wp_enabled !== false}
             ilink={ilinkEnabled ? { label: ilinkLabel || '', tooltip: ilinkTooltip || '', fileUrl: ilinkFileUrl } : undefined}
           />
           <main>{children}</main>

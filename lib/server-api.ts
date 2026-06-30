@@ -81,6 +81,7 @@ export interface SiteContent {
   seo_keywords_ar: string;
   seo_keywords_en: string;
   broadcast: { id: string; message: string; audience: string } | null;
+  wp_enabled: boolean;
 }
 
 export async function fetchCategories(): Promise<ApiCategory[]> {
@@ -685,4 +686,34 @@ export async function fetchMarket(params: {
 export async function fetchMarketListing(slug: string): Promise<ApiMarketListingFull | null> {
   const res = await get<{ data: ApiMarketListingFull }>(`/market/${slug}`, 120, ['market', `market-${slug}`]);
   return res?.data ?? null;
+}
+
+// ─── Wallpapers gallery ──────────────────────────────────────────────────────
+export interface WpFacet { key: string; value: string; label: string; count: number }
+export interface WpGalleryConfig {
+  enabled: boolean;
+  title_ar: string; title_en: string;
+  subtitle_ar: string; subtitle_en: string;
+  default_sort: string;
+  show: { models: boolean; countries: boolean; sections: boolean; brands: boolean; featured: boolean };
+}
+export interface WpCard {
+  id: number; title: string;
+  thumbnail: string | null; image: string | null;
+  brand_slug: string | null; section_slug: string | null; model: string | null;
+  is_featured: boolean; views: number; downloads: number;
+}
+
+export async function fetchWallpaperFacets(): Promise<{ config: WpGalleryConfig; facets: Record<string, WpFacet[]>; featured: WpCard[] }> {
+  const res = await get<{ config: WpGalleryConfig; facets: Record<string, WpFacet[]>; featured: WpCard[] }>('/wallpapers-gallery/facets', 120, ['wallpapers']);
+  return res ?? { config: { enabled: false } as WpGalleryConfig, facets: {}, featured: [] };
+}
+
+export async function fetchWallpaperGallery(params: {
+  model?: string; brand?: string; country?: string; section?: string; search?: string; sort?: string; page?: number;
+} = {}): Promise<{ data: WpCard[]; meta: any }> {
+  const q = new URLSearchParams();
+  Object.entries(params).forEach(([k, v]) => { if (v !== undefined && v !== '') q.set(k, String(v)); });
+  const res = await get<{ data: WpCard[]; meta: any }>(`/wallpapers-gallery?${q.toString()}`, 60, ['wallpapers']);
+  return res ?? { data: [], meta: { enabled: false } };
 }
