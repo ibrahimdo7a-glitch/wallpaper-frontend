@@ -6,6 +6,9 @@
 
 export const SITE_URL = (process.env.NEXT_PUBLIC_SITE_URL || 'https://qev.app').replace(/\/$/, '');
 
+/** Branded default share image (1200×630), generated at /api/og. */
+export const OG_IMAGE = `${SITE_URL}/api/og`;
+
 /** Strong Arabic keywords for the Chinese/EV cars hub across the Arab market. */
 export const DEFAULT_KEYWORDS_AR = [
   'سيارات كهربائية', 'سيارات صينية', 'سيارات هجينة', 'أسعار السيارات الكهربائية',

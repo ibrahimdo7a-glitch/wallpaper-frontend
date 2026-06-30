@@ -7,7 +7,7 @@ import { Footer } from '@/components/Footer';
 import { MemberProvider } from '@/lib/member-auth';
 import { translations } from '@/data/translations';
 import { fetchSiteContent, fetchMarketConfig } from '@/lib/server-api';
-import { SITE_URL, resolveKeywords, siteJsonLd } from '@/lib/seo';
+import { SITE_URL, OG_IMAGE, resolveKeywords, siteJsonLd } from '@/lib/seo';
 import './globals.css';
 
 export function generateStaticParams() {
@@ -51,13 +51,13 @@ export async function generateMetadata({
       title: siteName,
       description,
       locale: isAr ? 'ar_AR' : 'en_US',
-      ...(faviconUrl ? { images: [faviconUrl] } : {}),
+      images: [{ url: OG_IMAGE, width: 1200, height: 630 }],
     },
     twitter: {
       card: 'summary_large_image',
       title: siteName,
       description,
-      ...(faviconUrl ? { images: [faviconUrl] } : {}),
+      images: [OG_IMAGE],
     },
     robots: {
       index: true,

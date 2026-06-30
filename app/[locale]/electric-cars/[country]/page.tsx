@@ -5,7 +5,7 @@ import { notFound } from 'next/navigation';
 import { fetchMarket, fetchBrands, type ApiMarketListing, type ApiBrand } from '@/lib/server-api';
 import { locales, type Locale } from '@/lib/i18n';
 import { COUNTRIES, countryBySlug } from '@/lib/countries';
-import { SITE_URL } from '@/lib/seo';
+import { SITE_URL, OG_IMAGE } from '@/lib/seo';
 
 export const revalidate = 300;
 
@@ -37,6 +37,7 @@ export async function generateMetadata({ params: { locale, country } }: Props): 
       title,
       description,
       url: `${SITE_URL}/${locale}/electric-cars/${country}`,
+      images: [{ url: OG_IMAGE, width: 1200, height: 630 }],
     },
   };
 }
