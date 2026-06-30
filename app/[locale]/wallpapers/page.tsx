@@ -6,9 +6,10 @@ import { fetchWallpaperFacets, fetchWallpaperGallery, type WpCard, type WpFacet 
 import { type Locale } from '@/lib/i18n';
 import { SITE_URL, OG_IMAGE } from '@/lib/seo';
 
-export const revalidate = 60;
+// Dynamic so the random sort can reshuffle on every load (no ISR caching).
+export const dynamic = 'force-dynamic';
 
-type SP = { model?: string; brand?: string; country?: string; section?: string; sort?: string; page?: string };
+type SP = { model?: string; brand?: string; country?: string; section?: string; sort?: string; seed?: string; page?: string };
 type Props = { params: { locale: Locale }; searchParams: SP };
 
 export async function generateMetadata({ params: { locale }, searchParams }: Props): Promise<Metadata> {
@@ -27,22 +28,26 @@ export async function generateMetadata({ params: { locale }, searchParams }: Pro
 
 export default async function WallpapersPage({ params: { locale }, searchParams }: Props) {
   const isAr = locale === 'ar';
-  const [{ config, facets, featured }, { data, meta }] = await Promise.all([
-    fetchWallpaperFacets(),
-    fetchWallpaperGallery({
-      model: searchParams.model, brand: searchParams.brand, country: searchParams.country,
-      section: searchParams.section, sort: searchParams.sort, page: Math.max(1, Number(searchParams.page ?? 1)),
-    }),
-  ]);
-
+  const { config, facets, featured } = await fetchWallpaperFacets();
   if (!config?.enabled) notFound();
+
+  const activeSort = searchParams.sort || config.default_sort || 'newest';
+  // Random: a fresh seed per load (so refresh reshuffles), carried through pagination links.
+  const seed = activeSort === 'random'
+    ? (searchParams.seed || `${Date.now()}-${Math.floor(Math.random() * 1e9)}`)
+    : undefined;
+
+  const { data, meta } = await fetchWallpaperGallery({
+    model: searchParams.model, brand: searchParams.brand, country: searchParams.country,
+    section: searchParams.section, sort: searchParams.sort, seed, page: Math.max(1, Number(searchParams.page ?? 1)),
+  });
 
   const page = Math.max(1, Number(meta?.current_page ?? 1));
 
   const buildHref = (over: Record<string, string | undefined>) => {
     const params: Record<string, string | undefined> = {
       model: searchParams.model, country: searchParams.country, section: searchParams.section,
-      brand: searchParams.brand, sort: searchParams.sort, ...over,
+      brand: searchParams.brand, sort: searchParams.sort, seed, ...over,
     };
     const qs = Object.entries(params).filter(([, v]) => v !== undefined && v !== '')
       .map(([k, v]) => `${k}=${encodeURIComponent(v as string)}`).join('&');
@@ -66,7 +71,6 @@ export default async function WallpapersPage({ params: { locale }, searchParams 
     { v: 'downloads', label: isAr ? 'الأكثر تحميلًا' : 'Most downloaded' },
     { v: 'random', label: isAr ? '🎲 عشوائي' : '🎲 Random' },
   ];
-  const activeSort = searchParams.sort || config.default_sort || 'newest';
 
   return (
     <main className="min-h-screen bg-[#0a0c11] text-neutral-100" dir={isAr ? 'rtl' : 'ltr'}>

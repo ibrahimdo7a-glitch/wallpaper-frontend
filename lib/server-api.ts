@@ -710,7 +710,7 @@ export async function fetchWallpaperFacets(): Promise<{ config: WpGalleryConfig;
 }
 
 export async function fetchWallpaperGallery(params: {
-  model?: string; brand?: string; country?: string; section?: string; search?: string; sort?: string; page?: number;
+  model?: string; brand?: string; country?: string; section?: string; search?: string; sort?: string; seed?: string; page?: number;
 } = {}): Promise<{ data: WpCard[]; meta: any }> {
   const q = new URLSearchParams();
   Object.entries(params).forEach(([k, v]) => { if (v !== undefined && v !== '') q.set(k, String(v)); });
