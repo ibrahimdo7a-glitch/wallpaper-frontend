@@ -57,8 +57,6 @@ export function Header({ locale, siteName, marketLinks = [] }: HeaderProps) {
     ...marketLinks,
     { href: `/${locale}/news`, label: isRTL ? 'الأخبار' : 'News' },
     { href: `/${locale}/apps`, label: isRTL ? 'التطبيقات' : 'Apps' },
-    { href: `/${locale}/categories`, label: t.nav.categories },
-    { href: `/${locale}/most-downloaded`, label: t.nav.mostDownloaded },
   ];
 
   const isActive = (href: string) => pathname === href;
