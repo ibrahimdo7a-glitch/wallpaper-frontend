@@ -8,6 +8,7 @@ import { MemberProvider } from '@/lib/member-auth';
 import { translations } from '@/data/translations';
 import { fetchSiteContent, fetchMarketConfig } from '@/lib/server-api';
 import { SITE_URL, OG_IMAGE, resolveKeywords, siteJsonLd } from '@/lib/seo';
+import { AnalyticsTracker } from '@/components/AnalyticsTracker';
 import './globals.css';
 
 export function generateStaticParams() {
@@ -127,6 +128,19 @@ export default async function LocaleLayout({
             __html: JSON.stringify(siteJsonLd(siteName, locale, siteContent?.favicon_url || undefined)),
           }}
         />
+        {/* Hybrid analytics: Vercel Web Analytics (zero-package; active once enabled in the
+            Vercel dashboard) + optional GA4 when NEXT_PUBLIC_GA_ID is set. */}
+        <script defer src="/_vercel/insights/script.js" />
+        {process.env.NEXT_PUBLIC_GA_ID && (
+          <>
+            <script async src={`https://www.googletagmanager.com/gtag/js?id=${process.env.NEXT_PUBLIC_GA_ID}`} />
+            <script
+              dangerouslySetInnerHTML={{
+                __html: `window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js',new Date());gtag('config','${process.env.NEXT_PUBLIC_GA_ID}');`,
+              }}
+            />
+          </>
+        )}
       </head>
       <body
         className={`min-h-screen overflow-x-hidden bg-white dark:bg-gray-950 text-gray-900 dark:text-white antialiased ${
@@ -134,6 +148,7 @@ export default async function LocaleLayout({
         }`}
       >
         <MemberProvider>
+          <AnalyticsTracker />
           <Header
             locale={locale as Locale}
             siteName={siteName}
