@@ -64,6 +64,7 @@ export default async function WallpapersPage({ params: { locale }, searchParams 
     { v: 'newest', label: isAr ? 'الأحدث' : 'Newest' },
     { v: 'views', label: isAr ? 'الأكثر مشاهدة' : 'Most viewed' },
     { v: 'downloads', label: isAr ? 'الأكثر تحميلًا' : 'Most downloaded' },
+    { v: 'random', label: isAr ? '🎲 عشوائي' : '🎲 Random' },
   ];
   const activeSort = searchParams.sort || config.default_sort || 'newest';
 
