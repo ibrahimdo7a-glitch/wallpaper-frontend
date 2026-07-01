@@ -6,6 +6,11 @@ const withNextIntl = createNextIntlPlugin('./lib/i18n.ts');
 const nextConfig = {
   output: 'standalone',
   images: {
+    // Serve images straight from Cloudflare (cdn.qev.app) instead of Vercel's
+    // Image Optimization, which was returning 402 (monthly quota exhausted) and
+    // breaking newly-added covers. Images are already re-encoded + CDN-cached, so
+    // Vercel optimization is redundant and costly for an image-heavy catalog.
+    unoptimized: true,
     remotePatterns: [
       {
         protocol: 'https',
