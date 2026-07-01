@@ -13,6 +13,18 @@ interface MyListing {
   can_renew?: boolean; is_expired?: boolean; created_at: string;
 }
 
+interface BrandOpt { id: number; name_ar: string }
+interface MarketSub { enabled: boolean; brand_id: number | null }
+interface Subs { news: { enabled: boolean }; cars: MarketSub; parts: MarketSub }
+interface Dash {
+  stats: {
+    listings_total: number; listings_published: number; listings_pending: number;
+    views_total: number; saved_count: number; expiring_soon: number; member_since: string | null;
+  };
+  subscriptions: Subs;
+  brands: BrandOpt[];
+}
+
 const STATUS_AR: Record<string, { t: string; c: string }> = {
   published: { t: 'منشور', c: 'text-emerald-400' },
   pending: { t: 'بانتظار المراجعة', c: 'text-amber-400' },
@@ -30,14 +42,19 @@ export default function AccountPage() {
   const [listings, setListings] = useState<MyListing[]>([]);
   const [listingsLoading, setListingsLoading] = useState(true);
   const [saved, setSaved] = useState<MyListing[]>([]);
-  const [newsTg, setNewsTg] = useState(false);
+  const [dash, setDash] = useState<Dash | null>(null);
+  const [subs, setSubs] = useState<Subs | null>(null);
+  const [brands, setBrands] = useState<BrandOpt[]>([]);
   const [toast, setToast] = useState('');
 
   const showToast = (msg: string) => { setToast(msg); setTimeout(() => setToast(''), 4000); };
 
   useEffect(() => {
     if (!member) return;
-    setNewsTg(member.news_telegram);
+    memberFetch('/member/dashboard')
+      .then((r) => (r.ok ? r.json() : null))
+      .then((d: Dash | null) => { if (d) { setDash(d); setSubs(d.subscriptions); setBrands(d.brands ?? []); } })
+      .catch(() => {});
     memberFetch('/member/listings')
       .then((r) => (r.ok ? r.json() : { data: [] }))
       .then((d) => setListings(d.data ?? []))
@@ -60,14 +77,69 @@ export default function AccountPage() {
     } catch { /* ignore */ }
   };
 
-  const toggleNews = async () => {
-    const next = !newsTg;
-    setNewsTg(next);
+  // Persist the full subscription state; optimistic with revert on failure.
+  const saveSubs = async (next: Subs) => {
+    const prev = subs;
+    setSubs(next);
     try {
-      await memberFetch('/member/prefs', { method: 'POST', body: JSON.stringify({ news_telegram: next }) });
+      const res = await memberFetch('/member/subscriptions', {
+        method: 'POST',
+        body: JSON.stringify({
+          news: next.news.enabled,
+          cars_enabled: next.cars.enabled,
+          cars_brand_id: next.cars.brand_id,
+          parts_enabled: next.parts.enabled,
+          parts_brand_id: next.parts.brand_id,
+        }),
+      });
+      if (!res.ok) throw new Error();
+      showToast(isAr ? 'تم حفظ اشتراكاتك ✓' : 'Subscriptions saved ✓');
     } catch {
-      setNewsTg(!next);
+      if (prev) setSubs(prev);
+      showToast(isAr ? 'تعذّر الحفظ، حاول مجددًا' : 'Could not save, try again');
     }
+  };
+
+  const activeSubs = subs ? [subs.news.enabled, subs.cars.enabled, subs.parts.enabled].filter(Boolean).length : 0;
+  const since = dash?.stats.member_since
+    ? new Date(dash.stats.member_since).toLocaleDateString(isAr ? 'ar' : 'en', { year: 'numeric', month: 'long' })
+    : null;
+
+  // Renders one market channel card (cars / parts share the shape).
+  const marketCard = (
+    channel: 'cars' | 'parts', icon: string, title: string, desc: string,
+  ): ReactNode => {
+    if (!subs) return null;
+    const s = subs[channel];
+    return (
+      <div className={`rounded-2xl border p-4 transition-colors ${s.enabled ? 'border-emerald-500/30 bg-emerald-500/[0.06]' : 'border-white/10 bg-white/[0.03]'}`}>
+        <div className="flex items-start justify-between gap-3">
+          <div className="min-w-0">
+            <p className="text-sm font-bold flex items-center gap-2">{icon} {title}</p>
+            <p className="text-xs text-neutral-500 mt-0.5">{desc}</p>
+          </div>
+          <button
+            onClick={() => saveSubs({ ...subs, [channel]: { ...s, enabled: !s.enabled } })}
+            className={`shrink-0 px-3 py-1 rounded-full text-xs font-bold transition-colors ${s.enabled ? 'bg-emerald-500 text-black' : 'bg-white/10 text-neutral-400 hover:bg-white/15'}`}
+          >
+            {s.enabled ? (isAr ? 'مُفعّل' : 'On') : (isAr ? 'إيقاف' : 'Off')}
+          </button>
+        </div>
+        {s.enabled && (
+          <div className="mt-3">
+            <label className="block text-[11px] text-neutral-500 mb-1">{isAr ? 'تنبيهات لـ:' : 'Alerts for:'}</label>
+            <select
+              value={s.brand_id ?? ''}
+              onChange={(e) => saveSubs({ ...subs, [channel]: { ...s, brand_id: e.target.value ? Number(e.target.value) : null } })}
+              className="w-full rounded-lg bg-[#171a21] border border-white/10 text-sm px-3 py-2 text-neutral-100 focus:outline-none focus:border-emerald-500/50"
+            >
+              <option value="">{isAr ? '🌐 كل الماركات' : '🌐 All brands'}</option>
+              {brands.map((b) => <option key={b.id} value={b.id}>{b.name_ar}</option>)}
+            </select>
+          </div>
+        )}
+      </div>
+    );
   };
 
   return (
@@ -81,7 +153,7 @@ export default function AccountPage() {
             <Link href={`/${locale}`} className="inline-block px-4 py-2 rounded-lg bg-white/10 hover:bg-white/15">{isAr ? 'الرئيسية' : 'Home'}</Link>
           </div>
         ) : (
-          <div className="space-y-8">
+          <div className="space-y-7">
             <div className="flex items-center justify-between gap-4 flex-wrap">
               <div className="flex items-center gap-4">
                 {member.photo_url ? (
@@ -99,15 +171,69 @@ export default function AccountPage() {
               <Link href={`/${locale}/sell`} className="px-4 py-2 rounded-full bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-sm">➕ {isAr ? 'أضف إعلان' : 'Post listing'}</Link>
             </div>
 
-            <button onClick={toggleNews} className="w-full flex items-center justify-between gap-3 p-4 rounded-2xl bg-white/[0.03] border border-white/10 hover:bg-white/[0.05] transition-colors text-start">
-              <div className="min-w-0">
-                <p className="text-sm font-semibold flex items-center gap-2">📩 {isAr ? 'تنبيهات الأخبار على تلجرام' : 'News alerts on Telegram'}</p>
-                <p className="text-xs text-neutral-500 mt-0.5">{isAr ? 'يوصلك كل خبر جديد برسالة من البوت' : 'Get every new article as a bot message'}</p>
+            {/* ── Stats window ── */}
+            <section className="rounded-3xl border border-white/10 bg-white/[0.03] p-4 sm:p-5">
+              <div className="flex items-center justify-between mb-3">
+                <p className="text-sm font-bold flex items-center gap-2">📊 {isAr ? 'لوحتي' : 'My dashboard'}</p>
+                {since && <p className="text-[11px] text-neutral-500">{isAr ? `عضو منذ ${since}` : `Member since ${since}`}</p>}
               </div>
-              <span className={`shrink-0 px-3 py-1 rounded-full text-xs font-bold ${newsTg ? 'bg-emerald-500 text-black' : 'bg-white/10 text-neutral-400'}`}>
-                {newsTg ? (isAr ? 'مُفعّل' : 'On') : (isAr ? 'إيقاف' : 'Off')}
-              </span>
-            </button>
+
+              {!dash ? (
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
+                  {[0, 1, 2, 3].map((i) => <div key={i} className="h-[76px] rounded-2xl bg-white/[0.04] animate-pulse" />)}
+                </div>
+              ) : (
+                <>
+                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
+                    <Stat icon="📢" value={dash.stats.listings_total} label={isAr ? 'إعلاناتي' : 'Listings'}
+                      sub={isAr ? `${dash.stats.listings_published} منشور` : `${dash.stats.listings_published} live`} color="text-sky-400" />
+                    <Stat icon="👁️" value={dash.stats.views_total} label={isAr ? 'مشاهدات إعلاناتي' : 'Listing views'} color="text-violet-400" />
+                    <Stat icon="❤️" value={dash.stats.saved_count} label={isAr ? 'محفوظاتي' : 'Saved'} color="text-rose-400" />
+                    <Stat icon="🔔" value={activeSubs} label={isAr ? 'اشتراكاتي النشطة' : 'Active alerts'} color="text-emerald-400" />
+                  </div>
+
+                  {dash.stats.expiring_soon > 0 && (
+                    <div className="mt-2.5 flex items-center gap-2 rounded-2xl border border-amber-500/30 bg-amber-500/[0.08] px-3.5 py-2.5 text-xs text-amber-300">
+                      ⏳ {isAr
+                        ? `لديك ${dash.stats.expiring_soon} إعلان ينتهي خلال ٣ أيام — جدّدها من قائمة «إعلاناتي» بالأسفل.`
+                        : `${dash.stats.expiring_soon} listing(s) expire within 3 days — renew them below.`}
+                    </div>
+                  )}
+                </>
+              )}
+            </section>
+
+            {/* ── Subscriptions ── */}
+            <section>
+              <h2 className="text-lg font-bold mb-1">{isAr ? 'اشتراكاتي 🔔' : 'My subscriptions 🔔'}</h2>
+              <p className="text-xs text-neutral-500 mb-3">{isAr ? 'اختر ما يهمّك ويوصلك فورًا برسالة على تلجرام.' : 'Pick what matters — delivered instantly to your Telegram.'}</p>
+              {!subs ? (
+                <div className="grid gap-2.5 sm:grid-cols-3">
+                  {[0, 1, 2].map((i) => <div key={i} className="h-24 rounded-2xl bg-white/[0.04] animate-pulse" />)}
+                </div>
+              ) : (
+                <div className="grid gap-2.5 sm:grid-cols-3">
+                  {/* News */}
+                  <div className={`rounded-2xl border p-4 transition-colors ${subs.news.enabled ? 'border-emerald-500/30 bg-emerald-500/[0.06]' : 'border-white/10 bg-white/[0.03]'}`}>
+                    <div className="flex items-start justify-between gap-3">
+                      <div className="min-w-0">
+                        <p className="text-sm font-bold flex items-center gap-2">📰 {isAr ? 'الأخبار' : 'News'}</p>
+                        <p className="text-xs text-neutral-500 mt-0.5">{isAr ? 'كل خبر جديد يوصلك على تلجرام' : 'Every new article on Telegram'}</p>
+                      </div>
+                      <button
+                        onClick={() => saveSubs({ ...subs, news: { enabled: !subs.news.enabled } })}
+                        className={`shrink-0 px-3 py-1 rounded-full text-xs font-bold transition-colors ${subs.news.enabled ? 'bg-emerald-500 text-black' : 'bg-white/10 text-neutral-400 hover:bg-white/15'}`}
+                      >
+                        {subs.news.enabled ? (isAr ? 'مُفعّل' : 'On') : (isAr ? 'إيقاف' : 'Off')}
+                      </button>
+                    </div>
+                  </div>
+
+                  {marketCard('cars', '🚗', isAr ? 'سوق السيارات' : 'Car market', isAr ? 'كل إعلان بيع أو طلب سيارة' : 'Every car sale/request')}
+                  {marketCard('parts', '🔧', isAr ? 'سوق قطع الغيار' : 'Parts market', isAr ? 'كل قطعة غيار وإكسسوار جديد' : 'Every new part/accessory')}
+                </div>
+              )}
+            </section>
 
             <section>
               <h2 className="text-lg font-bold mb-3">{isAr ? 'إعلاناتي' : 'My listings'}</h2>
@@ -209,5 +335,15 @@ export default function AccountPage() {
         </div>
       )}
     </main>
+  );
+}
+
+function Stat({ icon, value, label, sub, color }: { icon: string; value: number; label: string; sub?: string; color: string }) {
+  return (
+    <div className="rounded-2xl bg-white/[0.04] border border-white/5 p-3">
+      <div className="flex items-center gap-1.5 text-[11px] text-neutral-400">{icon} {label}</div>
+      <div className={`text-2xl font-extrabold mt-1 ${color}`}>{value.toLocaleString()}</div>
+      {sub && <div className="text-[10px] text-neutral-500 mt-0.5">{sub}</div>}
+    </div>
   );
 }
