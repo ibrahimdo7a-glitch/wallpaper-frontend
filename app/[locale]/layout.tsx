@@ -7,7 +7,7 @@ import { Footer } from '@/components/Footer';
 import { MemberProvider } from '@/lib/member-auth';
 import { translations } from '@/data/translations';
 import { fetchSiteContent, fetchMarketConfig } from '@/lib/server-api';
-import { SITE_URL, OG_IMAGE, resolveKeywords, siteJsonLd } from '@/lib/seo';
+import { SITE_URL, OG_IMAGE, resolveKeywords, siteJsonLd, jsonLdScript } from '@/lib/seo';
 import { AnalyticsTracker } from '@/components/AnalyticsTracker';
 import './globals.css';
 
@@ -127,7 +127,7 @@ export default async function LocaleLayout({
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{
-            __html: JSON.stringify(siteJsonLd(siteName, locale, siteContent?.favicon_url || undefined)),
+            __html: jsonLdScript(siteJsonLd(siteName, locale, siteContent?.favicon_url || undefined)),
           }}
         />
         {/* Hybrid analytics: Vercel Web Analytics (zero-package; active once enabled in the

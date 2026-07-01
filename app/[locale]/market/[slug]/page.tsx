@@ -7,7 +7,7 @@ import { MarketGallery } from '@/components/market/MarketGallery';
 import { SaveButton } from '@/components/market/SaveButton';
 import { ShareButton } from '@/components/market/ShareButton';
 import { type Locale } from '@/lib/i18n';
-import { SITE_URL } from '@/lib/seo';
+import { SITE_URL, jsonLdScript } from '@/lib/seo';
 
 export const revalidate = 60;
 export async function generateStaticParams() { return []; }
@@ -93,7 +93,7 @@ export default async function MarketDetailPage({ params: { locale, slug } }: Pro
 
   return (
     <main className="min-h-screen bg-[#0a0c11] text-neutral-100" dir={isAr ? 'rtl' : 'ltr'}>
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(productJsonLd) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: jsonLdScript(productJsonLd) }} />
       <div className="max-w-6xl mx-auto px-4 py-8">
         <nav className="text-xs text-neutral-500 mb-6 flex gap-2">
           <Link href={`/${locale}${section.base}`} className="hover:text-white transition-colors">{section.label}</Link>

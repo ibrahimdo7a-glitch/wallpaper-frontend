@@ -6,6 +6,7 @@ import { fetchNewsArticle, fetchNews } from '@/lib/server-api';
 import { type Locale } from '@/lib/i18n';
 import NewsSubscribeForm from '@/components/news/NewsSubscribeForm';
 import NewsArticleActions from '@/components/news/NewsArticleActions';
+import { jsonLdScript } from '@/lib/seo';
 
 type Props = { params: { locale: Locale; slug: string } };
 
@@ -74,7 +75,7 @@ export default async function NewsArticlePage({ params }: Props) {
 
   return (
     <main className="min-h-screen bg-[#0a0c11] text-neutral-100" dir={isAr ? 'rtl' : 'ltr'}>
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(articleJsonLd) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: jsonLdScript(articleJsonLd) }} />
       <article className="max-w-3xl mx-auto px-4 py-10">
         {/* Breadcrumb */}
         <div className="flex items-center gap-2 text-sm text-neutral-400 mb-6">

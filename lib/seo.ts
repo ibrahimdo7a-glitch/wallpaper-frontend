@@ -9,6 +9,15 @@ export const SITE_URL = (process.env.NEXT_PUBLIC_SITE_URL || 'https://qev.app').
 /** Branded default share image (1200×630), generated at /api/og. */
 export const OG_IMAGE = `${SITE_URL}/api/og`;
 
+/**
+ * Serialize JSON-LD for safe inline <script> injection. JSON.stringify does NOT
+ * escape "<", so a value containing "</script>" (e.g. a member-controlled listing
+ * title) would break out of the tag → stored XSS. Escaping "<" closes that hole.
+ */
+export function jsonLdScript(data: unknown): string {
+  return JSON.stringify(data).replace(/</g, '\\u003c');
+}
+
 /** Strong Arabic keywords for the Chinese/EV cars hub across the Arab market. */
 export const DEFAULT_KEYWORDS_AR = [
   'سيارات كهربائية', 'سيارات صينية', 'سيارات هجينة', 'أسعار السيارات الكهربائية',

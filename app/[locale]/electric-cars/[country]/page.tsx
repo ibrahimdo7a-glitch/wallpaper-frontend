@@ -5,7 +5,7 @@ import { notFound } from 'next/navigation';
 import { fetchMarket, fetchBrands, type ApiMarketListing, type ApiBrand } from '@/lib/server-api';
 import { locales, type Locale } from '@/lib/i18n';
 import { COUNTRIES, countryBySlug } from '@/lib/countries';
-import { SITE_URL, OG_IMAGE } from '@/lib/seo';
+import { SITE_URL, OG_IMAGE, jsonLdScript } from '@/lib/seo';
 
 export const revalidate = 300;
 
@@ -69,7 +69,7 @@ export default async function CountryPage({ params: { locale, country } }: Props
 
   return (
     <main className="min-h-screen bg-[#0a0c11] text-neutral-100" dir={isAr ? 'rtl' : 'ltr'}>
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: jsonLdScript(jsonLd) }} />
       <div className="max-w-7xl mx-auto px-4 py-10">
         {/* Hero */}
         <nav className="text-xs text-neutral-500 mb-5 flex gap-2">
